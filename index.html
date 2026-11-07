@@ -7,6 +7,7 @@
   <meta name="description" content="Lumi: cada acerto acende uma luz.">
   <link rel="stylesheet" href="css/estilo.css">
   <script src="js/pontos.js" defer></script>
+  <script src="js/fotos.js" defer></script>
   <script src="js/quiz.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -46,25 +47,53 @@
         <h1 class="barra-topo__titulo" id="titulo-fotoquest">FotoQuest</h1>
       </div>
 
-      <div class="conteudo">
+      <form class="conteudo" id="form-fotos" novalidate>
         <div class="guia-doris vidro">
           <img class="guia-doris__imagem" src="assets/doris.jpg" alt="" width="72" height="72">
-          <p>Tire uma foto do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
+          <p>Tire fotos do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
         </div>
 
-        <input type="file" id="entrada-foto" class="visualmente-oculto" accept="image/*">
-        <label class="botao-foto" for="entrada-foto" id="rotulo-foto">Tirar ou escolher foto</label>
+        <fieldset class="campo vidro">
+          <legend class="campo__titulo">1. Qual é a disciplina?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="disciplina" value="portugues"><span>Português</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="matematica"><span>Matemática</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="ciencias"><span>Ciências</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="historia"><span>História</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="geografia"><span>Geografia</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="outra"><span>Outra</span></label>
+          </div>
+          <div class="campo-outra" id="campo-outra" hidden>
+            <label for="disciplina-outra">Qual disciplina?</label>
+            <input type="text" id="disciplina-outra" maxlength="40" autocomplete="off" placeholder="Ex.: Inglês">
+          </div>
+        </fieldset>
 
-        <figure class="previa" id="previa" hidden>
-          <img class="previa__imagem" id="previa-imagem" alt="Pré-visualização da foto escolhida">
-        </figure>
+        <fieldset class="campo vidro">
+          <legend class="campo__titulo">2. Fotos do material</legend>
+          <p class="campo__ajuda">De 1 a 10 fotos, em JPG, PNG ou HEIC.</p>
+          <input type="file" id="entrada-foto" class="visualmente-oculto" accept="image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif" multiple>
+          <label class="botao-foto" for="entrada-foto" id="rotulo-foto">Tirar ou escolher fotos</label>
+          <p class="contador" id="contador-fotos" aria-live="polite"></p>
+          <ul class="miniaturas" id="miniaturas" aria-label="Fotos escolhidas"></ul>
+        </fieldset>
 
-        <button type="button" class="botao-principal" id="botao-criar-missao" disabled>
-          Criar missão
+        <section class="aviso-privacidade vidro" aria-labelledby="titulo-privacidade">
+          <h2 class="aviso-privacidade__titulo" id="titulo-privacidade">Sua privacidade</h2>
+          <p>Suas fotos são usadas só para criar as perguntas da missão e são descartadas logo depois. As perguntas ficam guardadas somente para a sua família, para você estudar quando quiser. Nenhuma outra família tem acesso a elas, e elas não são usadas para treinar sistemas. Você pode apagar tudo a qualquer momento no botão 'Apagar dados da família'.</p>
+        </section>
+
+        <label class="declaracao" for="declaracao">
+          <input type="checkbox" id="declaracao">
+          <span>Declaro que as fotos enviadas são de cadernos ou materiais de estudo meus ou do meu filho, e que serão usadas apenas para estudo da nossa família.</span>
+        </label>
+
+        <button type="submit" class="botao-principal" id="botao-enviar" disabled>
+          Enviar fotos
         </button>
 
         <p class="mensagem" id="mensagem-foto" role="status" aria-live="polite"></p>
-      </div>
+      </form>
     </section>
 
     <!-- Quiz -->
