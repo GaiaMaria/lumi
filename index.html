@@ -96,6 +96,17 @@
       </form>
     </section>
 
+    <!-- Aviso de disciplina diferente -->
+    <section class="tela" id="tela-disciplina" aria-labelledby="titulo-disciplina" hidden>
+      <div class="conteudo conteudo--centro">
+        <img class="guia-doris__imagem guia-doris__imagem--grande" src="assets/doris.jpg" alt="" width="120" height="120">
+        <h1 class="titulo-aviso" id="titulo-disciplina">Hmm, será a matéria certa?</h1>
+        <p class="texto-aviso" id="texto-disciplina"></p>
+        <button type="button" class="botao-principal" id="botao-continuar">Continuar</button>
+        <button type="button" class="botao-secundario" id="botao-trocar">Trocar</button>
+      </div>
+    </section>
+
     <!-- Quiz -->
     <section class="tela" id="tela-quiz" aria-labelledby="quiz-enunciado" hidden>
       <div class="barra-topo">
@@ -110,8 +121,10 @@
       <div class="conteudo">
         <p class="aviso-demo vidro" id="aviso-demo" hidden>
           <strong>Modo demonstração</strong>
-          Estas são perguntas de exemplo. A leitura da foto ainda não está ligada.
+          Estas são perguntas de exemplo criadas pela equipe da Lumi. A leitura das fotos não está ligada.
         </p>
+
+        <p class="aviso-leitura vidro" id="quiz-aviso" hidden></p>
 
         <p class="quiz-progresso" id="quiz-progresso"></p>
         <h2 class="quiz-enunciado" id="quiz-enunciado"></h2>

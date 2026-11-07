@@ -598,6 +598,34 @@ figure {
   min-height: 1.5em;
 }
 
+/* Aviso de disciplina */
+.conteudo--centro {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.conteudo--centro .botao-principal,
+.conteudo--centro .botao-secundario {
+  width: 100%;
+}
+
+.guia-doris__imagem--grande {
+  width: 120px;
+  height: 120px;
+}
+
+.titulo-aviso {
+  font-size: clamp(1.5rem, 6vw, 1.9rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.texto-aviso {
+  color: var(--texto-suave);
+  font-size: 1.1rem;
+}
+
 /* Quiz */
 .pontos {
   background: var(--sucesso);
@@ -726,6 +754,108 @@ figure {
 
 .feedback--erro {
   background: var(--erro);
+}
+
+.feedback--neutro {
+  background: var(--vidro-forte);
+  border: 1px solid var(--vidro-borda);
+  color: var(--texto);
+}
+
+.aviso-leitura {
+  padding: 12px 16px;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+/* Relacionar */
+.relacionar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.relacionar__linha {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--vidro);
+  border: 1px solid var(--vidro-borda);
+  border-radius: 16px;
+}
+
+.relacionar__item {
+  font-weight: 800;
+}
+
+.relacionar__campo {
+  min-height: 48px;
+  padding: 8px 12px;
+  border: 1px solid var(--vidro-borda);
+  border-radius: 12px;
+  background: var(--fundo-escuro);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.relacionar__campo:focus-visible {
+  outline: 3px solid var(--texto);
+  outline-offset: 2px;
+}
+
+.relacionar__linha--certa {
+  background: var(--sucesso);
+  border-color: var(--sucesso);
+  color: var(--fundo);
+}
+
+.relacionar__linha--errada {
+  background: var(--erro);
+  border-color: var(--erro);
+  color: var(--fundo);
+}
+
+/* Dissertativa */
+.dissertativa {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dissertativa__rotulo {
+  color: var(--texto-suave);
+  font-weight: 700;
+}
+
+.dissertativa__campo {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--vidro-borda);
+  border-radius: 14px;
+  background: var(--fundo-escuro);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.dissertativa__campo:focus-visible {
+  outline: 3px solid var(--texto);
+  outline-offset: 2px;
+}
+
+.resposta-modelo {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.resposta-modelo__dica {
+  color: var(--texto-suave);
+  font-size: 0.95rem;
 }
 
 /* Resultado */

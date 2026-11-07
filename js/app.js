@@ -3,12 +3,13 @@
 const App = (() => {
   const telas = document.querySelectorAll('.tela');
 
-  function mostrarTela(nome) {
+  // { manter: true } volta para a tela sem limpar o que já foi preenchido.
+  function mostrarTela(nome, { manter = false } = {}) {
     telas.forEach((tela) => {
       tela.hidden = tela.id !== `tela-${nome}`;
     });
     window.scrollTo(0, 0);
-    if (nome === 'fotoquest') FotoQuest.preparar();
+    if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
   }
 
   // Botões com data-ir="nome-da-tela" levam para aquela tela.
@@ -40,6 +41,8 @@ const FotoQuest = (() => {
     heicSemSuporte: 'Este navegador não abre fotos HEIC. Tire a foto direto pelo celular ou salve como JPG.',
     naoAbriu: 'Não consegui abrir uma das fotos. Tente outra foto.',
     muitoGrande: 'As fotos ficaram grandes demais para enviar juntas. Tente com menos fotos.',
+    semPerguntas: 'Não encontrei conteúdo para criar perguntas nessas fotos.',
+    falhou: 'Não consegui criar as perguntas agora. Tente de novo daqui a pouco.',
   };
 
   // Limite seguro para o corpo do pedido na Vercel (cerca de 4,5 MB).
@@ -58,12 +61,25 @@ const FotoQuest = (() => {
     mensagem: document.getElementById('mensagem-foto'),
     resultadoPontos: document.getElementById('resultado-pontos'),
     resultadoDetalhe: document.getElementById('resultado-detalhe'),
+    textoDisciplina: document.getElementById('texto-disciplina'),
+    continuar: document.getElementById('botao-continuar'),
+    trocar: document.getElementById('botao-trocar'),
   };
 
-  // Fotos já reduzidas, só na memória desta tela: { blob, url }.
+  // Fotos já reduzidas, só na memória desta tela: { id, blob, url }.
   let fotos = [];
+  let proximoId = 1;
   let preparando = false;
   let enviando = false;
+
+  // Última resposta da API, para não reenviar as mesmas fotos ao trocar a disciplina.
+  let ultimaResposta = null;
+  // Missão esperando a confirmação da disciplina.
+  let pendente = null;
+
+  function chaveDasFotos() {
+    return fotos.map((foto) => foto.id).join(',');
+  }
 
   function atualizarBotao() {
     el.enviar.disabled = !el.declaracao.checked || preparando || enviando;
@@ -84,6 +100,8 @@ const FotoQuest = (() => {
   function liberarFotos() {
     fotos.forEach((foto) => URL.revokeObjectURL(foto.url));
     fotos = [];
+    ultimaResposta = null;
+    pendente = null;
   }
 
   // Começa sempre do zero: nenhuma foto fica guardada.
@@ -170,7 +188,7 @@ const FotoQuest = (() => {
       }
       try {
         const { blob } = await Fotos.reduzir(arquivo);
-        fotos.push({ blob, url: URL.createObjectURL(blob) });
+        fotos.push({ id: proximoId++, blob, url: URL.createObjectURL(blob) });
         desenharMiniaturas();
       } catch (erro) {
         avisos.push(Fotos.ehHeic(arquivo) ? MENSAGENS.heicSemSuporte : MENSAGENS.naoAbriu);
@@ -206,11 +224,50 @@ const FotoQuest = (() => {
     atualizarBotao();
 
     if (resultado.erro) return avisar(resultado.mensagem);
-
     avisar('');
-    Quiz.iniciar(resultado.perguntas, { demo: resultado.demo, aoTerminar: mostrarResultado });
-    App.mostrarTela('quiz');
+
+    const missao = { ...resultado, disciplina };
+    const detectada = resultado.disciplinaDetectada;
+    const diferente = !resultado.demo
+      && disciplina.slug !== 'outra'
+      && detectada
+      && detectada !== 'outra'
+      && detectada !== disciplina.slug;
+
+    if (diferente) {
+      pendente = missao;
+      el.textoDisciplina.textContent =
+        `Esta página parece ser de ${DISCIPLINAS[detectada]}. Você escolheu ${disciplina.nome}. Continuar?`;
+      App.mostrarTela('disciplina');
+      el.continuar.focus();
+      return;
+    }
+    comecarMissao(missao);
   });
+
+  el.continuar.addEventListener('click', () => {
+    if (!pendente) return;
+    const missao = pendente;
+    pendente = null;
+    comecarMissao(missao);
+  });
+
+  el.trocar.addEventListener('click', () => {
+    pendente = null;
+    App.mostrarTela('fotoquest', { manter: true });
+    avisar('Troque a disciplina ou as fotos e envie de novo.');
+    const marcada = el.form.querySelector('input[name="disciplina"]:checked');
+    if (marcada) marcada.focus();
+  });
+
+  function comecarMissao(missao) {
+    Quiz.iniciar(missao.perguntas, {
+      demo: missao.demo,
+      aviso: missao.aviso,
+      aoTerminar: mostrarResultado,
+    });
+    App.mostrarTela('quiz');
+  }
 
   async function montarPedido(disciplina) {
     const imagens = await Promise.all(fotos.map((foto) => Fotos.paraBase64(foto.blob)));
@@ -224,7 +281,16 @@ const FotoQuest = (() => {
   // Pede as perguntas para api/questoes.js. Se a função não estiver
   // disponível (sem chave configurada, rodando local ou fora do ar),
   // usa as perguntas de exemplo em modo demonstração.
+  function modoDemonstracao() {
+    return { perguntas: Quiz.PERGUNTAS_DEMO, demo: true, aviso: '', disciplinaDetectada: null };
+  }
+
   async function buscarPerguntas(disciplina) {
+    const chave = chaveDasFotos();
+    if (ultimaResposta && ultimaResposta.chave === chave) {
+      return ultimaResposta.resultado;
+    }
+
     let corpo;
     try {
       corpo = await montarPedido(disciplina);
@@ -235,30 +301,50 @@ const FotoQuest = (() => {
       return { erro: true, mensagem: MENSAGENS.muitoGrande };
     }
 
+    let resposta;
+    let dados = null;
     try {
-      const resposta = await fetch('/api/questoes', {
+      resposta = await fetch('/api/questoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: corpo,
       });
-      const dados = await resposta.json().catch(() => null);
-
-      if (dados && dados.erro === 'nao_foi_possivel_ler') {
-        return { erro: true, mensagem: MENSAGENS.naoLeu };
-      }
-      if (resposta.ok && dados && Quiz.suportadas(dados.questoes).length > 0) {
-        return { perguntas: dados.questoes, demo: false };
-      }
+      dados = await resposta.json().catch(() => null);
     } catch (erro) {
-      // Sem conexão com a função: segue para o modo demonstração.
+      // Sem conexão com a função: modo demonstração.
+      return modoDemonstracao();
     }
-    return { perguntas: Quiz.QUESTOES_DEMO, demo: true };
+
+    // Função ausente (rodando sem servidor) ou sem chave: modo demonstração.
+    if (!dados || dados.erro === 'sem_chave') {
+      return [404, 405, 501, 503].includes(resposta.status) || (dados && dados.erro === 'sem_chave')
+        ? modoDemonstracao()
+        : { erro: true, mensagem: MENSAGENS.falhou };
+    }
+
+    if (dados.erro === 'nao_foi_possivel_ler') return { erro: true, mensagem: MENSAGENS.naoLeu };
+    if (dados.erro === 'sem_perguntas') {
+      return { erro: true, mensagem: [MENSAGENS.semPerguntas, dados.aviso].filter(Boolean).join(' ') };
+    }
+    if (!resposta.ok || dados.erro) return { erro: true, mensagem: MENSAGENS.falhou };
+
+    const perguntas = Quiz.suportadas(dados.perguntas);
+    if (!perguntas.length) return { erro: true, mensagem: MENSAGENS.falhou };
+
+    const resultado = {
+      perguntas,
+      demo: false,
+      aviso: typeof dados.aviso === 'string' ? dados.aviso : '',
+      disciplinaDetectada: dados.disciplina_detectada,
+    };
+    ultimaResposta = { chave, resultado };
+    return resultado;
   }
 
-  function mostrarResultado({ pontos, acertosDePrimeira, total }) {
+  function mostrarResultado({ pontos, acertosDePrimeira, corrigiveis }) {
     el.resultadoPontos.textContent = pontos;
     el.resultadoDetalhe.textContent =
-      `Você acertou ${acertosDePrimeira} de ${total} de primeira. ` +
+      `Você acertou ${acertosDePrimeira} de ${corrigiveis} de primeira. ` +
       `Seu total: ${Quiz.textoPontos(Pontos.total())}.`;
     App.mostrarTela('resultado');
   }
