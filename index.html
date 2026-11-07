@@ -6,7 +6,9 @@
   <title>Lumi</title>
   <meta name="description" content="Lumi: cada acerto acende uma luz.">
   <link rel="stylesheet" href="css/estilo.css">
+  <script src="js/familia.js" defer></script>
   <script src="js/pontos.js" defer></script>
+  <script src="js/fotos.js" defer></script>
   <script src="js/quiz.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -16,20 +18,34 @@
     <!-- Tela inicial -->
     <section class="tela" id="tela-inicio">
       <header class="cabecalho">
-        <img class="cabecalho__lumi" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="160" height="160">
+        <div class="cabecalho__luz">
+          <img class="cabecalho__lumi flutuar" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="180" height="180">
+        </div>
         <h1 class="cabecalho__nome">Lumi</h1>
         <p class="cabecalho__frase">Cada acerto acende uma luz</p>
       </header>
 
       <div class="inicio">
-        <button type="button" class="botao-principal" data-ir="fotoquest">
-          Tirar foto e começar a missão
+        <button type="button" class="botao-principal botao-principal--grande" data-ir="fotoquest">
+          <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+            <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-1.8A1.5 1.5 0 0 1 10.5 3.5h3a1.5 1.5 0 0 1 1.2.7L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="12" cy="12.5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span>Tirar foto e começar a missão</span>
         </button>
 
-        <section class="area-doris" aria-labelledby="titulo-doris">
+        <section class="area-doris vidro" aria-labelledby="titulo-doris">
           <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
           <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
         </section>
+
+        <section class="missoes vidro" id="missoes" aria-labelledby="titulo-missoes" hidden>
+          <h2 class="missoes__titulo" id="titulo-missoes">Suas missões</h2>
+          <ul class="missoes__lista" id="lista-missoes"></ul>
+        </section>
+
+        <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
+        <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -40,24 +56,63 @@
         <h1 class="barra-topo__titulo" id="titulo-fotoquest">FotoQuest</h1>
       </div>
 
-      <div class="conteudo">
-        <div class="guia-doris">
+      <form class="conteudo" id="form-fotos" novalidate>
+        <div class="guia-doris vidro">
           <img class="guia-doris__imagem" src="assets/doris.jpg" alt="" width="72" height="72">
-          <p>Tire uma foto do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
+          <p>Tire fotos do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
         </div>
 
-        <input type="file" id="entrada-foto" class="visualmente-oculto" accept="image/*">
-        <label class="botao-foto" for="entrada-foto" id="rotulo-foto">Tirar ou escolher foto</label>
+        <fieldset class="campo vidro">
+          <legend class="campo__titulo">1. Qual é a disciplina?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="disciplina" value="portugues"><span>Português</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="matematica"><span>Matemática</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="ciencias"><span>Ciências</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="historia"><span>História</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="geografia"><span>Geografia</span></label>
+            <label class="chip"><input type="radio" name="disciplina" value="outra"><span>Outra</span></label>
+          </div>
+          <div class="campo-outra" id="campo-outra" hidden>
+            <label for="disciplina-outra">Qual disciplina?</label>
+            <input type="text" id="disciplina-outra" maxlength="40" autocomplete="off" placeholder="Ex.: Inglês">
+          </div>
+        </fieldset>
 
-        <figure class="previa" id="previa" hidden>
-          <img class="previa__imagem" id="previa-imagem" alt="Pré-visualização da foto escolhida">
-        </figure>
+        <fieldset class="campo vidro">
+          <legend class="campo__titulo">2. Fotos do material</legend>
+          <p class="campo__ajuda">De 1 a 10 fotos, em JPG, PNG ou HEIC.</p>
+          <input type="file" id="entrada-foto" class="visualmente-oculto" accept="image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif" multiple>
+          <label class="botao-foto" for="entrada-foto" id="rotulo-foto">Tirar ou escolher fotos</label>
+          <p class="contador" id="contador-fotos" aria-live="polite"></p>
+          <ul class="miniaturas" id="miniaturas" aria-label="Fotos escolhidas"></ul>
+        </fieldset>
 
-        <button type="button" class="botao-principal" id="botao-criar-missao" disabled>
-          Criar missão
+        <section class="aviso-privacidade vidro" aria-labelledby="titulo-privacidade">
+          <h2 class="aviso-privacidade__titulo" id="titulo-privacidade">Sua privacidade</h2>
+          <p>Suas fotos são usadas só para criar as perguntas da missão e são descartadas logo depois. As perguntas ficam guardadas somente para a sua família, para você estudar quando quiser. Nenhuma outra família tem acesso a elas, e elas não são usadas para treinar sistemas. Você pode apagar tudo a qualquer momento no botão 'Apagar dados da família'.</p>
+        </section>
+
+        <label class="declaracao" for="declaracao">
+          <input type="checkbox" id="declaracao">
+          <span>Declaro que as fotos enviadas são de cadernos ou materiais de estudo meus ou do meu filho, e que serão usadas apenas para estudo da nossa família.</span>
+        </label>
+
+        <button type="submit" class="botao-principal" id="botao-enviar" disabled>
+          Enviar fotos
         </button>
 
         <p class="mensagem" id="mensagem-foto" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <!-- Aviso de disciplina diferente -->
+    <section class="tela" id="tela-disciplina" aria-labelledby="titulo-disciplina" hidden>
+      <div class="conteudo conteudo--centro">
+        <img class="guia-doris__imagem guia-doris__imagem--grande" src="assets/doris.jpg" alt="" width="120" height="120">
+        <h1 class="titulo-aviso" id="titulo-disciplina">Hmm, será a matéria certa?</h1>
+        <p class="texto-aviso" id="texto-disciplina"></p>
+        <button type="button" class="botao-principal" id="botao-continuar">Continuar</button>
+        <button type="button" class="botao-secundario" id="botao-trocar">Trocar</button>
       </div>
     </section>
 
@@ -68,11 +123,17 @@
         <span class="pontos" id="quiz-pontos">0 pontos</span>
       </div>
 
+      <div class="progresso" id="quiz-progresso-barra" role="progressbar" aria-label="Progresso da missão" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+        <div class="progresso__preenchido" id="quiz-progresso-preenchido"></div>
+      </div>
+
       <div class="conteudo">
-        <p class="aviso-demo" id="aviso-demo" hidden>
+        <p class="aviso-demo vidro" id="aviso-demo" hidden>
           <strong>Modo demonstração</strong>
-          Estas são perguntas de exemplo. A leitura da foto ainda não está ligada.
+          Estas são perguntas de exemplo criadas pela equipe da Lumi. A leitura das fotos não está ligada.
         </p>
+
+        <p class="aviso-leitura vidro" id="quiz-aviso" hidden></p>
 
         <p class="quiz-progresso" id="quiz-progresso"></p>
         <h2 class="quiz-enunciado" id="quiz-enunciado"></h2>
@@ -90,7 +151,9 @@
     <!-- Resultado da missão -->
     <section class="tela" id="tela-resultado" aria-labelledby="titulo-resultado" hidden>
       <div class="conteudo resultado">
-        <img class="resultado__lumi" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="200" height="200">
+        <div class="resultado__luz">
+          <img class="resultado__lumi flutuar" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="200" height="200">
+        </div>
         <h1 class="resultado__titulo" id="titulo-resultado">Missão completa!</h1>
         <p class="pontos pontos--grande"><span id="resultado-pontos">0</span> pontos</p>
         <p class="resultado__detalhe" id="resultado-detalhe"></p>
