@@ -16,17 +16,23 @@
     <!-- Tela inicial -->
     <section class="tela" id="tela-inicio">
       <header class="cabecalho">
-        <img class="cabecalho__lumi" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="160" height="160">
+        <div class="cabecalho__luz">
+          <img class="cabecalho__lumi flutuar" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="180" height="180">
+        </div>
         <h1 class="cabecalho__nome">Lumi</h1>
         <p class="cabecalho__frase">Cada acerto acende uma luz</p>
       </header>
 
       <div class="inicio">
-        <button type="button" class="botao-principal" data-ir="fotoquest">
-          Tirar foto e começar a missão
+        <button type="button" class="botao-principal botao-principal--grande" data-ir="fotoquest">
+          <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
+            <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-1.8A1.5 1.5 0 0 1 10.5 3.5h3a1.5 1.5 0 0 1 1.2.7L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="12" cy="12.5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+          </svg>
+          <span>Tirar foto e começar a missão</span>
         </button>
 
-        <section class="area-doris" aria-labelledby="titulo-doris">
+        <section class="area-doris vidro" aria-labelledby="titulo-doris">
           <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
           <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
         </section>
@@ -41,7 +47,7 @@
       </div>
 
       <div class="conteudo">
-        <div class="guia-doris">
+        <div class="guia-doris vidro">
           <img class="guia-doris__imagem" src="assets/doris.jpg" alt="" width="72" height="72">
           <p>Tire uma foto do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
         </div>
@@ -68,8 +74,12 @@
         <span class="pontos" id="quiz-pontos">0 pontos</span>
       </div>
 
+      <div class="progresso" id="quiz-progresso-barra" role="progressbar" aria-label="Progresso da missão" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+        <div class="progresso__preenchido" id="quiz-progresso-preenchido"></div>
+      </div>
+
       <div class="conteudo">
-        <p class="aviso-demo" id="aviso-demo" hidden>
+        <p class="aviso-demo vidro" id="aviso-demo" hidden>
           <strong>Modo demonstração</strong>
           Estas são perguntas de exemplo. A leitura da foto ainda não está ligada.
         </p>
@@ -90,7 +100,9 @@
     <!-- Resultado da missão -->
     <section class="tela" id="tela-resultado" aria-labelledby="titulo-resultado" hidden>
       <div class="conteudo resultado">
-        <img class="resultado__lumi" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="200" height="200">
+        <div class="resultado__luz">
+          <img class="resultado__lumi flutuar" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="200" height="200">
+        </div>
         <h1 class="resultado__titulo" id="titulo-resultado">Missão completa!</h1>
         <p class="pontos pontos--grande"><span id="resultado-pontos">0</span> pontos</p>
         <p class="resultado__detalhe" id="resultado-detalhe"></p>

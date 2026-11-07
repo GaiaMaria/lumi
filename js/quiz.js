@@ -51,7 +51,17 @@ const Quiz = (() => {
     feedback: document.getElementById('quiz-feedback'),
     proxima: document.getElementById('quiz-proxima'),
     pontos: document.getElementById('quiz-pontos'),
+    barra: document.getElementById('quiz-progresso-barra'),
+    barraPreenchida: document.getElementById('quiz-progresso-preenchido'),
   };
+
+  // Só visual: mostra quantas perguntas já foram respondidas.
+  function atualizarBarra(respondidas) {
+    const total = estado.questoes.length;
+    el.barraPreenchida.style.width = `${(respondidas / total) * 100}%`;
+    el.barra.setAttribute('aria-valuemax', String(total));
+    el.barra.setAttribute('aria-valuenow', String(respondidas));
+  }
 
   let estado = null;
 
@@ -114,6 +124,7 @@ const Quiz = (() => {
     estado.respondida = false;
 
     el.progresso.textContent = `Pergunta ${estado.indice + 1} de ${estado.questoes.length}`;
+    atualizarBarra(estado.indice);
     el.enunciado.textContent = questao.enunciado;
     el.feedback.hidden = true;
     el.feedback.className = 'feedback';
@@ -169,6 +180,7 @@ const Quiz = (() => {
       botao.classList.add('opcao--certa');
       el.opcoes.querySelectorAll('.opcao').forEach((b) => { b.disabled = true; });
       el.pontos.textContent = textoPontos(estado.pontos);
+      atualizarBarra(estado.indice + 1);
       mostrarFeedback('sucesso', `Isso! +${ganhos} pontos`, questao.explicacao);
 
       const ultima = estado.indice === estado.questoes.length - 1;
