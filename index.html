@@ -6,6 +6,7 @@
   <title>Lumi</title>
   <meta name="description" content="Lumi: cada acerto acende uma luz.">
   <link rel="stylesheet" href="css/estilo.css">
+  <script src="js/familia.js" defer></script>
   <script src="js/pontos.js" defer></script>
   <script src="js/fotos.js" defer></script>
   <script src="js/quiz.js" defer></script>
@@ -37,6 +38,14 @@
           <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
           <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
         </section>
+
+        <section class="missoes vidro" id="missoes" aria-labelledby="titulo-missoes" hidden>
+          <h2 class="missoes__titulo" id="titulo-missoes">Suas missões</h2>
+          <ul class="missoes__lista" id="lista-missoes"></ul>
+        </section>
+
+        <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
+        <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
       </div>
     </section>
 

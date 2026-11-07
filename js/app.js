@@ -10,6 +10,7 @@ const App = (() => {
     });
     window.scrollTo(0, 0);
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
+    if (nome === 'inicio') Inicio.atualizar();
   }
 
   // Botões com data-ir="nome-da-tela" levam para aquela tela.
@@ -261,10 +262,27 @@ const FotoQuest = (() => {
   });
 
   function comecarMissao(missao) {
-    Quiz.iniciar(missao.perguntas, {
-      demo: missao.demo,
-      aviso: missao.aviso,
-      aoTerminar: mostrarResultado,
+    // Guarda as perguntas para a família estudar depois. As fotos não são guardadas.
+    // As perguntas de exemplo do modo demonstração não são guardadas.
+    const id = missao.demo
+      ? null
+      : Familia.salvarMissao({
+        disciplina: missao.disciplina.slug,
+        disciplinaNome: missao.disciplina.nome,
+        perguntas: missao.perguntas,
+        aviso: missao.aviso,
+      });
+    jogar(missao.perguntas, { demo: missao.demo, aviso: missao.aviso, id });
+  }
+
+  function jogar(perguntas, { demo = false, aviso = '', id = null } = {}) {
+    Quiz.iniciar(perguntas, {
+      demo,
+      aviso,
+      aoTerminar: (resultado) => {
+        if (id) Familia.concluirMissao(id, resultado);
+        mostrarResultado(resultado);
+      },
     });
     App.mostrarTela('quiz');
   }
@@ -349,5 +367,61 @@ const FotoQuest = (() => {
     App.mostrarTela('resultado');
   }
 
-  return { preparar };
+  return { preparar, jogar };
+})();
+
+// Tela inicial: missões guardadas e botão de apagar os dados da família.
+const Inicio = (() => {
+  const el = {
+    caixa: document.getElementById('missoes'),
+    lista: document.getElementById('lista-missoes'),
+    apagar: document.getElementById('botao-apagar'),
+    mensagem: document.getElementById('mensagem-inicio'),
+  };
+
+  const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
+
+  function atualizar() {
+    const missoes = Familia.missoes();
+    el.caixa.hidden = missoes.length === 0;
+    el.lista.replaceChildren(...missoes.map((missao) => {
+      const item = document.createElement('li');
+      item.className = 'missao';
+
+      const info = document.createElement('div');
+      const nome = document.createElement('p');
+      nome.className = 'missao__nome';
+      nome.textContent = missao.disciplinaNome;
+      const detalhe = document.createElement('p');
+      detalhe.className = 'missao__detalhe';
+      const data = formatoData.format(new Date(missao.criadaEm));
+      const situacao = missao.vezes ? `melhor: ${Quiz.textoPontos(missao.melhorPontuacao)}` : 'nova';
+      detalhe.textContent = `${missao.perguntas.length} perguntas · ${data} · ${situacao}`;
+      info.append(nome, detalhe);
+
+      const botao = document.createElement('button');
+      botao.type = 'button';
+      botao.className = 'botao-secundario';
+      botao.textContent = missao.vezes ? 'Estudar de novo' : 'Começar';
+      botao.addEventListener('click', () => {
+        FotoQuest.jogar(missao.perguntas, { aviso: missao.aviso, id: missao.id });
+      });
+
+      item.append(info, botao);
+      return item;
+    }));
+  }
+
+  el.apagar.addEventListener('click', () => {
+    const ok = window.confirm(
+      'Apagar todas as perguntas e o progresso da família neste aparelho? Isso não pode ser desfeito.',
+    );
+    if (!ok) return;
+    Familia.apagarTudo();
+    atualizar();
+    el.mensagem.textContent = 'Pronto. Os dados da família foram apagados deste aparelho.';
+  });
+
+  atualizar();
+  return { atualizar };
 })();
