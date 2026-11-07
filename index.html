@@ -6,24 +6,100 @@
   <title>Lumi</title>
   <meta name="description" content="Lumi: cada acerto acende uma luz.">
   <link rel="stylesheet" href="css/estilo.css">
+  <script src="js/pontos.js" defer></script>
+  <script src="js/quiz.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
-  <header class="cabecalho">
-    <img class="cabecalho__lumi" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="160" height="160">
-    <h1 class="cabecalho__nome">Lumi</h1>
-    <p class="cabecalho__frase">Cada acerto acende uma luz</p>
-  </header>
+  <main class="app">
 
-  <main class="inicio">
-    <button type="button" class="botao-principal" id="botao-missao">
-      Tirar foto e começar a missão
-    </button>
+    <!-- Tela inicial -->
+    <section class="tela" id="tela-inicio">
+      <header class="cabecalho">
+        <img class="cabecalho__lumi" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="160" height="160">
+        <h1 class="cabecalho__nome">Lumi</h1>
+        <p class="cabecalho__frase">Cada acerto acende uma luz</p>
+      </header>
 
-    <section class="area-doris" aria-labelledby="titulo-doris">
-      <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
-      <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
+      <div class="inicio">
+        <button type="button" class="botao-principal" data-ir="fotoquest">
+          Tirar foto e começar a missão
+        </button>
+
+        <section class="area-doris" aria-labelledby="titulo-doris">
+          <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
+          <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
+        </section>
+      </div>
     </section>
+
+    <!-- FotoQuest: escolher a foto -->
+    <section class="tela" id="tela-fotoquest" aria-labelledby="titulo-fotoquest" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-fotoquest">FotoQuest</h1>
+      </div>
+
+      <div class="conteudo">
+        <div class="guia-doris">
+          <img class="guia-doris__imagem" src="assets/doris.jpg" alt="" width="72" height="72">
+          <p>Tire uma foto do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
+        </div>
+
+        <input type="file" id="entrada-foto" class="visualmente-oculto" accept="image/*">
+        <label class="botao-foto" for="entrada-foto" id="rotulo-foto">Tirar ou escolher foto</label>
+
+        <figure class="previa" id="previa" hidden>
+          <img class="previa__imagem" id="previa-imagem" alt="Pré-visualização da foto escolhida">
+        </figure>
+
+        <button type="button" class="botao-principal" id="botao-criar-missao" disabled>
+          Criar missão
+        </button>
+
+        <p class="mensagem" id="mensagem-foto" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section class="tela" id="tela-quiz" aria-labelledby="quiz-enunciado" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="inicio">← Sair</button>
+        <span class="pontos" id="quiz-pontos">0 pontos</span>
+      </div>
+
+      <div class="conteudo">
+        <p class="aviso-demo" id="aviso-demo" hidden>
+          <strong>Modo demonstração</strong>
+          Estas são perguntas de exemplo. A leitura da foto ainda não está ligada.
+        </p>
+
+        <p class="quiz-progresso" id="quiz-progresso"></p>
+        <h2 class="quiz-enunciado" id="quiz-enunciado"></h2>
+
+        <div class="quiz-opcoes" id="quiz-opcoes"></div>
+
+        <div class="feedback" id="quiz-feedback" role="status" aria-live="polite" hidden></div>
+
+        <button type="button" class="botao-principal" id="quiz-proxima" hidden>
+          Próxima pergunta
+        </button>
+      </div>
+    </section>
+
+    <!-- Resultado da missão -->
+    <section class="tela" id="tela-resultado" aria-labelledby="titulo-resultado" hidden>
+      <div class="conteudo resultado">
+        <img class="resultado__lumi" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="200" height="200">
+        <h1 class="resultado__titulo" id="titulo-resultado">Missão completa!</h1>
+        <p class="pontos pontos--grande"><span id="resultado-pontos">0</span> pontos</p>
+        <p class="resultado__detalhe" id="resultado-detalhe"></p>
+
+        <button type="button" class="botao-principal" data-ir="fotoquest">Nova missão</button>
+        <button type="button" class="botao-secundario" data-ir="inicio">Voltar ao início</button>
+      </div>
+    </section>
+
   </main>
 
   <footer class="rodape">
