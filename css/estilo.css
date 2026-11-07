@@ -1,0 +1,19 @@
+/* Paleta Lumi */
+:root {
+  --fundo: #1E1B4B;
+  --fundo-escuro: #120F33;
+  --superficie: #2A2663;
+  --borda: #3B3680;
+  --texto: #F8FAFC;
+  --texto-suave: #C7D2FE;
+  --primaria: #7C3AED;
+  --primaria-hover: #6D28D9;
+  --sucesso: #34D399;
+  --brilho: #A7F3D0;
+  --doris: #FB923C;
+  --creme: #FFF7ED;
+  --atencao: #FACC15;
+  --erro: #F87171;
+  --info: #38BDF8;
+  --gradiente-marca: linear-gradient(135deg, #7C3AED, #34D399);
+}

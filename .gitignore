@@ -1,0 +1,11 @@
+# Variáveis de ambiente (chaves de API)
+.env
+.env.*
+
+# Vercel
+.vercel
+
+# Sistema
+.DS_Store
+Thumbs.db
+node_modules/

@@ -46,9 +46,9 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 - No máximo três cores de destaque na mesma tela.
 
 **Mascotes:**
-- **Lumi:** vaga-lume verde-menta, com asas violeta. Aparece nos acertos, nas medalhas e no guia das missões. Arquivos: `assets/lumi.png` e `assets/lumi-comemorando.png`.
-- **Dóris:** coruja laranja com barriga creme, que lê um livro em voz alta. Aparece na área de fotos e na leitura. Arquivo: `assets/doris.png`.
-- **Referência de cena:** `assets/referencia-cena.png`, com as duas juntas. Usar como base da landing.
+- **Lumi:** vaga-lume verde-menta, com asas violeta. Aparece nos acertos, nas medalhas e no guia das missões. Arquivos: `assets/lumi.jpg` e `assets/lumi-comemorando.jpg`.
+- **Dóris:** coruja laranja com barriga creme, que lê um livro em voz alta. Aparece na área de fotos e na leitura. Arquivo: `assets/doris.jpg`.
+- **Referência de cena:** `assets/referencia-cena.jpeg`, com as duas juntas. Usar como base da landing.
 
 ## 4. Funções do app
 
