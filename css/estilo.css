@@ -1,0 +1,199 @@
+/* Paleta Lumi */
+:root {
+  --fundo: #1E1B4B;
+  --fundo-escuro: #120F33;
+  --superficie: #2A2663;
+  --borda: #3B3680;
+  --texto: #F8FAFC;
+  --texto-suave: #C7D2FE;
+  --primaria: #7C3AED;
+  --primaria-hover: #6D28D9;
+  --sucesso: #34D399;
+  --brilho: #A7F3D0;
+  --doris: #FB923C;
+  --creme: #FFF7ED;
+  --atencao: #FACC15;
+  --erro: #F87171;
+  --info: #38BDF8;
+  --gradiente-marca: linear-gradient(135deg, #7C3AED, #34D399);
+}
+
+/* Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: "Nunito", "Trebuchet MS", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+/* Cabeçalho */
+.cabecalho {
+  background: var(--fundo-escuro);
+  border-bottom: 1px solid var(--borda);
+  padding: 32px 16px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.cabecalho__lumi {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--borda);
+  box-shadow: 0 0 32px var(--brilho);
+}
+
+.cabecalho__nome {
+  color: var(--brilho);
+  font-size: clamp(3rem, 14vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 24px var(--brilho);
+}
+
+.cabecalho__frase {
+  color: var(--texto-suave);
+  font-size: clamp(1.05rem, 4.5vw, 1.3rem);
+  font-weight: 700;
+  line-height: 1.3;
+  max-width: 24ch;
+  text-wrap: balance;
+}
+
+/* Conteúdo */
+.inicio {
+  flex: 1;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 32px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 32px;
+}
+
+/* Botão principal */
+.botao-principal {
+  appearance: none;
+  border: 0;
+  border-radius: 16px;
+  background: var(--primaria);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1.15rem;
+  font-weight: 800;
+  padding: 18px 24px;
+  min-height: 56px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+}
+
+.botao-principal:hover {
+  background: var(--primaria-hover);
+}
+
+.botao-principal:active {
+  transform: scale(0.98);
+}
+
+.botao-principal:focus-visible {
+  outline: 3px solid var(--texto);
+  outline-offset: 3px;
+}
+
+/* Área da Dóris */
+.area-doris {
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.area-doris__imagem {
+  width: 110px;
+  height: 110px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.area-doris__titulo {
+  color: var(--doris);
+  font-size: clamp(1.4rem, 5vw, 1.8rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Rodapé */
+.rodape {
+  background: var(--fundo-escuro);
+  border-top: 1px solid var(--borda);
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 16px;
+}
+
+/* Telas maiores */
+@media (min-width: 768px) {
+  .cabecalho {
+    padding: 48px 24px 40px;
+  }
+
+  .cabecalho__lumi {
+    width: 180px;
+    height: 180px;
+  }
+
+  .inicio {
+    padding-top: 48px;
+  }
+
+  .area-doris__imagem {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+/* Movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  .botao-principal {
+    transition: none;
+  }
+
+  .botao-principal:active {
+    transform: none;
+  }
+}
