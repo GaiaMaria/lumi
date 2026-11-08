@@ -147,7 +147,7 @@ test('callback: estado diferente (ou sem cookie) é recusado', async () => {
     query: { code: 'c', state: 'estado-errado' },
     headers: { cookie: `${G.COOKIE_ESTADO}=${encodeURIComponent(estadoCookie)}` },
   });
-  assert.strictEqual(res.headers.location, 'https://lumi-teste.vercel.app/?google=erro');
+  assert.strictEqual(res.headers.location, 'https://lumi-teste.vercel.app/?google=erro&motivo=estado_diferente');
   assert.strictEqual(pedidos.length, 0);
   // Sem o cookie do estado: o login começou em outro endereço.
   const semCookie = await rodar(callback, { query: { code: 'c', state: 'x' } });
@@ -305,4 +305,30 @@ test('estado: diz se está configurado, se o login chegou e o endereço de retor
   for (const segredo of [REFRESH, AMBIENTE.GOOGLE_CLIENT_SECRET, AMBIENTE.GOOGLE_CLIENT_ID]) assert.ok(!texto.includes(segredo));
   const semConfig = await rodar(estado, {}, [], {});
   assert.deepStrictEqual(semConfig.res.corpo, { configurado: false, conectado: false, cookieRecebido: false, enderecoDoRetorno: null });
+});
+
+test('callback: falha na troca do código volta com o código do motivo (sem tokens)', async () => {
+  const passo1 = await rodar(login, {});
+  const url = new URL(passo1.res.headers.location);
+  const cookieEstado = `${G.COOKIE_ESTADO}=${encodeURIComponent(valorDoCookie(passo1.res, G.COOKIE_ESTADO))}`;
+  const casos = [
+    [() => resposta(400, { error: 'invalid_grant', error_description: 'Bad Request' }), 'invalid_grant'],
+    [() => resposta(400, { error: 'redirect_uri_mismatch' }), 'redirect_uri_mismatch'],
+    [() => resposta(200, { access_token: ACESSO, scope: G.ESCOPO }), 'sem_refresh_token'],
+  ];
+  for (const [respostaDoGoogle, motivo] of casos) {
+    const { res, logs } = await rodar(callback, {
+      query: { code: 'c', state: url.searchParams.get('state') }, headers: { cookie: cookieEstado },
+    }, [[G.URL_TOKEN, respostaDoGoogle]]);
+    assert.strictEqual(res.headers.location, `https://lumi-teste.vercel.app/?google=erro&motivo=${motivo}`);
+    assert.ok(!res.headers.location.includes(ACESSO));
+    assert.ok(logs.join('\n').includes(motivo));
+    assert.ok(!logs.join('\n').includes(ACESSO));
+  }
+});
+
+test('código do motivo só aceita letras, números, _ e -', () => {
+  assert.strictEqual(G.codigoSeguro('invalid_grant'), 'invalid_grant');
+  assert.strictEqual(G.codigoSeguro('<script>x</script>'), 'scriptxscript');
+  assert.strictEqual(G.codigoSeguro(''), 'desconhecido');
 });

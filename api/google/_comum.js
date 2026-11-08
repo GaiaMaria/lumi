@@ -28,9 +28,16 @@ function config() {
 }
 
 // Endereço do app (mesma origem do callback), para voltar depois do login.
-function urlDoApp(cfg, resultado) {
+// motivo: código curto e seguro (ex.: "invalid_grant"), nunca token ou segredo.
+function urlDoApp(cfg, resultado, motivo) {
   const base = new URL(cfg.redirect).origin;
-  return `${base}/?google=${encodeURIComponent(resultado)}`;
+  const extra = motivo ? `&motivo=${encodeURIComponent(codigoSeguro(motivo))}` : '';
+  return `${base}/?google=${encodeURIComponent(resultado)}${extra}`;
+}
+
+// Só letras, números, _ e -, no máximo 40 caracteres.
+function codigoSeguro(texto) {
+  return String(texto || '').toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40) || 'desconhecido';
 }
 
 // ---------- criptografia do cookie ----------
@@ -190,6 +197,7 @@ module.exports = {
   DURACAO_ESTADO_S,
   config,
   urlDoApp,
+  codigoSeguro,
   cifrar,
   decifrar,
   lerCookies,

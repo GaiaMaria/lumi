@@ -15,7 +15,8 @@ module.exports = async function handler(req, res) {
   // A pessoa cancelou ou o Google recusou.
   if (consulta.error) {
     const resultado = consulta.error === 'access_denied' ? 'cancelado' : 'erro';
-    return G.redirecionar(res, G.urlDoApp(cfg, resultado), [limparEstado]);
+    if (resultado === 'erro') console.error('google: retorno com erro', G.codigoSeguro(consulta.error));
+    return G.redirecionar(res, G.urlDoApp(cfg, resultado, resultado === 'erro' ? consulta.error : null), [limparEstado]);
   }
 
   const valido = estado
@@ -26,8 +27,9 @@ module.exports = async function handler(req, res) {
   if (!valido) {
     // Sem o cookie do estado: o login começou num endereço diferente do de retorno.
     const resultado = estado ? 'erro' : 'outro_endereco';
-    console.error('google: estado inválido no retorno', resultado);
-    return G.redirecionar(res, G.urlDoApp(cfg, resultado), [limparEstado]);
+    const motivo = !estado ? null : (consulta.state !== estado.estado ? 'estado_diferente' : 'estado_expirado');
+    console.error('google: estado inválido no retorno', resultado, motivo || '');
+    return G.redirecionar(res, G.urlDoApp(cfg, resultado, motivo), [limparEstado]);
   }
 
   const resultado = await G.chamar(G.URL_TOKEN, G.formulario({
@@ -40,8 +42,13 @@ module.exports = async function handler(req, res) {
   }));
 
   if (!resultado.ok || !resultado.dados || !resultado.dados.refresh_token) {
-    console.error('google: troca do código falhou', resultado.status); // sem tokens no log
-    return G.redirecionar(res, G.urlDoApp(cfg, 'erro'), [limparEstado]);
+    // Motivo seguro: o código de erro do Google (ex.: invalid_grant), ou a falta do refresh token.
+    let motivo = 'sem_resposta';
+    if (resultado.dados && typeof resultado.dados.error === 'string') motivo = resultado.dados.error;
+    else if (resultado.ok) motivo = 'sem_refresh_token';
+    else if (resultado.status) motivo = `http_${resultado.status}`;
+    console.error('google: troca do código falhou', resultado.status, G.codigoSeguro(motivo)); // sem tokens no log
+    return G.redirecionar(res, G.urlDoApp(cfg, 'erro', motivo), [limparEstado]);
   }
 
   // A pessoa pode desmarcar a permissão da agenda na tela do Google.

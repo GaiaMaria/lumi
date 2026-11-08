@@ -438,7 +438,10 @@ const Calendario = (() => {
     const parametros = new URLSearchParams(window.location.search);
     const resultado = parametros.get('google');
     if (!resultado) return;
+    // Código curto do motivo (sem segredos), para entender uma falha.
+    const motivo = (parametros.get('motivo') || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 40);
     parametros.delete('google');
+    parametros.delete('motivo');
     const busca = parametros.toString();
     window.history.replaceState(null, '', `${window.location.pathname}${busca ? `?${busca}` : ''}${window.location.hash}`);
 
@@ -464,7 +467,7 @@ const Calendario = (() => {
       erro: 'Não consegui conectar ao Google agora. Tente de novo ou baixe o arquivo .ics.',
       outro_endereco: 'O login no Google começou num endereço diferente do app. Abra o app pelo endereço desta página e tente de novo.',
     };
-    avisar(textos[resultado] || textos.erro);
+    avisar(`${textos[resultado] || textos.erro}${motivo ? ` (código: ${motivo})` : ''}`);
     if (resultado === 'conectado') acabouDeConectar = true;
     if (prova) {
       if (resultado === 'conectado') adicionarAoGoogle(prova.id);
