@@ -91,6 +91,15 @@ const FotoQuest = (() => {
     mensagem: document.getElementById('mensagem-foto'),
     resultadoPontos: document.getElementById('resultado-pontos'),
     resultadoDetalhe: document.getElementById('resultado-detalhe'),
+    resultadoAcertosCartao: document.getElementById('resultado-acertos-cartao'),
+    resultadoAcertos: document.getElementById('resultado-acertos'),
+    resultadoMelhorCartao: document.getElementById('resultado-melhor-cartao'),
+    resultadoMelhor: document.getElementById('resultado-melhor'),
+    resultadoNivelTitulo: document.getElementById('resultado-nivel-titulo'),
+    resultadoNivelFaltam: document.getElementById('resultado-nivel-faltam'),
+    resultadoNivelBarra: document.getElementById('resultado-nivel-barra'),
+    resultadoNivelPreenchido: document.getElementById('resultado-nivel-preenchido'),
+    resultadoOuvir: document.getElementById('resultado-ouvir'),
     textoDisciplina: document.getElementById('texto-disciplina'),
     continuar: document.getElementById('botao-continuar'),
     trocar: document.getElementById('botao-trocar'),
@@ -320,7 +329,7 @@ const FotoQuest = (() => {
       aviso,
       aoTerminar: (resultado) => {
         if (id) Familia.concluirMissao(id, resultado);
-        mostrarResultado(resultado);
+        mostrarResultado(resultado, id);
       },
     });
     App.mostrarTela('quiz');
@@ -399,11 +408,41 @@ const FotoQuest = (() => {
     return resultado;
   }
 
-  function mostrarResultado({ pontos, acertosDePrimeira, corrigiveis }) {
+  function mostrarResultado({ pontos, acertosDePrimeira, corrigiveis }, id = null) {
+    const missao = id ? Familia.missao(id) : null;
     el.resultadoPontos.textContent = pontos;
     el.resultadoDetalhe.textContent =
       `Você acertou ${acertosDePrimeira} de ${corrigiveis} de primeira. ` +
       `Seu total: ${Quiz.textoPontos(Pontos.total())}.`;
+
+    const cartoes = Resultado.cartoes({
+      acertosDePrimeira,
+      corrigiveis,
+      vezes: missao ? missao.vezes : 0,
+      melhorPontuacao: missao ? missao.melhorPontuacao : 0,
+    });
+    el.resultadoAcertosCartao.hidden = !cartoes.acertos;
+    el.resultadoAcertos.textContent = cartoes.acertos || '';
+    el.resultadoMelhorCartao.hidden = !cartoes.melhor;
+    el.resultadoMelhor.textContent = cartoes.melhor || '';
+
+    const nivel = Pontos.nivel();
+    const textos = Resultado.textoNivel(nivel);
+    el.resultadoNivelTitulo.textContent = textos.titulo;
+    el.resultadoNivelFaltam.textContent = textos.faltam;
+    el.resultadoNivelPreenchido.style.width = `${(nivel.noNivel / Pontos.PONTOS_POR_NIVEL) * 100}%`;
+    el.resultadoNivelBarra.setAttribute('aria-valuemax', Pontos.PONTOS_POR_NIVEL);
+    el.resultadoNivelBarra.setAttribute('aria-valuenow', nivel.noNivel);
+
+    // Só com a voz digital da família: sem ela, a tela de narração pede a gravação
+    // em vez de ler o fato. E só quando o fato lido vai ser o desta missão.
+    const maisRecente = Familia.curiosidadeDasFotos();
+    el.resultadoOuvir.hidden = !Resultado.mostrarFato({
+      fatoDaMissao: missao ? missao.fato : '',
+      fatoMaisRecente: maisRecente ? maisRecente.texto : null,
+      narracaoDisponivel: Boolean(Familia.vozDigital()),
+    });
+
     App.mostrarTela('resultado');
   }
 
