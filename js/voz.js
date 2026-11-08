@@ -380,6 +380,33 @@ const Voz = (() => {
   }
 
   // Lendo agora? Usa o estado do próprio app, não o do navegador, que às vezes erra.
+  // Fala um texto curto com a voz do aparelho e avisa a posição de cada palavra
+  // (evento "boundary" do navegador), para destacar a palavra falada.
+  // Devolve 'sintetizada', 'parada', 'erro' ou 'indisponivel'.
+  let falaMarcada = null; // mantém a fala viva até terminar
+  function falarComMarcacao(texto, aoChegarNaPalavra) {
+    parar();
+    if (!disponivel()) return Promise.resolve('indisponivel');
+    return new Promise((resolver) => {
+      const fala = new SpeechSynthesisUtterance(texto);
+      fala.lang = vozPt.lang || 'pt-BR';
+      fala.voice = vozPt;
+      fala.rate = VELOCIDADE;
+      fala.onboundary = (evento) => {
+        if (typeof evento.charIndex === 'number' && aoChegarNaPalavra) aoChegarNaPalavra(evento.charIndex);
+      };
+      fala.onend = () => { falaMarcada = null; resolver('sintetizada'); };
+      fala.onerror = (evento) => {
+        falaMarcada = null;
+        resolver(evento && (evento.error === 'interrupted' || evento.error === 'canceled') ? 'parada' : 'erro');
+      };
+      falaMarcada = fala;
+      const sintese = window.speechSynthesis;
+      if (sintese.paused) sintese.resume();
+      sintese.speak(fala);
+    });
+  }
+
   function lendo() {
     return Boolean(leitura) || Boolean(audioAtual);
   }
@@ -400,6 +427,7 @@ const Voz = (() => {
     temGravacao,
     tocarFrase,
     lerPergunta,
+    falarComMarcacao,
     limparTexto,
     parar,
     lendo,

@@ -1141,6 +1141,141 @@ figure {
   font-size: var(--fonte-0-95);
 }
 
+/* Voz da família: gravação, progresso e teleprompter */
+.narracao-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+}
+
+.narracao-bloco--centro {
+  align-items: center;
+  text-align: center;
+}
+
+/* Ilustrações com fundo azul-marinho em quadro arredondado */
+.quadro-ilustracao {
+  align-self: center;
+  width: 100%;
+  max-width: var(--tamanho-200);
+  border-radius: var(--raio);
+  overflow: hidden;
+  border: var(--traco-fino) solid var(--vidro-borda);
+  box-shadow: var(--sombra-suave);
+  background: var(--fundo-escuro);
+}
+
+.quadro-ilustracao img {
+  width: 100%;
+  height: auto;
+}
+
+.quadro-ilustracao--pequeno {
+  max-width: var(--tamanho-160);
+}
+
+.roteiro {
+  padding: var(--espaco-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  font-size: var(--fonte-1-05);
+}
+
+.roteiro__titulo {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-95);
+  font-weight: 800;
+}
+
+.cronometro {
+  align-self: center;
+  padding: var(--espaco-1-5) var(--espaco-3);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-escuro);
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+.narracao-titulo {
+  font-size: var(--fonte-1-15);
+  font-weight: 800;
+}
+
+.progresso-estimado {
+  width: 100%;
+  height: var(--tamanho-14);
+  padding: var(--espaco-0-5);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-escuro);
+  border: var(--traco-fino) solid var(--vidro-borda);
+  overflow: hidden;
+}
+
+.progresso-estimado__barra {
+  width: 0;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: var(--sucesso);
+  box-shadow: var(--brilho-progresso);
+  transition: width var(--duracao-media) ease;
+}
+
+.teleprompter {
+  min-height: var(--tamanho-120);
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: var(--espaco-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+}
+
+.teleprompter__linha {
+  font-size: var(--fonte-1-3);
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--texto-suave);
+  transition: opacity var(--duracao-media) ease, transform var(--duracao-media) ease;
+}
+
+.teleprompter__linha--oculta {
+  opacity: 0;
+  transform: translateY(var(--espaco-2));
+}
+
+.teleprompter__linha--atual {
+  color: var(--texto);
+}
+
+.teleprompter__palavra {
+  border-radius: var(--raio-xs);
+  padding: 0 var(--espaco-0-5);
+  transition: background-color var(--duracao-toque) ease, color var(--duracao-toque) ease;
+}
+
+.teleprompter__palavra--falada {
+  color: var(--texto);
+}
+
+.teleprompter__palavra--agora {
+  background: var(--brilho);
+  color: var(--fundo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teleprompter__linha,
+  .teleprompter__palavra,
+  .progresso-estimado__barra {
+    transition: none;
+  }
+
+  .teleprompter__linha--oculta {
+    transform: none;
+  }
+}
+
 /* Área dos pais: Minha voz */
 .voz-area {
   display: flex;

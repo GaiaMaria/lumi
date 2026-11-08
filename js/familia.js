@@ -178,9 +178,60 @@ const Familia = (() => {
     return dados.consentimentoVoz;
   }
 
+  // ---------- voz digital (ElevenLabs) ----------
+  // No aparelho fica só o ID da voz, nunca o áudio.
+
+  function vozDigital() {
+    const voz = ler().vozDigital;
+    return voz && typeof voz.id === 'string' ? voz : null;
+  }
+
+  function salvarVozDigital(id) {
+    const dados = ler();
+    dados.vozDigital = { id, criadaEm: new Date().toISOString() };
+    gravar();
+  }
+
+  function removerVozDigital() {
+    const dados = ler();
+    delete dados.vozDigital;
+    gravar();
+  }
+
+  function hoje() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  // Quantas narrações com a voz digital a família já fez hoje.
+  function narracoesHoje() {
+    const n = ler().narracoes;
+    return n && n.dia === hoje() ? n.quantidade : 0;
+  }
+
+  function registrarNarracao() {
+    const dados = ler();
+    const quantidade = narracoesHoje() + 1;
+    dados.narracoes = { dia: hoje(), quantidade };
+    gravar();
+    return quantidade;
+  }
+
+  // Fato da missão mais recente que tem fato.
+  function ultimoFato() {
+    const missao = ler().missoes.find((m) => typeof m.fato === 'string' && m.fato.trim());
+    return missao ? { texto: missao.fato, disciplinaNome: missao.disciplinaNome } : null;
+  }
+
   return {
     id: lerId,
     garantirId,
+    vozDigital,
+    salvarVozDigital,
+    removerVozDigital,
+    narracoesHoje,
+    registrarNarracao,
+    ultimoFato,
     consentimentoVoz,
     registrarConsentimentoVoz,
     salvarMissao,

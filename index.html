@@ -12,6 +12,7 @@
   <script src="js/voz.js" defer></script>
   <script src="js/quiz.js" defer></script>
   <script src="js/tabuada.js" defer></script>
+  <script src="js/narracao.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -37,6 +38,7 @@
         </button>
 
         <button type="button" class="botao-secundario" data-ir="tabuada">Treinar tabuada</button>
+        <button type="button" class="botao-secundario" id="botao-voz-familia" data-ir="narracao" hidden>Ouvir a voz da sua família</button>
 
         <section class="area-doris vidro" aria-labelledby="titulo-doris">
           <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
@@ -51,6 +53,74 @@
         <button type="button" class="botao-apagar" data-ir="pais">Área dos pais</button>
         <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
         <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Voz da família: gravar, gerar e ouvir a narração -->
+    <section class="tela" id="tela-narracao" aria-labelledby="titulo-narracao" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-narracao">Voz da família</h1>
+      </div>
+
+      <div class="conteudo">
+        <p class="aviso-gravacao" id="narracao-mensagem" role="status" aria-live="polite" hidden></p>
+
+        <!-- 1. Gravar a voz para criar a voz digital -->
+        <div class="narracao-bloco" id="narracao-gravar" hidden>
+          <figure class="quadro-ilustracao">
+            <img src="assets/doris-lumi-lapis.png" alt="Dóris segurando um lápis, com a Lumi na ponta" width="440" height="412">
+          </figure>
+          <h2 class="tabuada-subtitulo">Crie a voz digital da família</h2>
+          <p class="campo__ajuda">Grave de 1 a 2 minutos lendo o texto abaixo, num lugar silencioso. Com essa gravação, o app cria uma voz parecida com a sua para narrar um fato das missões.</p>
+
+          <p class="aviso-gravacao" id="narracao-sem-suporte" role="alert" hidden></p>
+
+          <div class="narracao-bloco" id="narracao-area-gravacao">
+            <label class="declaracao" for="narracao-aceite">
+              <input type="checkbox" id="narracao-aceite">
+              <span>Esta é a minha voz. Ela será enviada à ElevenLabs para criar uma voz digital, usada só para narrar as missões da minha família. Posso apagar a voz a qualquer momento, e ela também será apagada no serviço.</span>
+            </label>
+
+            <div class="roteiro vidro">
+              <h3 class="roteiro__titulo">Texto para ler em voz alta</h3>
+              <p>Oi! Hoje vamos estudar juntos. Antes de começar, respire fundo e prepare o seu caderno. Cada missão é uma aventura nova, e cada acerto acende uma luz no caminho.</p>
+              <p>Quando a gente erra, não tem problema. O erro mostra o que ainda falta aprender, e a próxima tentativa fica mais fácil. Vamos ler com calma, pensar um pouquinho e responder sem pressa.</p>
+              <p>Você sabia que a água do mar sobe para o céu, vira nuvem e volta como chuva? E que a Lua não tem luz própria, porque só reflete a luz do Sol? O mundo está cheio de perguntas curiosas esperando por você.</p>
+              <p>Agora é a sua vez. Escolha uma página, olhe com atenção e conte para mim o que descobriu. Eu estou aqui, torcendo por você. Vamos lá!</p>
+            </div>
+
+            <p class="cronometro" id="narracao-cronometro" aria-live="off" hidden>0:00</p>
+            <button type="button" class="botao-principal" id="narracao-botao-gravar" disabled>Começar a gravar</button>
+          </div>
+        </div>
+
+        <!-- 2. Esperando: criando a voz ou gerando a narração -->
+        <div class="narracao-bloco narracao-bloco--centro" id="narracao-esperando" hidden>
+          <figure class="quadro-ilustracao quadro-ilustracao--pequeno">
+            <img src="assets/doris-livro-olhos-fechados.jpg" alt="" width="300" height="364">
+          </figure>
+          <p class="narracao-titulo" id="narracao-esperando-titulo"></p>
+          <div class="progresso-estimado" id="narracao-progresso" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progresso-estimado__barra" id="narracao-progresso-barra"></div>
+          </div>
+          <p class="campo__ajuda" id="narracao-tempo"></p>
+        </div>
+
+        <!-- 3. Ouvir o fato, estilo teleprompter -->
+        <div class="narracao-bloco" id="narracao-ouvir" hidden>
+          <figure class="quadro-ilustracao">
+            <img src="assets/doris-lumi-livro.png" alt="Dóris lendo um livro com a Lumi" width="430" height="452">
+          </figure>
+          <p class="campo__ajuda" id="narracao-origem"></p>
+          <div class="teleprompter vidro" id="narracao-teleprompter"></div>
+          <button type="button" class="botao-principal botao-principal--grande" id="narracao-tocar">
+            <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+            <span id="narracao-tocar-texto">Ouvir</span>
+          </button>
+          <p class="campo__ajuda" id="narracao-restantes"></p>
+          <button type="button" class="botao-apagar" id="narracao-apagar-voz" hidden>Apagar a voz digital</button>
+        </div>
       </div>
     </section>
 

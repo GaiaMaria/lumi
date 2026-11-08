@@ -14,6 +14,8 @@ const App = (() => {
     else Tabuada.parar(); // para o relógio do desafio ao sair
     if (nome === 'pais') MinhaVoz.abrir();
     else MinhaVoz.sair(); // para uma gravação em andamento ao sair
+    if (nome === 'narracao') Narracao.abrir();
+    else Narracao.sair();
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
   }
@@ -399,6 +401,7 @@ const Inicio = (() => {
   const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
 
   function atualizar() {
+    Narracao.atualizarBotaoInicio();
     const missoes = Familia.missoes();
     el.caixa.hidden = missoes.length === 0;
     el.lista.replaceChildren(...missoes.map((missao) => {
@@ -431,11 +434,18 @@ const Inicio = (() => {
 
   el.apagar.addEventListener('click', async () => {
     const ok = window.confirm(
-      'Apagar todas as perguntas, o progresso e as gravações de voz da família neste aparelho? Isso não pode ser desfeito.',
+      'Apagar todas as perguntas, o progresso, as gravações de voz e a voz digital da família (também na ElevenLabs)? Isso não pode ser desfeito.',
     );
     if (!ok) return;
     const familia = Familia.id(); // guarda antes de apagar, para achar os áudios
     Voz.parar();
+    // Primeiro a voz digital na ElevenLabs: se falhar, não apaga nada (para não perder o ID dela).
+    el.mensagem.textContent = 'Apagando...';
+    const vozDigital = await Narracao.apagarVozDigital();
+    if (!vozDigital.ok) {
+      el.mensagem.textContent = vozDigital.mensagem;
+      return;
+    }
     Familia.apagarTudo();
     let audiosApagados = true;
     try {
@@ -445,7 +455,7 @@ const Inicio = (() => {
     }
     atualizar();
     el.mensagem.textContent = audiosApagados
-      ? 'Pronto. Os dados e as gravações da família foram apagados deste aparelho.'
+      ? 'Pronto. Os dados, as gravações e a voz digital da família foram apagados.'
       : 'Os dados foram apagados, mas não consegui apagar as gravações. Tente de novo.';
   });
 
