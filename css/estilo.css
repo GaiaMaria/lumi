@@ -948,6 +948,30 @@ figure {
   outline-offset: 2px;
 }
 
+/* Completar lacunas */
+.lacuna__campo {
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 14px;
+  border: 1px solid var(--vidro-borda);
+  border-radius: 14px;
+  background: var(--fundo-escuro);
+  color: var(--texto);
+  font: inherit;
+  font-size: 1.1rem;
+}
+
+.lacuna__campo:focus-visible {
+  outline: 3px solid var(--texto);
+  outline-offset: 2px;
+}
+
+.lacuna__campo--certa {
+  background: var(--sucesso);
+  border-color: var(--sucesso);
+  color: var(--fundo);
+}
+
 .resposta-modelo {
   padding: 14px 16px;
   display: flex;

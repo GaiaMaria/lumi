@@ -96,7 +96,7 @@ test('pedido inválido: 11 fotos, disciplina desconhecida, base64 inválido, sem
 
 test('pedido certo: usa claude-haiku-5-5, manda todas as fotos e pede JSON', async () => {
   const { res, pedidoEnviado } = await chamar({ disciplina: 'historia', fotos: [FOTO, FOTO] }, {
-    fetchFalso: respostaDoModelo({ disciplina_detectada: 'historia', legivel: true, aviso: '', perguntas: [vf(1), me, rel, dis] }),
+    fetchFalso: respostaDoModelo({ disciplina_detectada: 'historia', legivel: true, aviso: '', perguntas: [vf(1), me, rel, me] }),
   });
   assert.strictEqual(res.statusCode, 200);
   assert.strictEqual(pedidoEnviado.model, 'claude-haiku-5-5');
@@ -145,14 +145,90 @@ test('perguntas fora do formato são descartadas e o total para em 10', async ()
   assert.strictEqual(res.corpo.perguntas.length, 10);
 });
 
-test('não repete o mesmo tipo mais de duas vezes seguidas quando há como variar', async () => {
-  const { res } = await chamar({ disciplina: 'ciencias', fotos: [FOTO] }, {
-    fetchFalso: respostaDoModelo({ disciplina_detectada: 'ciencias', legivel: true, aviso: '', perguntas: [vf(1), vf(2), vf(3), vf(4), me, dis] }),
+const lac = {
+  tipo: 'completar_lacunas',
+  enunciado: 'A água vira vapor na ___.',
+  gabarito: 'evaporação',
+  respostas_aceitas: ['evaporacao'],
+  explicacao: 'Explicação.',
+};
+const outros = [vf(1), rel, dis, lac];
+const variosOutros = (n) => Array.from({ length: n }, (_, i) => outros[i % outros.length]);
+const variasMultipla = (n) => Array.from({ length: n }, () => me);
+
+test('limites: até 5 páginas pede no mínimo 5; mais de 5 pede de 10 a 15', () => {
+  const { limitesDePerguntas, instrucoes } = handler._interno;
+  assert.deepStrictEqual(limitesDePerguntas(1), { minimo: 5, maximo: 10 });
+  assert.deepStrictEqual(limitesDePerguntas(5), { minimo: 5, maximo: 10 });
+  assert.deepStrictEqual(limitesDePerguntas(6), { minimo: 10, maximo: 15 });
+  assert.ok(instrucoes(3).includes('no mínimo 5'));
+  assert.ok(instrucoes(8).includes('no mínimo 10 e no máximo 15'));
+  assert.ok(instrucoes(8).includes('completar_lacunas'));
+  assert.ok(instrucoes(8).includes('não copie o enunciado nem as alternativas'));
+});
+
+test('composição ímpar: 11 perguntas = 6 de múltipla escolha + 5 dos outros tipos', async () => {
+  const { res } = await chamar({ disciplina: 'ciencias', fotos: Array(6).fill(FOTO) }, {
+    fetchFalso: respostaDoModelo({
+      disciplina_detectada: 'ciencias', legivel: true, aviso: '',
+      perguntas: [...variasMultipla(8), ...variosOutros(5)],
+    }),
   });
   const tipos = res.corpo.perguntas.map((p) => p.tipo);
-  for (let i = 2; i < 5; i += 1) {
+  assert.strictEqual(tipos.length, 11);
+  assert.strictEqual(tipos.filter((t) => t === 'multipla_escolha').length, 6);
+});
+
+test('mais de 5 páginas: para em 15 (8 + 7), com os outros tipos variados', async () => {
+  const { res } = await chamar({ disciplina: 'ciencias', fotos: Array(8).fill(FOTO) }, {
+    fetchFalso: respostaDoModelo({
+      disciplina_detectada: 'ciencias', legivel: true, aviso: '',
+      perguntas: [...variasMultipla(12), ...variosOutros(12)],
+    }),
+  });
+  const tipos = res.corpo.perguntas.map((p) => p.tipo);
+  assert.strictEqual(tipos.length, 15);
+  assert.strictEqual(tipos.filter((t) => t === 'multipla_escolha').length, 8);
+  assert.strictEqual(new Set(tipos.filter((t) => t !== 'multipla_escolha')).size, 4);
+});
+
+test('tipos intercalados: nunca o mesmo tipo três vezes seguidas', async () => {
+  const { res } = await chamar({ disciplina: 'ciencias', fotos: Array(3).fill(FOTO) }, {
+    fetchFalso: respostaDoModelo({
+      disciplina_detectada: 'ciencias', legivel: true, aviso: '',
+      perguntas: [...variosOutros(5), ...variasMultipla(5)],
+    }),
+  });
+  const tipos = res.corpo.perguntas.map((p) => p.tipo);
+  assert.strictEqual(tipos.length, 10);
+  for (let i = 2; i < tipos.length; i += 1) {
     assert.ok(!(tipos[i] === tipos[i - 1] && tipos[i] === tipos[i - 2]), tipos.join(','));
   }
+});
+
+test('completar_lacunas: precisa de exatamente uma lacuna e de resposta', async () => {
+  const { res } = await chamar({ disciplina: 'ciencias', fotos: [FOTO] }, {
+    fetchFalso: respostaDoModelo({
+      disciplina_detectada: 'ciencias', legivel: true, aviso: '',
+      perguntas: [
+        me, lac,
+        me, { ...lac, enunciado: 'Sem lacuna nenhuma.' },
+        me, { ...lac, enunciado: 'Duas ___ e ___.' },
+        me, { ...lac, gabarito: '' },
+      ],
+    }),
+  });
+  const lacunas = res.corpo.perguntas.filter((p) => p.tipo === 'completar_lacunas');
+  assert.strictEqual(lacunas.length, 1);
+  assert.deepStrictEqual(lacunas[0].respostas_aceitas, ['evaporacao']);
+});
+
+test('sem nenhuma múltipla escolha: usa o que veio em vez de deixar sem missão', async () => {
+  const { res } = await chamar({ disciplina: 'ciencias', fotos: [FOTO] }, {
+    fetchFalso: respostaDoModelo({ disciplina_detectada: 'ciencias', legivel: true, aviso: '', perguntas: variosOutros(6) }),
+  });
+  assert.strictEqual(res.statusCode, 200);
+  assert.strictEqual(res.corpo.perguntas.length, 6);
 });
 
 test('só atividades prontas: sem_perguntas com o aviso do modelo', async () => {

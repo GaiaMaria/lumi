@@ -58,6 +58,15 @@ const Contas = (() => {
       return { ...p, gabarito: 'abcde'[indice] };
     }
 
+    if (p.tipo === 'completar_lacunas') {
+      // Frases como "7 × 8 = ___": a resposta vem do código.
+      const conta = resolver(p.enunciado);
+      if (!conta) return p;
+      if (!/^\s*=\s*_{3,}/.test(p.enunciado.slice(conta.fim))) return p;
+      const resposta = String(Math.round(conta.valor * 1000) / 1000).replace('.', ',');
+      return { ...p, gabarito: resposta, respostas_aceitas: [] };
+    }
+
     if (p.tipo === 'relacionar') {
       // Pares como "3 × 4" ↔ "12": se algum estiver errado, descarta.
       const errado = p.pares.some((par) => {
@@ -75,7 +84,15 @@ const Contas = (() => {
 
 const Quiz = (() => {
   // Perguntas de exemplo criadas por nós (sem trechos de livros), usadas no modo demonstração.
+  // Metade múltipla escolha e metade dos outros tipos, intercaladas.
   const PERGUNTAS_DEMO = [
+    {
+      tipo: 'multipla_escolha',
+      enunciado: 'Como se chama quando a água vira vapor com o calor?',
+      alternativas: ['Condensação', 'Evaporação', 'Congelamento', 'Derretimento', 'Chuva'],
+      gabarito: 'b',
+      explicacao: 'Com o calor do Sol, a água evapora e sobe para o céu.',
+    },
     {
       tipo: 'verdadeiro_falso',
       enunciado: 'A chuva cai das nuvens.',
@@ -84,10 +101,24 @@ const Quiz = (() => {
     },
     {
       tipo: 'multipla_escolha',
-      enunciado: 'Como se chama quando a água vira vapor com o calor?',
-      alternativas: ['Condensação', 'Evaporação', 'Congelamento', 'Derretimento', 'Chuva'],
+      enunciado: 'Do que as nuvens são feitas?',
+      alternativas: ['Fumaça', 'Gotinhas de água', 'Algodão', 'Poeira', 'Areia'],
       gabarito: 'b',
-      explicacao: 'Com o calor do Sol, a água evapora e sobe para o céu.',
+      explicacao: 'As nuvens são milhões de gotinhas de água bem pequenas.',
+    },
+    {
+      tipo: 'completar_lacunas',
+      enunciado: 'Quando o vapor esfria no céu e vira gotinhas, acontece a ___.',
+      gabarito: 'condensação',
+      respostas_aceitas: [],
+      explicacao: 'Condensação é quando o vapor volta a ser água líquida.',
+    },
+    {
+      tipo: 'multipla_escolha',
+      enunciado: 'O que esquenta a água dos rios e mares e faz ela evaporar?',
+      alternativas: ['A Lua', 'O vento', 'O Sol', 'As estrelas', 'As nuvens'],
+      gabarito: 'c',
+      explicacao: 'O Sol esquenta a água, e ela começa a subir como vapor.',
     },
     {
       tipo: 'relacionar',
@@ -100,10 +131,11 @@ const Quiz = (() => {
       explicacao: 'A mesma água muda de estado quando esquenta ou esfria.',
     },
     {
-      tipo: 'verdadeiro_falso',
-      enunciado: 'O gelo é água no estado gasoso.',
-      gabarito: false,
-      explicacao: 'O gelo é água no estado sólido. O vapor é que é gasoso.',
+      tipo: 'multipla_escolha',
+      enunciado: 'Como se chama a água que cai do céu como gotas, neve ou granizo?',
+      alternativas: ['Evaporação', 'Infiltração', 'Precipitação', 'Condensação', 'Transpiração'],
+      gabarito: 'c',
+      explicacao: 'Tudo o que cai das nuvens se chama precipitação.',
     },
     {
       tipo: 'dissertativa',
@@ -111,14 +143,9 @@ const Quiz = (() => {
       gabarito: 'Porque o calor do Sol faz a água das roupas evaporar mais depressa.',
       explicacao: 'Quanto mais calor, mais rápido a água vira vapor.',
     },
-    {
-      tipo: 'multipla_escolha',
-      enunciado: 'Do que as nuvens são feitas?',
-      alternativas: ['Fumaça', 'Gotinhas de água', 'Algodão', 'Poeira', 'Areia'],
-      gabarito: 'b',
-      explicacao: 'As nuvens são milhões de gotinhas de água bem pequenas.',
-    },
   ];
+
+  const TENTATIVAS_LACUNA = 3;
 
   const PONTOS_PRIMEIRA_TENTATIVA = 10;
   const PONTOS_OUTRA_TENTATIVA = 5;
@@ -162,9 +189,24 @@ const Quiz = (() => {
           && new Set(p.pares.map((par) => texto(par.par))).size === p.pares.length;
       case 'dissertativa':
         return Boolean(texto(p.gabarito));
+      case 'completar_lacunas':
+        return (texto(p.enunciado).match(/_{3,}/g) || []).length === 1
+          && Boolean(texto(p.gabarito))
+          && (p.respostas_aceitas === undefined || Array.isArray(p.respostas_aceitas));
       default:
         return false;
     }
+  }
+
+  // Compara respostas digitadas sem ligar para maiúsculas, acentos e pontuação.
+  function normalizar(valor) {
+    return String(valor)
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '')
+      .toLowerCase()
+      .replace(/[.,;:!?"'()]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 
   // Só as perguntas que o quiz sabe mostrar, com as contas conferidas no código.
@@ -333,6 +375,67 @@ const Quiz = (() => {
     el.area.replaceChildren(...linhas.map(({ linha }) => linha), conferir);
   }
 
+  function mostrarLacuna(p) {
+    const idCampo = `lacuna-${estado.indice}`;
+    const rotulo = criar('label', 'dissertativa__rotulo', 'Complete a lacuna:');
+    rotulo.htmlFor = idCampo;
+    const campo = criar('input', 'lacuna__campo');
+    campo.id = idCampo;
+    campo.type = 'text';
+    campo.maxLength = 60;
+    campo.autocomplete = 'off';
+    campo.setAttribute('autocapitalize', 'off');
+    campo.spellcheck = false;
+
+    const certas = [p.gabarito, ...(p.respostas_aceitas || [])].map(normalizar);
+    const conferir = criar('button', 'botao-principal', 'Conferir');
+    conferir.type = 'button';
+
+    function responder() {
+      if (estado.respondida) return;
+      const digitado = normalizar(campo.value);
+      if (!digitado) {
+        mostrarFeedback('neutro', 'Escreva sua resposta.');
+        campo.focus();
+        return;
+      }
+      if (certas.includes(digitado)) {
+        campo.disabled = true;
+        conferir.hidden = true;
+        campo.classList.add('lacuna__campo--certa');
+        acertou(p);
+        // Mostra a escrita certa quando a criança acertou sem acento ou com outra forma.
+        if (campo.value.trim() !== p.gabarito) {
+          el.feedback.append(criar('span', '', ` Escreve-se: ${p.gabarito}.`));
+        }
+        return;
+      }
+      errou();
+      if (estado.tentativas >= TENTATIVAS_LACUNA) {
+        // Depois de algumas tentativas, mostra a resposta e segue, sem pontos.
+        estado.respondida = true;
+        campo.disabled = true;
+        conferir.hidden = true;
+        mostrarFeedback('neutro', `A resposta era: ${p.gabarito}`, p.explicacao);
+        atualizarBarra(estado.indice + 1);
+        mostrarProxima();
+      } else {
+        campo.select();
+      }
+    }
+
+    conferir.addEventListener('click', responder);
+    campo.addEventListener('keydown', (evento) => {
+      if (evento.key === 'Enter') {
+        evento.preventDefault();
+        responder();
+      }
+    });
+
+    el.area.className = 'dissertativa';
+    el.area.replaceChildren(rotulo, campo, conferir);
+  }
+
   function mostrarDissertativa(p) {
     const idCampo = `dissertativa-${estado.indice}`;
     const rotulo = criar('label', 'dissertativa__rotulo', 'Sua resposta (fica só nesta tela):');
@@ -397,6 +500,7 @@ const Quiz = (() => {
     if (p.tipo === 'verdadeiro_falso') mostrarVerdadeiroFalso(p);
     else if (p.tipo === 'multipla_escolha') mostrarMultiplaEscolha(p);
     else if (p.tipo === 'relacionar') mostrarRelacionar(p);
+    else if (p.tipo === 'completar_lacunas') mostrarLacuna(p);
     else mostrarDissertativa(p);
   }
 
