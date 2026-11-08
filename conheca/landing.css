@@ -31,6 +31,28 @@ body.landing a {
   margin-bottom: 0;
 }
 
+/* Link para pular direto ao formulário: aparece só com o teclado */
+.pular {
+  position: absolute;
+  left: var(--espaco-4);
+  top: calc(-1 * var(--altura-64));
+  z-index: 10;
+  padding: var(--espaco-2) var(--espaco-4);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
+  background: var(--brilho);
+  color: var(--texto-escuro);
+  font-weight: 800;
+}
+
+body.landing .pular {
+  color: var(--texto-escuro);
+}
+
+.pular:focus {
+  top: var(--espaco-2);
+}
+
 /* ---------- barra do topo ---------- */
 .barra-landing {
   max-width: var(--landing-largura);
@@ -42,6 +64,9 @@ body.landing a {
 }
 
 .barra-landing__marca {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-44);
   font-family: var(--fonte-titulo);
   font-size: var(--fonte-1-6);
   font-weight: 700;
@@ -576,5 +601,12 @@ body.landing a {
 
   .form-curto__linha .botao-principal {
     flex-shrink: 0;
+  }
+}
+
+/* Movimento reduzido: sem rolagem suave nem animações */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

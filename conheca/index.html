@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lumi · O caderno vira missão</title>
   <meta name="description" content="App que transforma a foto do caderno em missão com perguntas, pontos e a voz da família. Para crianças de 9 a 12 anos.">
+  <meta name="theme-color" content="#1E1B4B">
+  <link rel="canonical" href="https://lumi-psi-nine.vercel.app/conheca/">
+  <!-- Compartilhamento (WhatsApp, redes): imagem provisória com a Dóris e a Lumi -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Lumi">
+  <meta property="og:title" content="Lumi · O caderno vira missão">
+  <meta property="og:description" content="A foto do caderno vira uma missão com perguntas, pontos e a voz da família. Para crianças de 9 a 12 anos.">
+  <meta property="og:url" content="https://lumi-psi-nine.vercel.app/conheca/">
+  <meta property="og:image" content="https://lumi-psi-nine.vercel.app/assets/recortes/duas-comemorando.png">
+  <meta property="og:image:width" content="900">
+  <meta property="og:image:height" content="890">
+  <meta property="og:image:alt" content="Dóris, a coruja, e Lumi, o vaga-lume, comemorando">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Lumi · O caderno vira missão">
+  <meta name="twitter:description" content="A foto do caderno vira uma missão com perguntas, pontos e a voz da família.">
+  <meta name="twitter:image" content="https://lumi-psi-nine.vercel.app/assets/recortes/duas-comemorando.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -12,8 +29,11 @@
   <link rel="stylesheet" href="../css/estilo.css">
   <link rel="stylesheet" href="landing.css">
   <script src="landing.js" defer></script>
+  <!-- Vercel Web Analytics (sem biblioteca): visitas, para calcular leads ÷ visitantes -->
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body class="landing">
+  <a class="pular" href="#lista">Pular para a lista de espera</a>
   <header class="barra-landing">
     <a class="barra-landing__marca" href="#topo">Lumi</a>
     <a class="barra-landing__link" href="/">Abrir o app</a>
@@ -46,7 +66,7 @@
       <div class="hero__app" id="experimente">
         <img class="hero__rede" src="../assets/rede-neuronios.svg" alt="" width="390" height="470">
         <div class="celular">
-          <iframe class="celular__tela" src="/?vitrine=1" title="Experimente o app Lumi" allow="microphone; autoplay" loading="lazy"></iframe>
+          <iframe class="celular__tela" src="/?vitrine=1" title="Experimente o app Lumi" allow="microphone; autoplay" loading="lazy" decoding="async"></iframe>
         </div>
         <p class="nota nota--centro">Toque e jogue uma missão de exemplo.</p>
       </div>
@@ -57,17 +77,17 @@
       <h2 class="secao__titulo secao__titulo--centro" id="como-titulo">Do caderno para a missão em um minuto.</h2>
       <ol class="passos">
         <li class="passo">
-          <img class="passo__img" src="../assets/recortes/doris-acenando.png" alt="" width="812" height="900" loading="lazy">
+          <img class="passo__img" src="../assets/recortes/doris-acenando.png" alt="" width="812" height="900" loading="lazy" decoding="async">
           <h3 class="passo__titulo">Fotografe o caderno.</h3>
           <p class="passo__texto">Até 10 fotos da matéria da prova.</p>
         </li>
         <li class="passo">
-          <img class="passo__img" src="../assets/recortes/lumi-lapis.png" alt="" width="666" height="900" loading="lazy">
+          <img class="passo__img" src="../assets/recortes/lumi-lapis.png" alt="" width="666" height="900" loading="lazy" decoding="async">
           <h3 class="passo__titulo">Responda a missão.</h3>
           <p class="passo__texto">Perguntas de 5 tipos, criadas a partir do que a criança estudou.</p>
         </li>
         <li class="passo">
-          <img class="passo__img" src="../assets/recortes/duas-comemorando.png" alt="" width="900" height="890" loading="lazy">
+          <img class="passo__img" src="../assets/recortes/duas-comemorando.png" alt="" width="900" height="890" loading="lazy" decoding="async">
           <h3 class="passo__titulo">Cada acerto acende uma luz.</h3>
           <p class="passo__texto">Pontos, medalhas, tabuada e a voz da família comemorando.</p>
         </li>
@@ -214,7 +234,7 @@
 
       <!-- Sucesso -->
       <div class="lista__sucesso" id="lista-sucesso" tabindex="-1" hidden>
-        <img class="lista__lumi" src="../assets/recortes/lumi-comemorando.png" alt="" width="695" height="896" loading="lazy">
+        <img class="lista__lumi" src="../assets/recortes/lumi-comemorando.png" alt="" width="695" height="896" loading="lazy" decoding="async">
         <h2 class="secao__titulo">Pronto! Você está na lista.</h2>
         <p class="secao__texto">Avisamos você assim que o Lumi abrir. Enquanto isso, que tal chamar outra mãe?</p>
         <a class="botao-principal botao--menta" id="lista-compartilhar" href="#" target="_blank" rel="noopener">Compartilhar com outra mãe</a>
