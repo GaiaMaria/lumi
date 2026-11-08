@@ -86,7 +86,7 @@ const Familia = (() => {
     }
   }
 
-  function salvarMissao({ disciplina, disciplinaNome, perguntas, aviso }) {
+  function salvarMissao({ disciplina, disciplinaNome, perguntas, aviso, fato }) {
     const dados = ler();
     const missao = {
       id: gerarId(),
@@ -94,6 +94,7 @@ const Familia = (() => {
       disciplina,
       disciplinaNome,
       aviso: aviso || '',
+      fato: fato || '', // fato curto para a narração (sem a foto)
       perguntas,
       vezes: 0,
       melhorPontuacao: 0,

@@ -266,3 +266,20 @@ test('logs não guardam conteúdo das fotos nem das respostas', async () => {
   assert.ok(!tudo.includes(segredo));
   assert.ok(!tudo.includes(FOTO));
 });
+
+test('fato: vem junto com as perguntas, com no máximo duas frases e 300 caracteres', async () => {
+  const longo = `${'Palavra '.repeat(60)}fim. Segunda frase curta. Terceira frase que sai.`;
+  const { res, pedidoEnviado } = await chamar({ disciplina: 'ciencias', fotos: [FOTO] }, {
+    fetchFalso: respostaDoModelo({
+      disciplina_detectada: 'ciencias', legivel: true, aviso: '',
+      fato: 'A água evapora com o calor do Sol. Depois vira nuvem. E cai como chuva.',
+      perguntas: [me, vf(1)],
+    }),
+  });
+  assert.strictEqual(res.corpo.fato, 'A água evapora com o calor do Sol. Depois vira nuvem.');
+  assert.ok(pedidoEnviado.system.includes('Nunca coloque nomes de pessoas, escolas ou professoras'));
+  assert.ok(pedidoEnviado.output_config.format.schema.required.includes('fato'));
+  const cortado = handler._interno.limparFato(longo);
+  assert.ok(cortado.length <= 300, String(cortado.length));
+  assert.ok(cortado.endsWith('.'));
+});

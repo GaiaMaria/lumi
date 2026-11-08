@@ -286,6 +286,7 @@ const FotoQuest = (() => {
         disciplinaNome: missao.disciplina.nome,
         perguntas: missao.perguntas,
         aviso: missao.aviso,
+        fato: missao.fato,
       });
     jogar(missao.perguntas, { demo: missao.demo, aviso: missao.aviso, id });
   }
@@ -315,7 +316,7 @@ const FotoQuest = (() => {
   // disponível (sem chave configurada, rodando local ou fora do ar),
   // usa as perguntas de exemplo em modo demonstração.
   function modoDemonstracao() {
-    return { perguntas: Quiz.PERGUNTAS_DEMO, demo: true, aviso: '', disciplinaDetectada: null };
+    return { perguntas: Quiz.PERGUNTAS_DEMO, demo: true, aviso: '', fato: Quiz.FATO_DEMO, disciplinaDetectada: null };
   }
 
   async function buscarPerguntas(disciplina) {
@@ -368,6 +369,7 @@ const FotoQuest = (() => {
       perguntas,
       demo: false,
       aviso: typeof dados.aviso === 'string' ? dados.aviso : '',
+      fato: typeof dados.fato === 'string' ? dados.fato.slice(0, 300) : '',
       disciplinaDetectada: dados.disciplina_detectada,
     };
     ultimaResposta = { chave, resultado };

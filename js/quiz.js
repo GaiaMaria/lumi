@@ -145,6 +145,9 @@ const Quiz = (() => {
     },
   ];
 
+  // Fato de exemplo do modo demonstração (escrito por nós).
+  const FATO_DEMO = 'A água que você bebe hoje já pode ter sido nuvem, chuva e até gelo muitas vezes. Ela vive dando voltas pelo planeta!';
+
   const TENTATIVAS_LACUNA = 3;
 
   const PONTOS_PRIMEIRA_TENTATIVA = 10;
@@ -599,6 +602,7 @@ const Quiz = (() => {
 
   return {
     PERGUNTAS_DEMO,
+    FATO_DEMO,
     textoParaLer,
     iniciar,
     suportadas,
