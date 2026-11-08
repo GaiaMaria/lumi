@@ -82,3 +82,12 @@ test('título não repete a matéria quando o nome já tem ("Prova de Matemátic
   assert.strictEqual(D.titulo({ materiaNome: 'Matemática', nome: 'Prova de Matemática' }), 'Prova de Matemática');
   assert.strictEqual(D.titulo({ materiaNome: 'Inglês', nome: 'Prova de Inglês' }), 'Prova de Inglês');
 });
+
+test('ics: várias provas viram um arquivo só, com um evento por prova em ordem', () => {
+  const ics = D.gerarIcs([provas[2], provas[0], provas[1]], new Date(Date.UTC(2026, 10, 8, 12, 0, 0)));
+  assert.strictEqual((ics.match(/BEGIN:VCALENDAR/g) || []).length, 1);
+  assert.strictEqual((ics.match(/BEGIN:VEVENT/g) || []).length, 3);
+  const uids = [...ics.matchAll(/UID:(\w+)@lumi/g)].map((m) => m[1]);
+  assert.strictEqual(uids.join(','), 'a,b,c');
+  assert.ok(ics.endsWith('END:VCALENDAR\r\n'));
+});

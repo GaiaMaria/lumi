@@ -332,3 +332,73 @@ test('código do motivo só aceita letras, números, _ e -', () => {
   assert.strictEqual(G.codigoSeguro('<script>x</script>'), 'scriptxscript');
   assert.strictEqual(G.codigoSeguro(''), 'desconhecido');
 });
+
+// ---------- enviar todas as provas ----------
+
+const criarEventos = require(path.join(pasta, 'criar-eventos.js'));
+const LISTA = [
+  { id: 'p1', ...PROVA },
+  { id: 'p2', materia: 'Português', nome: 'Prova de Português', data: '2026-11-28', hora: '10:00' },
+  { id: 'p3', materia: 'Geografia', nome: 'Prova de Geografia', data: '2026-11-30', hora: '07:30' },
+];
+
+function pedidoDeTodas(cookieToken, provas = LISTA) {
+  return {
+    method: 'POST',
+    headers: { cookie: `${G.COOKIE_TOKEN}=${encodeURIComponent(cookieToken)}` },
+    body: { provas },
+  };
+}
+
+test('enviar todas: um login só cria um evento por prova, com títulos sem repetir a matéria', async () => {
+  const { cookieToken } = await entrar();
+  const { res, pedidos, logs } = await rodar(criarEventos, pedidoDeTodas(cookieToken), [
+    [G.URL_TOKEN, () => resposta(200, { access_token: ACESSO })],
+    [G.URL_EVENTOS, () => resposta(200, { id: 'evento' })],
+  ]);
+  assert.strictEqual(res.statusCode, 200);
+  assert.deepStrictEqual(res.corpo, {
+    criados: 3, total: 3,
+    resultados: [{ id: 'p1', criado: true }, { id: 'p2', criado: true }, { id: 'p3', criado: true }],
+  });
+  const eventos = pedidos.filter((p) => p.url === G.URL_EVENTOS).map((p) => JSON.parse(p.opcoes.body));
+  assert.deepStrictEqual(eventos.map((e) => e.summary), ['Matemática – Prova de frações', 'Prova de Português', 'Prova de Geografia']);
+  assert.strictEqual(pedidos.filter((p) => p.url === G.URL_TOKEN).length, 1);
+  assert.ok(!logs.join(' ').includes(REFRESH) && !logs.join(' ').includes(ACESSO));
+});
+
+test('enviar todas: se uma falhar, as outras seguem e a resposta diz qual falhou', async () => {
+  const { cookieToken } = await entrar();
+  let n = 0;
+  const { res } = await rodar(criarEventos, pedidoDeTodas(cookieToken), [
+    [G.URL_TOKEN, () => resposta(200, { access_token: ACESSO })],
+    [G.URL_EVENTOS, () => { n += 1; return n === 2 ? resposta(500, {}) : resposta(200, { id: 'e' }); }],
+  ]);
+  assert.strictEqual(res.statusCode, 200);
+  assert.strictEqual(res.corpo.criados, 2);
+  assert.deepStrictEqual(res.corpo.resultados.map((r) => r.criado), [true, false, true]);
+});
+
+test('enviar todas: sem login pede para entrar; acesso revogado apaga o cookie', async () => {
+  const semLogin = await rodar(criarEventos, { method: 'POST', body: { provas: LISTA } });
+  assert.strictEqual(semLogin.res.statusCode, 401);
+  assert.deepStrictEqual(semLogin.res.corpo, { erro: 'sem_login' });
+
+  const { cookieToken } = await entrar();
+  const { res } = await rodar(criarEventos, pedidoDeTodas(cookieToken), [
+    [G.URL_TOKEN, () => resposta(400, { error: 'invalid_grant' })],
+  ]);
+  assert.strictEqual(res.statusCode, 401);
+  assert.deepStrictEqual(res.corpo, { erro: 'sem_login', motivo: 'revogado' });
+  assert.ok(cookiesDe(res).some((c) => c.startsWith(`${G.COOKIE_TOKEN}=;`) && c.includes('Max-Age=0')));
+});
+
+test('enviar todas: lista vazia, data inválida ou método errado são recusados', async () => {
+  const { cookieToken } = await entrar();
+  const vazia = await rodar(criarEventos, pedidoDeTodas(cookieToken, []));
+  assert.strictEqual(vazia.res.statusCode, 400);
+  const ruim = await rodar(criarEventos, pedidoDeTodas(cookieToken, [{ id: 'x', ...PROVA, data: '2026-02-30' }]));
+  assert.strictEqual(ruim.res.statusCode, 400);
+  const get = await rodar(criarEventos, { method: 'GET' });
+  assert.strictEqual(get.res.statusCode, 405);
+});

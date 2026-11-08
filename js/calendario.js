@@ -96,8 +96,28 @@ const DatasDeProva = (() => {
     };
   }
 
-  function gerarIcs(prova, agora = new Date()) {
+  function eventoIcs(prova, carimbo) {
     const fim = somarUmaHora(prova.data, prova.hora);
+    return [
+      'BEGIN:VEVENT',
+      `UID:${prova.id}@lumi`,
+      `DTSTAMP:${carimbo}`,
+      `DTSTART;TZID=America/Sao_Paulo:${horaIcs(prova.data, prova.hora)}`,
+      `DTEND;TZID=America/Sao_Paulo:${horaIcs(fim.data, fim.hora)}`,
+      `SUMMARY:${escaparIcs(titulo(prova))}`,
+      'DESCRIPTION:Data de prova anotada no app Lumi.',
+      'BEGIN:VALARM',
+      'TRIGGER:-P1D',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Prova amanhã',
+      'END:VALARM',
+      'END:VEVENT',
+    ];
+  }
+
+  // Arquivo .ics com uma prova ou com várias (lista).
+  function gerarIcs(provaOuLista, agora = new Date()) {
+    const lista = Array.isArray(provaOuLista) ? provaOuLista : [provaOuLista];
     const carimbo = agora.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
     return [
       'BEGIN:VCALENDAR',
@@ -114,19 +134,7 @@ const DatasDeProva = (() => {
       'TZNAME:-03',
       'END:STANDARD',
       'END:VTIMEZONE',
-      'BEGIN:VEVENT',
-      `UID:${prova.id}@lumi`,
-      `DTSTAMP:${carimbo}`,
-      `DTSTART;TZID=America/Sao_Paulo:${horaIcs(prova.data, prova.hora)}`,
-      `DTEND;TZID=America/Sao_Paulo:${horaIcs(fim.data, fim.hora)}`,
-      `SUMMARY:${escaparIcs(titulo(prova))}`,
-      'DESCRIPTION:Data de prova anotada no app Lumi.',
-      'BEGIN:VALARM',
-      'TRIGGER:-P1D',
-      'ACTION:DISPLAY',
-      'DESCRIPTION:Prova amanhã',
-      'END:VALARM',
-      'END:VEVENT',
+      ...ordenar(lista).flatMap((prova) => eventoIcs(prova, carimbo)),
       'END:VCALENDAR',
       '',
     ].join('\r\n');
@@ -174,6 +182,10 @@ const Calendario = (() => {
     hora: $('prova-hora'),
     cancelar: $('prova-cancelar'),
     desconectar: $('provas-desconectar'),
+    enviarTodas: $('provas-enviar-todas'),
+    googleSituacao: $('provas-google-situacao'),
+    googleEntrar: $('provas-google-entrar'),
+    googleIcs: $('provas-google-ics'),
   };
 
   const CHAVE_PENDENTE = 'lumi.google.pendente';
@@ -236,6 +248,7 @@ const Calendario = (() => {
     });
     el.grade.replaceChildren(...linhas);
     el.proxima.disabled = !DatasDeProva.proxima(Familia.provas());
+    atualizarBotaoTodas();
   }
 
   function irPara(novoAno, novoMes) {
@@ -272,7 +285,7 @@ const Calendario = (() => {
     return b;
   }
 
-  function abrirCartao(chave, mensagemDaProva = {}) {
+  function abrirCartao(chave) {
     diaAberto = chave;
     const doDia = DatasDeProva.porDia(Familia.provas())[chave] || [];
     if (!doDia.length) {
@@ -303,26 +316,14 @@ const Calendario = (() => {
       textos.append(nome, detalhe);
       cabeca.append(marca, textos);
 
-      const aviso = document.createElement('p');
-      aviso.className = 'cartao-prova__aviso';
-      aviso.setAttribute('role', 'status');
-      const recado = mensagemDaProva[prova.id];
-      aviso.textContent = recado ? recado.texto : '';
-      aviso.hidden = !recado;
-
       const acoes = document.createElement('div');
       acoes.className = 'cartao-prova__acoes';
-      if (recado && recado.login) {
-        acoes.append(botao('Entrar com Google', 'botao-principal botao-pequeno', () => entrarNoGoogle(prova.id)));
-      } else if (!prova.noGoogle) {
-        acoes.append(botao('Adicionar ao Google Agenda', 'botao-principal botao-pequeno', () => adicionarAoGoogle(prova.id)));
-      }
       acoes.append(
         botao('Baixar .ics', 'botao-secundario botao-pequeno', () => baixarIcs(prova)),
         botao('Remover', 'botao-apagar', () => remover(prova)),
       );
 
-      item.append(cabeca, aviso, acoes);
+      item.append(cabeca, acoes);
       return item;
     });
 
@@ -340,16 +341,25 @@ const Calendario = (() => {
 
   // ---------- Google Agenda e .ics ----------
 
-  function baixarIcs(prova) {
-    const blob = new Blob([DatasDeProva.gerarIcs(prova)], { type: 'text/calendar;charset=utf-8' });
+  function baixarArquivo(conteudo, nomeDoArquivo) {
+    const blob = new Blob([conteudo], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `prova-${prova.data}.ics`;
+    link.download = nomeDoArquivo;
     document.body.append(link);
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function baixarIcs(prova) {
+    baixarArquivo(DatasDeProva.gerarIcs(prova), `prova-${prova.data}.ics`);
+  }
+
+  function baixarIcsDeTodas() {
+    const lista = Familia.provas();
+    if (lista.length) baixarArquivo(DatasDeProva.gerarIcs(lista), 'provas-lumi.ics');
   }
 
   // Situação do Google no servidor (sem segredos). null se não houver resposta.
@@ -368,72 +378,102 @@ const Calendario = (() => {
     return `Para conectar o Google Agenda, abra o app por este endereço: ${endereco}`;
   }
 
-  async function entrarNoGoogle(idProva) {
+  // Área do botão único: mensagem e, quando preciso, "Entrar com Google" e o .ics de todas.
+  function mostrarSituacao(texto, { login = false, ics = false } = {}) {
+    el.googleSituacao.textContent = texto || '';
+    el.googleSituacao.hidden = !texto;
+    el.googleEntrar.hidden = !login;
+    el.googleIcs.hidden = !ics;
+  }
+
+  function atualizarBotaoTodas() {
+    const lista = Familia.provas();
+    const faltam = lista.filter((p) => !p.noGoogle).length;
+    el.enviarTodas.disabled = faltam === 0;
+    if (!lista.length) el.enviarTodas.textContent = 'Enviar todas as provas para o Google Agenda';
+    else if (faltam) el.enviarTodas.textContent = `Enviar ${faltam === 1 ? '1 prova' : `${faltam} provas`} para o Google Agenda`;
+    else el.enviarTodas.textContent = 'Todas as provas já estão no Google Agenda';
+  }
+
+  async function entrarNoGoogle() {
     const estado = await estadoDoGoogle();
-    const prova = Familia.provas().find((p) => p.id === idProva);
     if (estado && !estado.configurado) {
-      if (prova) abrirCartao(prova.data, { [idProva]: { texto: 'O Google Agenda ainda não está configurado neste app. Você pode baixar o arquivo .ics.' } });
+      mostrarSituacao('O Google Agenda ainda não está configurado neste app. Você pode baixar o arquivo .ics com todas as provas.', { ics: true });
       return;
     }
     if (estado && estado.enderecoDoRetorno && estado.enderecoDoRetorno !== window.location.origin) {
-      avisar(avisoDeEndereco(estado.enderecoDoRetorno));
-      if (prova) abrirCartao(prova.data, { [idProva]: { texto: avisoDeEndereco(estado.enderecoDoRetorno) } });
+      mostrarSituacao(avisoDeEndereco(estado.enderecoDoRetorno));
       return;
     }
     try {
-      sessionStorage.setItem(CHAVE_PENDENTE, idProva); // para criar o evento na volta
+      sessionStorage.setItem(CHAVE_PENDENTE, 'todas'); // para enviar as provas na volta
     } catch (erro) {
-      // segue sem lembrar a prova
+      // segue sem lembrar
     }
     window.location.assign('/api/google/login');
   }
 
-  async function adicionarAoGoogle(idProva) {
-    const prova = Familia.provas().find((p) => p.id === idProva);
-    if (!prova) return;
-    const recado = (texto, extra = {}) => abrirCartao(prova.data, { [prova.id]: { texto, ...extra } });
-    recado('Adicionando ao Google Agenda...');
+  // Envia de uma vez todas as provas que ainda não estão no Google Agenda.
+  async function enviarTodas() {
+    const pendentes = Familia.provas().filter((p) => !p.noGoogle);
+    if (!pendentes.length) {
+      mostrarSituacao(Familia.provas().length ? 'Todas as provas já estão no Google Agenda.' : 'Adicione uma prova antes de enviar.');
+      return;
+    }
+    el.enviarTodas.disabled = true;
+    mostrarSituacao(`Enviando ${pendentes.length === 1 ? '1 prova' : `${pendentes.length} provas`} para o Google Agenda...`);
 
-    let resposta;
+    let resposta = null;
     let dados = null;
     try {
-      resposta = await fetch('/api/google/criar-evento', {
+      resposta = await fetch('/api/google/criar-eventos', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ materia: prova.materiaNome, nome: prova.nome, data: prova.data, hora: prova.hora }),
+        body: JSON.stringify({
+          provas: pendentes.map((p) => ({ id: p.id, materia: p.materiaNome, nome: p.nome, data: p.data, hora: p.hora })),
+        }),
       });
       dados = await resposta.json().catch(() => null);
     } catch (erro) {
       resposta = null;
     }
 
-    if (resposta && resposta.ok && dados && dados.criado) {
-      Familia.marcarProvaNoGoogle(prova.id);
-      recado('Pronto! A prova está no Google Agenda.');
+    // Marca as que foram criadas (mesmo se depois houver falha).
+    const criadas = dados && Array.isArray(dados.resultados) ? dados.resultados.filter((r) => r.criado) : [];
+    criadas.forEach((r) => Familia.marcarProvaNoGoogle(r.id));
+    desenhar();
+    if (diaAberto) abrirCartao(diaAberto);
+
+    if (resposta && resposta.ok && dados && dados.criados === dados.total) {
+      acabouDeConectar = false;
+      mostrarSituacao(`Pronto! ${dados.criados === 1 ? '1 prova foi enviada' : `${dados.criados} provas foram enviadas`} para o Google Agenda.`);
       return;
     }
-    if (resposta && resposta.status === 401 && acabouDeConectar) {
-      // O login acabou de dar certo, mas o acesso não chegou: evita o loop e explica.
-      acabouDeConectar = false;
-      const estado = await estadoDoGoogle();
-      const texto = estado && estado.enderecoDoRetorno && estado.enderecoDoRetorno !== window.location.origin
-        ? avisoDeEndereco(estado.enderecoDoRetorno)
-        : 'O login no Google foi feito, mas este navegador não guardou o acesso. Confira se os cookies estão permitidos para este site e tente de novo. Você também pode baixar o arquivo .ics.';
-      recado(texto);
+    if (resposta && resposta.ok && dados) {
+      mostrarSituacao(`${dados.criados} de ${dados.total} provas foram enviadas. As outras falharam. Você pode tentar de novo ou baixar o arquivo .ics com todas as provas.`, { ics: true });
       return;
     }
     if (resposta && resposta.status === 401) {
-      const texto = dados && dados.motivo === 'revogado'
+      if (acabouDeConectar) {
+        // O login acabou de dar certo, mas o acesso não chegou: evita o loop e explica.
+        acabouDeConectar = false;
+        const estado = await estadoDoGoogle();
+        const texto = estado && estado.enderecoDoRetorno && estado.enderecoDoRetorno !== window.location.origin
+          ? avisoDeEndereco(estado.enderecoDoRetorno)
+          : 'O login no Google foi feito, mas este navegador não guardou o acesso. Confira se os cookies estão permitidos para este site e tente de novo. Você também pode baixar o arquivo .ics com todas as provas.';
+        mostrarSituacao(texto, { ics: true });
+        return;
+      }
+      mostrarSituacao(dados && dados.motivo === 'revogado'
         ? 'O acesso ao Google Agenda expirou ou foi cancelado. Entre de novo com a sua conta Google.'
-        : 'Para adicionar, entre primeiro com a sua conta Google.';
-      recado(texto, { login: true });
+        : 'Para enviar as provas, entre primeiro com a sua conta Google.', { login: true, ics: true });
       return;
     }
     const motivo = dados && dados.mensagem ? `${dados.mensagem} ` : '';
-    recado(`Não consegui adicionar ao Google Agenda. ${motivo}Você pode baixar o arquivo .ics e abrir na sua agenda.`);
+    mostrarSituacao(`Não consegui enviar ao Google Agenda. ${motivo}Você pode baixar o arquivo .ics com todas as provas e abrir na sua agenda.`, { ics: true });
   }
 
-  // Volta do login do Google (?google=...): mostra o resultado e cria o evento pendente.
+  // Volta do login do Google (?google=...): mostra o resultado e envia as provas pendentes.
   function aoVoltarDoGoogle() {
     const parametros = new URLSearchParams(window.location.search);
     const resultado = parametros.get('google');
@@ -454,24 +494,21 @@ const Calendario = (() => {
     }
 
     App.mostrarTela('provas');
-    const prova = pendente && Familia.provas().find((p) => p.id === pendente);
-    if (prova) {
-      const [a, m] = prova.data.split('-').map(Number);
-      irPara(a, m - 1);
-    }
     const textos = {
       conectado: 'Google Agenda conectado.',
-      cancelado: 'O login no Google foi cancelado. Nada foi adicionado. Você pode baixar o arquivo .ics.',
-      sem_permissao: 'Para adicionar provas, permita o acesso à agenda na tela do Google.',
-      nao_configurado: 'O Google Agenda ainda não está configurado neste app. Você pode baixar o arquivo .ics.',
-      erro: 'Não consegui conectar ao Google agora. Tente de novo ou baixe o arquivo .ics.',
+      cancelado: 'O login no Google foi cancelado. Nada foi enviado. Você pode baixar o arquivo .ics com todas as provas.',
+      sem_permissao: 'Para enviar as provas, permita o acesso à agenda na tela do Google.',
+      nao_configurado: 'O Google Agenda ainda não está configurado neste app. Você pode baixar o arquivo .ics com todas as provas.',
+      erro: 'Não consegui conectar ao Google agora. Tente de novo ou baixe o arquivo .ics com todas as provas.',
       outro_endereco: 'O login no Google começou num endereço diferente do app. Abra o app pelo endereço desta página e tente de novo.',
     };
-    avisar(`${textos[resultado] || textos.erro}${motivo ? ` (código: ${motivo})` : ''}`);
-    if (resultado === 'conectado') acabouDeConectar = true;
-    if (prova) {
-      if (resultado === 'conectado') adicionarAoGoogle(prova.id);
-      else abrirCartao(prova.data);
+    const texto = `${textos[resultado] || textos.erro}${motivo ? ` (código: ${motivo})` : ''}`;
+    if (resultado === 'conectado') {
+      acabouDeConectar = true;
+      mostrarSituacao(texto);
+      if (pendente) enviarTodas();
+    } else {
+      mostrarSituacao(texto, { login: resultado !== 'cancelado' && resultado !== 'nao_configurado', ics: true });
     }
   }
 
@@ -550,9 +587,13 @@ const Calendario = (() => {
     abrirCartao(prova.data);
   });
   el.desconectar.addEventListener('click', () => desconectarGoogle());
+  el.enviarTodas.addEventListener('click', enviarTodas);
+  el.googleEntrar.addEventListener('click', entrarNoGoogle);
+  el.googleIcs.addEventListener('click', baixarIcsDeTodas);
 
   function abrir() {
     avisar('');
+    mostrarSituacao('');
     fecharFormulario();
     fecharCartao();
     const hoje = new Date();

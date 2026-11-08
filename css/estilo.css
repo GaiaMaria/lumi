@@ -1520,7 +1520,25 @@ figure {
   font-size: var(--fonte-0-95);
 }
 
-.cartao-prova__aviso {
+/* Envio de todas as provas ao Google Agenda */
+.provas-google {
+  display: grid;
+  gap: var(--espaco-3);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-sm);
+}
+
+.provas-google__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-2);
+}
+
+.provas-google__acoes:not(:has(button:not([hidden]))) {
+  display: none;
+}
+
+.provas-google__situacao {
   padding: var(--espaco-2) var(--espaco-3);
   border-radius: var(--raio-sm);
   background: var(--fundo-escuro);

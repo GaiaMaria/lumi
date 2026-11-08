@@ -5,9 +5,6 @@
 
 const G = require('./_comum');
 
-const DURACAO_MIN = 60;
-const FUSO = 'America/Sao_Paulo';
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -17,7 +14,7 @@ module.exports = async function handler(req, res) {
   if (!cfg) return G.responder(res, 503, { erro: 'nao_configurado', mensagem: 'O Google Agenda não está configurado.' });
 
   const { materia, nome, data, hora } = req.body || {};
-  if (!G.limpar(materia, 40) || !G.limpar(nome, 60) || !G.dataValida(data) || !G.horaValida(hora)) {
+  if (!G.provaValida({ materia, nome, data, hora })) {
     return G.responder(res, 400, { erro: 'pedido_invalido', mensagem: 'Confira a matéria, o nome, o dia e o horário da prova.' });
   }
 
@@ -36,19 +33,7 @@ module.exports = async function handler(req, res) {
     return G.responder(res, 502, { erro: 'falha', mensagem: 'O Google Agenda não respondeu agora.' });
   }
 
-  const evento = {
-    summary: G.tituloDoEvento(materia, nome),
-    description: 'Data de prova anotada no app Lumi.',
-    start: { dateTime: `${data}T${hora}:00`, timeZone: FUSO },
-    end: { dateTime: G.somarMinutos(data, hora, DURACAO_MIN), timeZone: FUSO },
-    reminders: {
-      useDefault: false,
-      overrides: [
-        { method: 'popup', minutes: 24 * 60 }, // um dia antes
-        { method: 'popup', minutes: 60 },
-      ],
-    },
-  };
+  const evento = G.montarEvento({ materia, nome, data, hora });
 
   const resultado = await G.chamar(G.URL_EVENTOS, {
     method: 'POST',

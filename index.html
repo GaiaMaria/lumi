@@ -203,7 +203,15 @@
           <button type="button" class="botao-secundario" id="prova-cancelar">Cancelar</button>
         </form>
 
-        <button type="button" class="botao-apagar" id="provas-desconectar">Desconectar Google Agenda</button>
+        <div class="provas-google vidro">
+          <button type="button" class="botao-principal" id="provas-enviar-todas">Enviar todas as provas para o Google Agenda</button>
+          <p class="provas-google__situacao" id="provas-google-situacao" role="status" aria-live="polite" hidden></p>
+          <div class="provas-google__acoes">
+            <button type="button" class="botao-principal botao-pequeno" id="provas-google-entrar" hidden>Entrar com Google</button>
+            <button type="button" class="botao-secundario botao-pequeno" id="provas-google-ics" hidden>Baixar .ics com todas as provas</button>
+          </div>
+          <button type="button" class="botao-apagar" id="provas-desconectar">Desconectar Google Agenda</button>
+        </div>
       </div>
     </section>
 

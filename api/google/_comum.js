@@ -185,6 +185,29 @@ function somarMinutos(data, hora, minutos) {
   return `${fim.getUTCFullYear()}-${doisDigitos(fim.getUTCMonth() + 1)}-${doisDigitos(fim.getUTCDate())}T${doisDigitos(fim.getUTCHours())}:${doisDigitos(fim.getUTCMinutes())}:00`;
 }
 
+// Evento da prova: título só com matéria e nome, fuso de Brasília, 1 hora, lembretes.
+const DURACAO_EVENTO_MIN = 60;
+const FUSO = 'America/Sao_Paulo';
+function montarEvento({ materia, nome, data, hora }) {
+  return {
+    summary: tituloDoEvento(materia, nome),
+    description: 'Data de prova anotada no app Lumi.',
+    start: { dateTime: `${data}T${hora}:00`, timeZone: FUSO },
+    end: { dateTime: somarMinutos(data, hora, DURACAO_EVENTO_MIN), timeZone: FUSO },
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: 'popup', minutes: 24 * 60 }, // um dia antes
+        { method: 'popup', minutes: 60 },
+      ],
+    },
+  };
+}
+
+function provaValida({ materia, nome, data, hora } = {}) {
+  return Boolean(limpar(materia, 40) && limpar(nome, 60) && dataValida(data) && horaValida(hora));
+}
+
 module.exports = {
   ESCOPO,
   URL_CONSENTIMENTO,
@@ -213,4 +236,6 @@ module.exports = {
   dataValida,
   horaValida,
   somarMinutos,
+  montarEvento,
+  provaValida,
 };
