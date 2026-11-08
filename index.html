@@ -111,9 +111,7 @@
 
         <!-- 1. Gravar a voz para criar a voz digital -->
         <div class="narracao-bloco" id="narracao-gravar" hidden>
-          <figure class="quadro-ilustracao">
-            <img src="assets/doris-lumi-lapis.png" alt="Dóris segurando um lápis, com a Lumi na ponta" width="440" height="412">
-          </figure>
+          <img class="mascote narracao__mascote" src="assets/recortes/duas-lapis.png" alt="Dóris segurando um lápis, com a Lumi na ponta" width="879" height="698">
           <h2 class="tabuada-subtitulo">Crie a voz digital da família</h2>
           <p class="campo__ajuda">Grave de 30 a 45 segundos lendo o texto abaixo, num lugar silencioso, com o celular a um palmo da boca. Fale com a sua voz de sempre, sem pressa. Com essa gravação, o app cria uma voz parecida com a sua para narrar um fato das missões.</p>
 
@@ -140,9 +138,7 @@
 
         <!-- 2. Esperando: criando a voz ou gerando a narração -->
         <div class="narracao-bloco narracao-bloco--centro" id="narracao-esperando" hidden>
-          <figure class="quadro-ilustracao quadro-ilustracao--pequeno">
-            <img src="assets/doris-livro-olhos-fechados.jpg" alt="" width="300" height="364">
-          </figure>
+          <img class="mascote narracao__mascote narracao__mascote--pequena" src="assets/recortes/doris-olhos-fechados.png" alt="" width="715" height="900">
           <p class="narracao-titulo" id="narracao-esperando-titulo"></p>
           <div class="progresso-estimado" id="narracao-progresso" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="progresso-estimado__barra" id="narracao-progresso-barra"></div>
@@ -152,12 +148,10 @@
 
         <!-- 3. Ouvir o fato, estilo teleprompter -->
         <div class="narracao-bloco" id="narracao-ouvir" hidden>
-          <figure class="quadro-ilustracao">
-            <img src="assets/doris-lumi-livro.png" alt="Dóris lendo um livro com a Lumi" width="430" height="452">
-          </figure>
-          <p class="campo__ajuda" id="narracao-origem"></p>
+          <img class="mascote narracao__mascote narracao__mascote--pequena" src="assets/recortes/doris-olhos-fechados.png" alt="Dóris de olhos fechados, ouvindo" width="715" height="900">
+          <p class="narracao-origem" id="narracao-origem"></p>
           <div class="teleprompter vidro" id="narracao-teleprompter"></div>
-          <button type="button" class="botao-principal botao-principal--grande" id="narracao-tocar">
+          <button type="button" class="botao-principal botao-principal--grande botao--laranja" id="narracao-tocar">
             <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
             <span id="narracao-tocar-texto">Ouvir</span>
           </button>

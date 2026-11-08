@@ -1758,33 +1758,75 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   max-width: var(--tamanho-160);
 }
 
+/* Mascotes soltas da narração */
+.narracao__mascote {
+  align-self: center;
+  width: min(75%, var(--tamanho-mascote-resultado));
+}
+
+.narracao__mascote--pequena {
+  width: min(50%, var(--tamanho-170));
+}
+
+/* Roteiro para ler em voz alta: papel creme, texto escuro, fácil de ler */
+.roteiro.vidro {
+  background: var(--creme);
+  border: var(--borda-adesivo);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
+}
+
 .roteiro {
   padding: var(--espaco-4);
   display: flex;
   flex-direction: column;
   gap: var(--espaco-2);
-  font-size: var(--fonte-1-05);
+  font-size: var(--fonte-1-1);
+  font-weight: 700;
+  line-height: 1.55;
 }
 
 .roteiro__titulo {
   margin: 0;
-  color: var(--texto-suave);
-  font-size: var(--fonte-0-95);
-  font-weight: 800;
+  color: var(--texto-escuro);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1);
+  font-weight: 600;
 }
 
+/* Cronômetro grande da gravação */
 .cronometro {
   align-self: center;
-  padding: var(--espaco-1-5) var(--espaco-3);
-  border-radius: var(--raio-pilula);
+  min-width: var(--tamanho-120);
+  padding: var(--espaco-1) var(--espaco-4);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
   background: var(--fundo-escuro);
-  font-weight: 900;
+  box-shadow: var(--sombra-dura);
+  color: var(--brilho);
+  font-size: var(--fonte-2-2);
+  font-weight: 700;
+  text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
 .narracao-titulo {
-  font-size: var(--fonte-1-15);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-25);
+  font-weight: 600;
+}
+
+/* Rótulo acima do teleprompter: de onde vem o fato */
+.narracao-origem {
+  color: var(--doris);
+  font-size: var(--fonte-0-8);
   font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.narracao-origem:empty {
+  display: none;
 }
 
 .progresso-estimado {
@@ -1819,7 +1861,7 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   margin: 0;
   width: 100%;
   font-size: var(--fonte-1-3);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.45;
   color: var(--texto);
 }
