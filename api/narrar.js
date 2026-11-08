@@ -8,6 +8,14 @@ const MAX_CARACTERES = 300;
 const MODELO = 'eleven_multilingual_v2';
 const FORMATO = 'mp3_44100_128';
 
+// Mais fidelidade à voz da família (o padrão do serviço é semelhança 0,75).
+const AJUSTES_DA_VOZ = {
+  stability: 0.5,
+  similarity_boost: 0.9,
+  style: 0,
+  use_speaker_boost: true,
+};
+
 function responder(res, http, corpo) {
   return res.status(http).json(corpo);
 }
@@ -50,7 +58,7 @@ async function handler(req, res) {
 
   const resultado = await ElevenLabs.chamar(
     `/v1/text-to-speech/${encodeURIComponent(idVoz)}/with-timestamps?output_format=${FORMATO}`,
-    { metodo: 'POST', json: { text: fato, model_id: MODELO } },
+    { metodo: 'POST', json: { text: fato, model_id: MODELO, voice_settings: AJUSTES_DA_VOZ } },
   );
   if (!resultado.ok || !resultado.dados || typeof resultado.dados.audio_base64 !== 'string') {
     const falha = ElevenLabs.traduzirFalha(resultado);

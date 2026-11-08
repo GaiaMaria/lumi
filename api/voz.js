@@ -1,5 +1,5 @@
 // Voz digital da família na ElevenLabs.
-// POST: recebe a gravação (1 a 2 minutos) e cria uma voz instantânea.
+// POST: recebe a gravação (30 a 45 segundos) e cria uma voz instantânea.
 //       Se a família já tem voz, devolve a mesma e não cria outra.
 // DELETE: apaga a voz da família no serviço.
 // O áudio só passa por aqui a caminho da ElevenLabs: não é gravado nem vai para o log.
@@ -14,7 +14,7 @@ const TIPOS = {
   'audio/mpeg': 'mp3',
   'audio/wav': 'wav',
 };
-const MIN_BYTES = 40 * 1024; // menos que isso não é uma gravação de 1 minuto
+const MIN_BYTES = 40 * 1024; // menos que isso não é uma gravação de 30 segundos
 const MAX_CARACTERES_AUDIO = 4 * 1024 * 1024; // base64; o corpo da Vercel aceita até ~4,5 MB
 const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
@@ -41,7 +41,7 @@ async function criar(req, res) {
 
   const bytes = Buffer.from(audio, 'base64');
   if (bytes.length < MIN_BYTES) {
-    return responder(res, 422, { erro: 'muito_curta', mensagem: 'A gravação ficou curta demais. Grave de 1 a 2 minutos.' });
+    return responder(res, 422, { erro: 'muito_curta', mensagem: 'A gravação ficou curta demais. Grave de 30 a 45 segundos.' });
   }
 
   // Já existe voz para esta família? Então não cria outra.

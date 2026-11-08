@@ -105,10 +105,10 @@ const TextoNarrado = (() => {
 // ---------- tela ----------
 
 const Narracao = (() => {
-  const DURACAO_MINIMA_MS = 60 * 1000;
-  const DURACAO_MAXIMA_MS = 120 * 1000;
+  const DURACAO_MINIMA_MS = 30 * 1000;
+  const DURACAO_MAXIMA_MS = 45 * 1000;
   const ESTIMATIVA_CRIAR_VOZ_S = 25;
-  const BITS_AUDIO = 64000; // mantém 2 minutos abaixo do limite de envio da Vercel
+  const BITS_AUDIO = 128000; // qualidade recomendada pela ElevenLabs; 45 s ficam bem abaixo do limite da Vercel
 
   const MENSAGENS = {
     vozDoAparelho: 'Não consegui usar a voz da sua família agora. Vou ler com a voz do aparelho.',
@@ -116,7 +116,7 @@ const Narracao = (() => {
     semSuporte: 'Seu navegador não permite gravar a voz. Tente pelo Chrome ou pelo Safari.',
     dentroDeApp: 'Você abriu o Lumi dentro de outro app (como WhatsApp ou Instagram). Para gravar sua voz, abra o link no Chrome ou no Safari.',
     semMicrofone: 'Não encontramos um microfone neste aparelho.',
-    curta: 'A gravação ficou curta demais. Grave pelo menos 1 minuto lendo o texto.',
+    curta: 'A gravação ficou curta demais. Grave pelo menos 30 segundos lendo o texto.',
     marqueAceite: 'Marque a caixa de autorização para começar a gravar.',
     limite: `Hoje já foram ${LIMITE_NARRACOES_POR_DIA} narrações com a voz da família. Amanhã tem mais! Agora vou ler com a voz do aparelho.`,
     falhaGravar: 'Não consegui gravar agora. Tente de novo.',
@@ -149,6 +149,7 @@ const Narracao = (() => {
     imagemRotulo: $('narracao-imagem-rotulo'),
     lerTexto: $('narracao-ler-texto'),
     apagarVoz: $('narracao-apagar-voz'),
+    regravar: $('narracao-regravar'),
     botaoInicio: $('botao-voz-familia'),
   };
 
@@ -174,6 +175,11 @@ const Narracao = (() => {
     el.blocoOuvir.hidden = qual !== 'ouvir';
   }
 
+  function textoCronometro(passou) {
+    const falta = passou < DURACAO_MINIMA_MS ? ` (mínimo ${formatarTempo(DURACAO_MINIMA_MS)})` : '';
+    return `${formatarTempo(passou)} de ${formatarTempo(DURACAO_MAXIMA_MS)}${falta}`;
+  }
+
   function formatarTempo(ms) {
     const s = Math.floor(ms / 1000);
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -192,6 +198,7 @@ const Narracao = (() => {
       ? `Narrações com a voz da família hoje: ${usadas} de ${LIMITE_NARRACOES_POR_DIA}${restam ? '' : ' (amanhã tem mais)'}.`
       : '';
     el.apagarVoz.hidden = !Familia.vozDigital();
+    el.regravar.hidden = !Familia.vozDigital();
   }
 
   // Botão da tela inicial: aparece se houver voz em português no aparelho (para o plano B)
@@ -451,7 +458,7 @@ const Narracao = (() => {
     prepararOuvir(fatoAtual());
   }
 
-  // ---------- gravação (1 a 2 minutos) ----------
+  // ---------- gravação (30 a 45 segundos) ----------
 
   async function comecarGravacao() {
     if (gravacao) {
@@ -467,7 +474,8 @@ const Narracao = (() => {
     let fluxo;
     try {
       fluxo = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        // Sem os filtros de chamada do navegador: eles achatam o timbre e a voz digital fica diferente.
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 1 },
       });
     } catch (erro) {
       if (erro && (erro.name === 'NotAllowedError' || erro.name === 'SecurityError')) avisar(MENSAGENS.negado);
@@ -514,12 +522,12 @@ const Narracao = (() => {
       relogio: setTimeout(pararGravacao, DURACAO_MAXIMA_MS),
       contador: setInterval(() => {
         const passou = Date.now() - gravacao.inicio;
-        el.cronometro.textContent = `${formatarTempo(passou)} de 2:00${passou < DURACAO_MINIMA_MS ? ' (mínimo 1:00)' : ''}`;
+        el.cronometro.textContent = textoCronometro(passou);
       }, 250),
     };
     gravador.start();
     el.cronometro.hidden = false;
-    el.cronometro.textContent = '0:00 de 2:00 (mínimo 1:00)';
+    el.cronometro.textContent = textoCronometro(0);
     el.gravar.textContent = 'Parar e criar a voz';
   }
 
@@ -549,6 +557,19 @@ const Narracao = (() => {
       mensagem: 'Não consegui apagar a voz digital na ElevenLabs agora. Nada foi apagado. Tente de novo daqui a pouco.',
     };
   }
+
+  // Gravar de novo: apaga a voz atual no serviço (uma voz por família) e volta para a gravação.
+  el.regravar.addEventListener('click', async () => {
+    if (!window.confirm('Gravar a voz de novo? A voz digital atual será apagada na ElevenLabs.')) return;
+    pararTudo();
+    const resultado = await apagarVozDigital();
+    if (!resultado.ok) {
+      avisar(resultado.mensagem);
+      return;
+    }
+    atualizarBotaoInicio();
+    abrir();
+  });
 
   el.apagarVoz.addEventListener('click', async () => {
     if (!window.confirm('Apagar a voz digital da família? Ela também será apagada na ElevenLabs.')) return;

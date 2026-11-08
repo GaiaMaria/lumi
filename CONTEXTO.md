@@ -110,7 +110,7 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 
 ### Voz digital da família (ElevenLabs)
 
-- Na página inicial, "Ouvir a voz da sua família": a responsável grava de 1 a 2 minutos, e o app cria uma voz digital instantânea na ElevenLabs para narrar um fato curto da última missão.
+- Na página inicial, "Ouvir a voz da sua família": a responsável grava de 30 a 45 segundos (sem os filtros de chamada do navegador), e o app cria uma voz digital instantânea na ElevenLabs para narrar um fato curto da última missão.
 - Antes da primeira gravação, a tela exige a marcação da caixa: "Esta é a minha voz. Ela será enviada à ElevenLabs para criar uma voz digital, usada só para narrar as missões da minha família. Posso apagar a voz a qualquer momento, e ela também será apagada no serviço."
 - O áudio gravado vai só para a ElevenLabs e não fica guardado no app. No aparelho fica só o ID da voz, ligado à família. Uma família tem no máximo uma voz digital (nome `lumi-<ID da família>`).
 - O fato (até duas frases, no máximo 300 caracteres, sem nomes de pessoas, escolas ou professoras) é criado pelo Claude na mesma leitura das fotos que gera as perguntas. As fotos não são enviadas de novo.

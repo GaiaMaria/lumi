@@ -174,6 +174,8 @@ test('narrar: devolve áudio, texto e alinhamento por caractere', async () => {
   const fala = pedidos.find((p) => p.url.includes('/with-timestamps'));
   assert.ok(fala.url.includes(`/v1/text-to-speech/${ID_VOZ}/with-timestamps`));
   assert.strictEqual(JSON.parse(fala.body).model_id, 'eleven_multilingual_v2');
+  assert.strictEqual(JSON.parse(fala.body).voice_settings.similarity_boost, 0.9);
+  assert.strictEqual(JSON.parse(fala.body).voice_settings.use_speaker_boost, true);
 });
 
 test('narrar: texto com mais de 300 caracteres é recusado', async () => {
