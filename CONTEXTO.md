@@ -174,7 +174,8 @@ lumi/
 │ ├── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
 │ ├── abertura.js tela de abertura (só na primeira visita da aba)
 │ ├── trilha.js textos e estado (nova ou feita) das paradas da trilha
-│ └── resultado.js cartões, barra de nível e regra do "Ouvir o fato da Dóris"
+│ ├── resultado.js cartões, barra de nível e regra do "Ouvir o fato da Dóris"
+│ └── navegacao.js regra do voltar de Provas (volta para a tela de origem)
 ├── api/ funções no servidor (Vercel), as únicas que leem chaves
 │ ├── questoes.js chama o Claude (perguntas e fato curto)
 │ ├── curiosidade.js lê uma curiosidade a partir de imagem (Claude)
@@ -195,7 +196,11 @@ lumi/
 
 **Telas em `index.html`:** abertura, inicio (trilha), fotoquest, disciplina, quiz, resultado, tabuada, narracao, pais (Área dos pais) e provas.
 
-**Navegação:** a barra de baixo (`#nav-principal`: Trilha, Tabuada, Ouvir e Pais) aparece só no Início, no menu da Tabuada, na Narração e na Área dos pais, controlada por `App.mostrarTela`. O item "Ouvir" é o `#botao-voz-familia` e segue a regra de `Narracao.atualizarBotaoInicio()`. O botão "Apagar dados da família" (`#botao-apagar`) fica no fim da Área dos pais, longe da criança.
+**Navegação:**
+- A barra de baixo (`#nav-principal`: Trilha, Tabuada, Provas, Ouvir e Pais) aparece só no Início, no menu da Tabuada, em Provas, na Narração e na Área dos pais, controlada por `App.mostrarTela`. O item "Ouvir" é o `#botao-voz-familia` e segue a regra de `Narracao.atualizarBotaoInicio()`.
+- A trilha tem um botão voltar no topo que leva para a abertura; lá, "Começar" volta para a trilha.
+- O voltar de Provas (`#provas-voltar`) leva para a tela de onde a pessoa veio (trilha, Tabuada ou Área dos pais), pela regra de `js/navegacao.js`. Quem vem da Narração volta para a trilha, porque reabrir a Narração gera uma narração nova e gastaria uma das 5 do dia. Na volta do login do Google, vai para a Área dos pais.
+- O botão "Apagar dados da família" (`#botao-apagar`) fica no fim da Área dos pais, longe da criança.
 
 **Onde cada dado fica:**
 - `localStorage`: `lumi.familia` guarda o ID da família, e `lumi.familia.<id>` guarda pontos, missões, tabuada, provas e o ID da voz digital.
@@ -257,7 +262,7 @@ lumi/
   Claude-Session: https://claude.ai/code/session_01MVYyXg6UiaydGP5yx6gGYm
   ```
 - Antes de qualquer `git push`, mostrar o diff e os comandos e aguardar confirmação.
-- Rodar `node --test testes/` antes de cada commit (137 testes passando em 8/11/2026). Se aparecer 1 falha estranha no Node 22, rodar `node --test testes/*.test.js`.
+- Rodar `node --test testes/` antes de cada commit (142 testes passando em 8/11/2026). Se aparecer 1 falha estranha no Node 22, rodar `node --test testes/*.test.js`.
 - Testar primeiro na prévia da branch e mostrar o resultado antes do merge.
 - Não criar bibliotecas novas sem perguntar antes.
 - Manter tudo em HTML, CSS e JavaScript puros, sem framework, a menos que a usuária autorize.
@@ -302,7 +307,7 @@ lumi/
 - Google Agenda: um botão "Enviar N provas para o Google Agenda", um login só, sem duplicar provas já enviadas. Se falhar, oferece `.ics` com todas as provas. Mensagens de erro mostram um código curto (ex.: `invalid_client`).
 - Testado na prévia: login, criação dos eventos, login cancelado e token expirado.
 
-**Layout novo (branch `estrutura-inicial`, etapas 1 a 10 de `docs/PROMPT-LAYOUT.md`):**
+**Layout novo (em produção pelos PRs #7 e #8, etapas 1 a 10 de `docs/PROMPT-LAYOUT.md`):**
 - Tema escuro com céu índigo, botões "adesivo", fontes Fredoka e Nunito e mascotes soltas (recortes sem fundo).
 - Tela de abertura com a rede de neurônios (só na primeira visita da aba).
 - Início em forma de trilha: topo com nível e pontos, missões salvas como paradas (nova ou feita), chip da próxima prova e barra de navegação de baixo.
@@ -313,6 +318,7 @@ lumi/
 - No desktop, o app fica numa coluna central de 480px. Contraste de 4.5:1 ou mais, área de toque de 44px e animações desligadas com movimento reduzido.
 - Testado na prévia com foto fictícia e a API real: matéria diferente, quiz, resultado, trilha, Tabuada, Provas e Apagar dados.
 
-**Falta:** testar na prévia o envio ao Google Agenda, a voz digital (ElevenLabs), "Minha voz" e o "Leia comigo"; depois, PR da `estrutura-inicial` para a `main` com a confirmação da usuária.
+- Navegação (PR #8): voltar para a capa pela trilha, Provas na barra de baixo e voltar de Provas para a tela de origem.
+- Testado na prévia pela usuária: Google Agenda, voz digital, "Minha voz", "Leia comigo", desktop e a navegação nova.
 
 **Fica para depois ("Em breve" no vídeo):** mapa dos Mundos, Chefão, sequência de dias, medalhas de missão, Turminha, login e assinatura, reforço automático. O teclado numérico na tela da Tabuada (opcional) não foi feito.
