@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lumi · O caderno vira missão</title>
+  <meta name="description" content="App que transforma a foto do caderno em missão com perguntas, pontos e a voz da família. Para crianças de 9 a 12 anos.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Variáveis e botões do app (cores, tamanhos, estilo adesivo) -->
+  <link rel="stylesheet" href="../css/estilo.css">
+  <link rel="stylesheet" href="landing.css">
+  <script src="landing.js" defer></script>
+</head>
+<body class="landing">
+  <header class="barra-landing">
+    <a class="barra-landing__marca" href="#topo">Lumi</a>
+    <a class="barra-landing__link" href="/">Abrir o app</a>
+  </header>
+
+  <main id="topo">
+    <!-- Hero: a promessa, o e-mail e o app funcionando -->
+    <section class="hero" aria-labelledby="hero-titulo">
+      <div class="hero__texto">
+        <h1 class="hero__titulo" id="hero-titulo">Use a tela a favor do estudo.</h1>
+        <p class="hero__sub">O Lumi transforma a foto do caderno em uma missão com perguntas, pontos e a voz da família. Seu filho revisa para a prova jogando, e você acompanha sem virar professora à noite.</p>
+
+        <form class="form-curto" id="form-curto" novalidate>
+          <label class="rotulo" for="curto-email">Seu e-mail</label>
+          <div class="form-curto__linha">
+            <input class="campo" type="email" id="curto-email" name="email" autocomplete="email" inputmode="email" placeholder="voce@email.com" required aria-describedby="curto-erro">
+            <button type="submit" class="botao-principal" id="curto-enviar">Entrar na lista de espera</button>
+          </div>
+          <label class="aceite aceite--curto" for="curto-aceite">
+            <input type="checkbox" id="curto-aceite" name="consentimento" required aria-describedby="curto-erro">
+            <span>Aceito receber novidades do Lumi por e-mail. Posso sair quando quiser.</span>
+          </label>
+          <p class="campo-erro" id="curto-erro" aria-live="polite"></p>
+          <p class="nota">Grátis para começar. Lançamento em breve. Ninguém é cobrado agora.</p>
+        </form>
+
+        <a class="link-seta" href="#experimente">Experimente agora ↓</a>
+      </div>
+
+      <div class="hero__app" id="experimente">
+        <img class="hero__rede" src="../assets/rede-neuronios.svg" alt="" width="390" height="470">
+        <div class="celular">
+          <iframe class="celular__tela" src="/?vitrine=1" title="Experimente o app Lumi" allow="microphone; autoplay" loading="lazy"></iframe>
+        </div>
+        <p class="nota nota--centro">Toque e jogue uma missão de exemplo.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape-landing">
+    <p>Lumi · Cada acerto acende uma luz.</p>
+    <nav class="rodape-landing__links" aria-label="Links do rodapé">
+      <a href="/">Abrir o app</a>
+      <a href="#privacidade">Privacidade</a>
+    </nav>
+    <p class="rodape-landing__copia">© 2026</p>
+  </footer>
+</body>
+</html>

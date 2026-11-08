@@ -1,0 +1,266 @@
+/* Landing do Lumi: usa as variáveis de ../css/estilo.css. Nada de cor ou tamanho solto. */
+
+:root {
+  --landing-coluna: 560px;
+  --landing-largura: 1120px;
+  --landing-secao: 64px;          /* espaço entre seções no celular */
+  --landing-secao-desktop: 112px; /* e no desktop */
+  --landing-titulo: clamp(2rem, 1.1rem + 3.6vw, 3.5rem); /* 32px no celular, 56px no desktop */
+  --landing-titulo-secao: clamp(2rem, 1.4rem + 2.2vw, 2.75rem);
+  --landing-sub: clamp(1.05rem, 0.95rem + 0.45vw, 1.25rem);
+  --celular-largura: 360px;
+  --celular-altura: 740px;
+  --celular-raio: 44px;
+  --celular-borda: 3px;
+  --sombra-longa: 0 40px 80px color-mix(in srgb, var(--contorno) 70%, transparent);
+}
+
+/* A landing rola como uma página comum (o app usa body em coluna) */
+body.landing {
+  display: block;
+  background-attachment: scroll;
+}
+
+body.landing a {
+  color: var(--texto);
+}
+
+/* ---------- barra do topo ---------- */
+.barra-landing {
+  max-width: var(--landing-largura);
+  margin: 0 auto;
+  padding: var(--espaco-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.barra-landing__marca {
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-6);
+  font-weight: 700;
+  text-decoration: none;
+  text-shadow: var(--brilho-texto-lumi-pequeno);
+}
+
+.barra-landing__link,
+.link-seta {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-44);
+  font-weight: 800;
+  text-underline-offset: var(--sublinhado-distancia);
+}
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  max-width: var(--landing-largura);
+  margin: 0 auto;
+  padding: var(--espaco-6) var(--espaco-4) var(--landing-secao);
+  display: grid;
+  gap: var(--espaco-10);
+  align-items: center;
+}
+
+/* Brilho sutil do gradiente da marca, só no topo (regra do CONTEXTO.md) */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 10% 5% auto auto;
+  width: min(80vw, 560px);
+  aspect-ratio: 1;
+  background: var(--gradiente-marca);
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.22;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.hero__texto {
+  max-width: var(--landing-coluna);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-5);
+}
+
+.hero__titulo {
+  font-size: var(--landing-titulo);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.hero__sub {
+  color: var(--texto-suave);
+  font-size: var(--landing-sub);
+  line-height: 1.55;
+}
+
+/* ---------- formulários ---------- */
+.rotulo {
+  display: block;
+  margin-bottom: var(--espaco-1-5);
+  font-weight: 800;
+}
+
+.campo {
+  width: 100%;
+  min-height: var(--altura-52);
+  padding: var(--espaco-2-5) var(--espaco-4);
+  border: var(--traco-medio) solid var(--borda);
+  border-radius: var(--raio-sm);
+  background: var(--fundo-escuro);
+  color: var(--texto);
+  font: inherit;
+  font-size: var(--fonte-1-05);
+}
+
+.campo::placeholder {
+  color: var(--texto-suave);
+  opacity: 0.7;
+}
+
+.campo:focus-visible {
+  outline: var(--foco-largura) solid var(--brilho);
+  outline-offset: var(--foco-distancia-2);
+}
+
+.campo[aria-invalid="true"] {
+  border-color: var(--erro);
+}
+
+.form-curto__linha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2-5);
+}
+
+.aceite {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-2-5);
+  margin-top: var(--espaco-3);
+  min-height: var(--altura-44);
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-95);
+  cursor: pointer;
+}
+
+.aceite input {
+  flex-shrink: 0;
+  width: var(--tamanho-24);
+  height: var(--tamanho-24);
+  margin: 0;
+  accent-color: var(--sucesso);
+}
+
+.campo-erro {
+  min-height: 1.5em;
+  margin-top: var(--espaco-1);
+  color: var(--erro);
+  font-size: var(--fonte-0-95);
+  font-weight: 800;
+}
+
+.campo-erro:empty {
+  min-height: 0;
+  margin: 0;
+}
+
+.nota {
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-9);
+}
+
+.nota--centro {
+  text-align: center;
+}
+
+/* ---------- celular com o app ---------- */
+.hero__app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-4);
+  scroll-margin-top: var(--espaco-4);
+}
+
+/* Rede de neurônios bem suave atrás do celular */
+.hero__rede {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  max-width: none;
+  transform: translate(-50%, -55%);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.celular {
+  width: min(88vw, var(--celular-largura));
+  aspect-ratio: 360 / 740;
+  max-height: var(--celular-altura);
+  border: var(--celular-borda) solid var(--borda);
+  border-radius: var(--celular-raio);
+  background: var(--fundo-escuro);
+  box-shadow: var(--sombra-longa);
+  overflow: hidden;
+}
+
+.celular__tela {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* ---------- rodapé ---------- */
+.rodape-landing {
+  max-width: var(--landing-largura);
+  margin: 0 auto;
+  padding: var(--espaco-8) var(--espaco-4) var(--espaco-10);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-3);
+  border-top: var(--traco-medio) solid var(--borda);
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-95);
+}
+
+.rodape-landing__links {
+  display: flex;
+  gap: var(--espaco-5);
+}
+
+.rodape-landing__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-44);
+  color: var(--texto-suave);
+}
+
+/* ---------- desktop ---------- */
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr auto;
+    gap: var(--espaco-14);
+    min-height: calc(100vh - var(--altura-72));
+    padding-bottom: var(--landing-secao-desktop);
+  }
+
+  .form-curto__linha {
+    flex-direction: row;
+  }
+
+  .form-curto__linha .botao-principal {
+    flex-shrink: 0;
+  }
+}
