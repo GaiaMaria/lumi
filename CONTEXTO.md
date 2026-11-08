@@ -64,9 +64,8 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 7. Narração com a voz gravada pela mãe
 
 **Se sobrar tempo:**
-8. Clonagem de voz (ElevenLabs), com as regras da seção 6
-9. Calendário de provas: cadastro de matéria e data, lista de revisão diária, check de tarefas feitas com pontos
-10. Painel dos pais com dados fictícios
+8. Calendário de provas: cadastro de matéria e data, lista de revisão diária, check de tarefas feitas com pontos
+9. Painel dos pais com dados fictícios
 
 **Em breve (aparece no vídeo com selo "Em breve"):**
 - Pagamento e assinatura
@@ -95,19 +94,18 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 - **Nenhum dado real de criança** no repositório, nos commits, nas imagens de demonstração ou no vídeo. Usar apenas dados fictícios.
 - Não mostrar rostos de crianças nem nomes reais de escolas no vídeo.
 - **Chave da API do Claude nunca no código.** Fica na variável `ANTHROPIC_API_KEY`, na Vercel, e é lida somente em `api/questoes.js`.
-- **Chave do ElevenLabs** fica na variável `ELEVENLABS_API_KEY`, na Vercel, e é lida somente em `api/voz.js`.
 - Arquivo `.env` sempre no `.gitignore`.
 - Foto enviada pela criança é processada na função e não é armazenada no servidor na versão de demonstração.
 - Para o piloto real (Corujinha), será necessário termo de consentimento dos responsáveis, conforme a LGPD (art. 14). Isso fica fora do link de domingo.
 
 ### Voz da responsável
 
-- Cada responsável clona apenas a própria voz. Voz nunca é compartilhada entre contas.
-- Antes de gravar, a tela pede consentimento: "Esta é a minha voz e autorizo o uso para narrar as missões." A data do consentimento é registrada.
-- Botão "Apagar minha voz" remove a gravação e o identificador de voz.
-- Nunca clonar voz de criança ou de terceiros. O app recusa e explica o motivo.
-- No protótipo, a voz clonada fica somente no navegador da usuária, sem envio a banco de dados.
-- Se a clonagem não estiver disponível no plano da conta, usar a gravação original como narração.
+- A voz é gravada no próprio aparelho, sem serviço externo e sem envio a servidor. Voz nunca é compartilhada entre famílias.
+- Frases gravadas: "Oi! Vamos estudar juntos?", "Muito bem!", "Quase! Tente de novo" e "Vamos lá!".
+- Antes da primeira gravação, a tela pede consentimento com uma caixa de marcação: "Esta é a minha voz. Ela será usada só para narrar as missões da minha família, e posso apagar quando quiser." A data do consentimento é registrada.
+- Cada frase pode ser ouvida, regravada e apagada. O botão "Apagar dados da família" também apaga os áudios.
+- Os áudios ficam no IndexedDB do navegador, não no localStorage.
+- As perguntas criadas pela IA são lidas com a voz do navegador em português. A gravação nunca é tocada para uma pergunta.
 
 ## 7. Estrutura de arquivos
 
@@ -121,11 +119,10 @@ lumi/
 │ ├── quiz.js perguntas, respostas e feedback
 │ ├── tabuada.js treinos de multiplicação (contas no código)
 │ ├── pontos.js pontos, níveis e medalhas
-│ ├── voz.js gravação, consentimento e narração (se houver tempo: clonagem)
+│ ├── voz.js gravação, consentimento e narração
 │ └── calendario.js provas e revisão (se houver tempo)
 ├── api/
-│ ├── questoes.js função no servidor que chama o Claude
-│ └── voz.js função no servidor que chama o ElevenLabs (se houver tempo)
+│ └── questoes.js função no servidor que chama o Claude
 ├── assets/ imagens da Lumi, da Dóris e da referência
 ├── CONTEXTO.md este arquivo
 └── README.md
@@ -192,6 +189,6 @@ lumi/
 
 - **0:00–0:20, problema:** a criança não gosta de revisar o caderno, e a mãe não tem método nem tempo para isso todo dia.
 - **0:20–1:20, demonstração:** foto → FotoQuest → quiz → pontos → narração (e tabuada, se estiver pronta).
-- **1:20–2:00, como foi construído:** Claude (leitura da foto e perguntas), ElevenLabs (voz), Claude Design ou Lovable (landing), GitHub e Vercel (publicação).
+- **1:20–2:00, como foi construído:** Claude (leitura da foto e perguntas), voz gravada no próprio aparelho, Claude Design ou Lovable (landing), GitHub e Vercel (publicação).
 - **2:00–2:30, próximos passos:** Turminha, assinatura, calendário, piloto na Escola Corujinha e adequação à LGPD.
 - Marcar "Em breve" nas funções que não estão no link.
