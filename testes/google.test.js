@@ -269,3 +269,22 @@ test('título do evento não repete a matéria quando o nome já tem', () => {
   assert.strictEqual(G.tituloDoEvento('Matemática', 'Prova de Matemática'), 'Prova de Matemática');
   assert.strictEqual(G.tituloDoEvento('Matemática', 'Prova de frações'), 'Matemática – Prova de frações');
 });
+
+test('criar evento: token expirado (invalid_grant) também apaga o cookie e pede login', async () => {
+  const { cookieToken } = await entrar();
+  const { res } = await rodar(criarEvento, {
+    method: 'POST', body: PROVA, headers: { cookie: `${G.COOKIE_TOKEN}=${encodeURIComponent(cookieToken)}` },
+  }, [[G.URL_TOKEN, () => resposta(400, { error: 'invalid_grant', error_description: 'Token has been expired.' })]]);
+  assert.strictEqual(res.statusCode, 401);
+  assert.strictEqual(res.corpo.erro, 'sem_login');
+  assert.ok(cookiesDe(res).some((c) => c.startsWith(`${G.COOKIE_TOKEN}=;`)));
+});
+
+test('criar evento: cookie de outra chave (ex.: segredo trocado) pede login', async () => {
+  const falso = G.cifrar({ refresh: REFRESH }, 'outra-chave');
+  const { res, pedidos } = await rodar(criarEvento, {
+    method: 'POST', body: PROVA, headers: { cookie: `${G.COOKIE_TOKEN}=${encodeURIComponent(falso)}` },
+  });
+  assert.strictEqual(res.corpo.erro, 'sem_login');
+  assert.strictEqual(pedidos.length, 0);
+});

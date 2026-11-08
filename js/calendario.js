@@ -386,7 +386,7 @@ const Calendario = (() => {
     }
     if (resposta && resposta.status === 401) {
       const texto = dados && dados.motivo === 'revogado'
-        ? 'O acesso ao Google Agenda foi cancelado. Entre de novo com a sua conta Google.'
+        ? 'O acesso ao Google Agenda expirou ou foi cancelado. Entre de novo com a sua conta Google.'
         : 'Para adicionar, entre primeiro com a sua conta Google.';
       recado(texto, { login: true });
       return;

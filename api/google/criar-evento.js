@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
   const acesso = await G.tokenDeAcesso(sessao.refresh, cfg);
   if (!acesso.ok) {
     if (acesso.revogado) {
-      // Acesso cancelado no Google: apaga o cookie e pede login de novo.
+      // Token expirado ou acesso cancelado no Google (invalid_grant): apaga o cookie e pede login de novo.
       return G.responder(res, 401, { erro: 'sem_login', motivo: 'revogado' }, [G.apagarCookie(G.COOKIE_TOKEN)]);
     }
     console.error('google: token de acesso falhou', acesso.status);
