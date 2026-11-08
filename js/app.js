@@ -9,6 +9,9 @@ const App = (() => {
       tela.hidden = tela.id !== `tela-${nome}`;
     });
     window.scrollTo(0, 0);
+    Voz.parar(); // não deixa a leitura continuar em outra tela
+    if (nome === 'tabuada') Tabuada.abrir();
+    else Tabuada.parar(); // para o relógio do desafio ao sair
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
   }
@@ -53,8 +56,9 @@ const FotoQuest = (() => {
     form: document.getElementById('form-fotos'),
     outraCaixa: document.getElementById('campo-outra'),
     outraTexto: document.getElementById('disciplina-outra'),
-    entrada: document.getElementById('entrada-foto'),
-    rotulo: document.getElementById('rotulo-foto'),
+    entradas: [document.getElementById('entrada-camera'), document.getElementById('entrada-galeria')],
+    rotuloCamera: document.getElementById('rotulo-camera'),
+    rotulos: [document.getElementById('rotulo-camera'), document.getElementById('rotulo-galeria')],
     contador: document.getElementById('contador-fotos'),
     miniaturas: document.getElementById('miniaturas'),
     declaracao: document.getElementById('declaracao'),
@@ -110,7 +114,7 @@ const FotoQuest = (() => {
     liberarFotos();
     el.form.reset();
     el.outraCaixa.hidden = true;
-    el.entrada.value = '';
+    el.entradas.forEach((entrada) => { entrada.value = ''; });
     preparando = false;
     enviando = false;
     el.enviar.textContent = 'Enviar fotos';
@@ -146,8 +150,10 @@ const FotoQuest = (() => {
     el.contador.textContent = fotos.length
       ? `${fotos.length} de ${Fotos.MAX_FOTOS} fotos`
       : '';
-    el.rotulo.textContent = fotos.length ? 'Adicionar mais fotos' : 'Tirar ou escolher fotos';
-    el.rotulo.classList.toggle('botao-foto--cheio', fotos.length >= Fotos.MAX_FOTOS);
+    el.rotuloCamera.textContent = fotos.length ? 'Tirar outra foto' : 'Tirar foto';
+    const cheio = fotos.length >= Fotos.MAX_FOTOS;
+    el.rotulos.forEach((rotulo) => rotulo.classList.toggle('botao-foto--cheio', cheio));
+    el.entradas.forEach((entrada) => { entrada.disabled = cheio; });
   }
 
   el.form.addEventListener('change', (evento) => {
@@ -159,9 +165,16 @@ const FotoQuest = (() => {
     if (evento.target === el.declaracao) atualizarBotao();
   });
 
-  el.entrada.addEventListener('change', async () => {
-    const escolhidas = Array.from(el.entrada.files || []);
-    el.entrada.value = '';
+  // Câmera e galeria usam o mesmo tratamento.
+  el.entradas.forEach((entrada) => {
+    entrada.addEventListener('change', () => {
+      const escolhidas = Array.from(entrada.files || []);
+      entrada.value = '';
+      adicionarFotos(escolhidas);
+    });
+  });
+
+  async function adicionarFotos(escolhidas) {
     if (!escolhidas.length) return;
 
     const vagas = Fotos.MAX_FOTOS - fotos.length;
@@ -199,7 +212,7 @@ const FotoQuest = (() => {
     preparando = false;
     atualizarBotao();
     avisar([...new Set(avisos)].join(' '));
-  });
+  }
 
   el.form.addEventListener('submit', async (evento) => {
     evento.preventDefault();

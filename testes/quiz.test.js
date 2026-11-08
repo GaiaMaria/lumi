@@ -85,14 +85,42 @@ test('relacionar com conta errada: pergunta descartada', () => {
   assert.strictEqual(lista.length, 0);
 });
 
+test('completar lacuna de conta: a resposta vem do código', () => {
+  const [p] = Quiz.suportadas([{
+    tipo: 'completar_lacunas',
+    enunciado: '7 × 8 = ___',
+    gabarito: '54', // errado de propósito
+    respostas_aceitas: ['cinquenta e quatro'],
+    explicacao: '',
+  }]);
+  assert.strictEqual(p.gabarito, '56');
+  assert.strictEqual(p.respostas_aceitas.length, 0);
+});
+
+test('completar lacuna sem lacuna ou com duas: descartada', () => {
+  const lista = Quiz.suportadas([
+    { tipo: 'completar_lacunas', enunciado: 'Sem lacuna.', gabarito: 'x', respostas_aceitas: [] },
+    { tipo: 'completar_lacunas', enunciado: 'Duas ___ e ___.', gabarito: 'x', respostas_aceitas: [] },
+  ]);
+  assert.strictEqual(lista.length, 0);
+});
+
+test('perguntas de exemplo: metade múltipla escolha', () => {
+  const multipla = Quiz.PERGUNTAS_DEMO.filter((p) => p.tipo === 'multipla_escolha').length;
+  assert.strictEqual(multipla, Math.ceil(Quiz.PERGUNTAS_DEMO.length / 2));
+});
+
 test('perguntas que não são de conta ficam como vieram', () => {
   const lista = Quiz.suportadas(Quiz.PERGUNTAS_DEMO);
   assert.strictEqual(lista.length, Quiz.PERGUNTAS_DEMO.length);
 });
 
-test('perguntas de exemplo cobrem os quatro tipos', () => {
+test('perguntas de exemplo cobrem os cinco tipos', () => {
   const tipos = new Set(Quiz.PERGUNTAS_DEMO.map((p) => p.tipo));
-  assert.deepStrictEqual([...tipos].sort(), ['dissertativa', 'multipla_escolha', 'relacionar', 'verdadeiro_falso']);
+  assert.deepStrictEqual(
+    [...tipos].sort(),
+    ['completar_lacunas', 'dissertativa', 'multipla_escolha', 'relacionar', 'verdadeiro_falso'],
+  );
 });
 
 test('formato inválido é descartado no navegador também', () => {
