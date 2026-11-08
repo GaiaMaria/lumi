@@ -64,11 +64,14 @@
         <!-- Menu dos modos -->
         <div class="tabuada-bloco" id="tabuada-menu">
           <div class="nivel vidro">
-            <p class="nivel__titulo">Nível <span id="tabuada-nivel">1</span></p>
-            <div class="nivel__barra" id="tabuada-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-              <div class="nivel__preenchido" id="tabuada-nivel-preenchido"></div>
+            <img class="nivel__lumi" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="88" height="88">
+            <div class="nivel__info">
+              <p class="nivel__titulo"><span class="nivel__rotulo">Nível</span> <span class="nivel__numero" id="tabuada-nivel">1</span></p>
+              <div class="nivel__barra" id="tabuada-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+                <div class="nivel__preenchido" id="tabuada-nivel-preenchido"></div>
+              </div>
+              <p class="nivel__detalhe" id="tabuada-nivel-detalhe"></p>
             </div>
-            <p class="nivel__detalhe" id="tabuada-nivel-detalhe"></p>
           </div>
 
           <h2 class="tabuada-subtitulo">Medalhas</h2>
@@ -76,21 +79,45 @@
 
           <h2 class="tabuada-subtitulo">Escolha o modo</h2>
           <div class="modos">
-            <button type="button" class="modo vidro" data-modo="falta">
-              <strong>Qual é o número que falta</strong>
-              <span>Ex.: 7 × ___ = 56</span>
+            <button type="button" class="modo modo--falta vidro" data-modo="falta">
+              <span class="modo__icone" aria-hidden="true">
+                <!-- lápis -->
+                <svg viewBox="0 0 24 24" width="32" height="32" focusable="false"><path d="M4 20l1-4.5L15.5 5a2.1 2.1 0 0 1 3 0l.5.5a2.1 2.1 0 0 1 0 3L8.5 19z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M13.5 7l3.5 3.5M5 15.5l3.5 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="modo__texto">
+                <strong>Qual é o número que falta</strong>
+                <span>Ex.: 7 × ___ = 56</span>
+              </span>
             </button>
-            <button type="button" class="modo vidro" data-modo="numero">
-              <strong>Tabuada de um número</strong>
-              <span>Escolha de 1 a 10 e responda a sequência</span>
+            <button type="button" class="modo modo--numero vidro" data-modo="numero">
+              <span class="modo__icone" aria-hidden="true">
+                <!-- escada -->
+                <svg viewBox="0 0 24 24" width="32" height="32" focusable="false"><path d="M7 3v18M17 3v18M7 7h10M7 12h10M7 17h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="modo__texto">
+                <strong>Tabuada de um número</strong>
+                <span>Escolha de 1 a 10 e responda a sequência</span>
+              </span>
             </button>
-            <button type="button" class="modo vidro" data-modo="desafio">
-              <strong>Desafio contra o tempo</strong>
-              <span>10 contas em 60 segundos</span>
+            <button type="button" class="modo modo--desafio vidro" data-modo="desafio">
+              <span class="modo__icone" aria-hidden="true">
+                <!-- cronômetro -->
+                <svg viewBox="0 0 24 24" width="32" height="32" focusable="false"><circle cx="12" cy="14" r="7.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 14V10.5M9.5 2.5h5M12 2.5v4M18.5 7l1.5-1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="modo__texto">
+                <strong>Desafio contra o tempo</strong>
+                <span>10 contas em 60 segundos</span>
+              </span>
             </button>
-            <button type="button" class="modo vidro" data-modo="revisao" id="modo-revisao">
-              <strong>Revisão de erros</strong>
-              <span id="revisao-detalhe"></span>
+            <button type="button" class="modo modo--revisao vidro" data-modo="revisao" id="modo-revisao">
+              <span class="modo__icone" aria-hidden="true">
+                <!-- setas circulares -->
+                <svg viewBox="0 0 24 24" width="32" height="32" focusable="false"><path d="M19.5 10A8 8 0 0 0 5.6 6.6M4.5 14a8 8 0 0 0 13.9 3.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 2.5v4.5h4.5M19 21.5V17h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="modo__texto">
+                <strong>Revisão de erros</strong>
+                <span id="revisao-detalhe"></span>
+              </span>
             </button>
           </div>
         </div>
@@ -118,6 +145,7 @@
         <!-- Fim da rodada -->
         <div class="tabuada-bloco resultado" id="tabuada-fim" hidden>
           <h2 class="resultado__titulo" id="tabuada-fim-titulo"></h2>
+          <div class="conquista-distintivo" id="tabuada-fim-distintivo" aria-hidden="true" hidden></div>
           <p class="pontos pontos--grande"><span id="tabuada-fim-pontos">0</span> pontos</p>
           <p class="resultado__detalhe" id="tabuada-fim-detalhe"></p>
           <p class="conquista" id="tabuada-fim-medalha" hidden></p>

@@ -101,6 +101,31 @@ const Tabuada = (() => {
     revisao: { nome: 'Revisão de erros', medalha: 'Nunca desisto' },
   };
 
+  // ---------- distintivos (só visual) ----------
+
+  // Símbolo de cada distintivo, desenhado numa área de 24 × 24.
+  const SIMBOLOS = {
+    falta: '<circle cx="10" cy="10" r="6" fill="none" stroke-width="2.4"/><path d="M14.5 14.5L20 20" stroke-width="2.6" stroke-linecap="round"/>', // lupa
+    numero: '<path d="M3.5 18.5h17M4.5 16.5L3.5 7.5l5 4 3.5-6.5 3.5 6.5 5-4-1 9z" fill="none" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>', // coroa
+    desafio: '<path d="M13.5 2L5 13.5h6L10 22l9-12.5h-6.5z" stroke-width="1.6" stroke-linejoin="round"/>', // raio
+    revisao: '<path d="M12 2.5c3.2 2.3 5 6 5 9.8l-2 3.7H9l-2-3.7c0-3.8 1.8-7.5 5-9.8z" fill="none" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="1.8" stroke-width="1.6"/><path d="M9.5 19.5l-1.5 2M14.5 19.5l1.5 2M12 18.5v3" stroke-width="2" stroke-linecap="round"/>', // foguete
+    nivel: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" stroke-width="1.6" stroke-linejoin="round"/>', // estrela
+  };
+
+  const CADEADO = '<g class="distintivo__cadeado"><rect x="40" y="40" width="20" height="20" rx="10"/><rect x="45" y="49" width="10" height="7" rx="1.5"/><path d="M47 49v-2.5a3 3 0 0 1 6 0V49" fill="none" stroke-width="1.8"/></g>';
+
+  // Distintivo em SVG: fita, círculo na cor do modo e símbolo. Bloqueado fica cinza com cadeado.
+  function distintivo(chave, ganho) {
+    const classes = `distintivo distintivo--${chave}${ganho ? '' : ' distintivo--bloqueado'}`;
+    return `<svg class="${classes}" viewBox="0 0 64 64" width="64" height="64" aria-hidden="true" focusable="false">
+      <path class="distintivo__fita" d="M20 38l-6 20 8-3 4 7 6-18zM44 38l6 20-8-3-4 7-6-18z"/>
+      <circle class="distintivo__fundo" cx="32" cy="28" r="22"/>
+      <circle class="distintivo__aro" cx="32" cy="28" r="17.5" fill="none" stroke-width="2"/>
+      <g class="distintivo__simbolo" transform="translate(20 16)">${SIMBOLOS[chave]}</g>
+      ${ganho ? '' : CADEADO}
+    </svg>`;
+  }
+
   const $ = (id) => document.getElementById(id);
   const el = {
     voltar: $('tabuada-voltar'),
@@ -127,6 +152,7 @@ const Tabuada = (() => {
     fimPontos: $('tabuada-fim-pontos'),
     fimDetalhe: $('tabuada-fim-detalhe'),
     fimMedalha: $('tabuada-fim-medalha'),
+    fimDistintivo: $('tabuada-fim-distintivo'),
     fimNivel: $('tabuada-fim-nivel'),
     deNovo: $('tabuada-de-novo'),
     outroModo: $('tabuada-menu-voltar'),
@@ -167,19 +193,31 @@ const Tabuada = (() => {
       `${Quiz.textoPontos(total)} · faltam ${faltam} para o nível ${nivel + 1}`;
   }
 
+  function itemMedalha(chave, nome, ganha, detalheTexto) {
+    const item = document.createElement('li');
+    item.className = `medalha ${ganha ? 'medalha--ganha' : 'medalha--bloqueada'}`;
+    const icone = document.createElement('span');
+    icone.className = 'medalha__icone';
+    icone.innerHTML = distintivo(chave, ganha); // SVG fixo do próprio código
+    const titulo = document.createElement('strong');
+    titulo.textContent = nome;
+    const detalhe = document.createElement('span');
+    detalhe.className = 'medalha__detalhe';
+    detalhe.textContent = detalheTexto;
+    item.append(icone, titulo, detalhe);
+    return item;
+  }
+
   function desenharMedalhas() {
     const { medalhas } = progresso();
-    el.medalhas.replaceChildren(...Object.entries(MODOS).map(([chave, modo]) => {
-      const item = document.createElement('li');
+    const itens = Object.entries(MODOS).map(([chave, modo]) => {
       const ganha = Boolean(medalhas[chave]);
-      item.className = `medalha ${ganha ? 'medalha--ganha' : 'medalha--bloqueada'}`;
-      const nome = document.createElement('strong');
-      nome.textContent = modo.medalha;
-      const detalhe = document.createElement('span');
-      detalhe.textContent = ganha ? 'Conquistada' : 'Ainda não';
-      item.append(nome, detalhe);
-      return item;
-    }));
+      return itemMedalha(chave, modo.medalha, ganha, ganha ? 'Conquistada' : 'Bloqueada');
+    });
+    // Medalha de nível: aparece conquistada a partir do nível 2.
+    const { nivel } = Pontos.nivel();
+    itens.push(itemMedalha('nivel', `Nível ${nivel}`, nivel >= 2, nivel >= 2 ? 'Conquistada' : 'Chegue a 50 pontos'));
+    el.medalhas.replaceChildren(...itens);
   }
 
   function desenharMenu() {
@@ -422,8 +460,22 @@ const Tabuada = (() => {
     }
 
     const nivelAgora = Pontos.nivel().nivel;
-    el.fimNivel.hidden = nivelAgora <= rodada.nivelAntes;
+    const subiuDeNivel = nivelAgora > rodada.nivelAntes;
+    el.fimNivel.hidden = !subiuDeNivel;
     el.fimNivel.textContent = `Nível novo: você chegou ao nível ${nivelAgora}!`;
+
+    // Distintivo com zoom quando ganha medalha (ou sobe de nível).
+    const chaveDistintivo = novaMedalha ? rodada.modo : (subiuDeNivel ? 'nivel' : null);
+    el.fimDistintivo.classList.remove('conquista-distintivo--zoom');
+    if (chaveDistintivo) {
+      el.fimDistintivo.innerHTML = distintivo(chaveDistintivo, true); // SVG fixo do próprio código
+      el.fimDistintivo.hidden = false;
+      void el.fimDistintivo.offsetWidth; // reinicia a animação
+      el.fimDistintivo.classList.add('conquista-distintivo--zoom');
+    } else {
+      el.fimDistintivo.replaceChildren();
+      el.fimDistintivo.hidden = true;
+    }
 
     el.deNovo.hidden = rodada.modo === 'revisao' && p.erros.length === 0;
     mostrar('fim');

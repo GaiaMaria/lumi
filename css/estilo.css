@@ -1036,30 +1036,94 @@ figure {
   font-weight: 800;
 }
 
+/* Cor de destaque de cada modo e distintivo (só cores da paleta) */
+.modo--falta,
+.distintivo--falta {
+  --cor-modo: var(--doris);
+}
+
+.modo--numero,
+.distintivo--numero {
+  --cor-modo: var(--atencao);
+}
+
+.modo--desafio,
+.distintivo--desafio {
+  --cor-modo: var(--info);
+}
+
+.modo--revisao,
+.distintivo--revisao {
+  --cor-modo: var(--brilho);
+}
+
+.distintivo--nivel {
+  --cor-modo: var(--sucesso);
+}
+
+/* Nível */
 .nivel {
   padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.nivel__lumi {
+  width: 88px;
+  height: 88px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--vidro-borda);
+  box-shadow: 0 0 28px var(--luz-lumi);
+}
+
+.nivel__info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .nivel__titulo {
-  font-size: 1.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1;
+}
+
+.nivel__rotulo {
+  color: var(--texto-suave);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.nivel__numero {
+  color: var(--brilho);
+  font-size: clamp(2.4rem, 11vw, 3rem);
   font-weight: 900;
+  text-shadow: 0 0 18px var(--luz-lumi);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 .nivel__barra {
-  height: 12px;
+  height: 14px;
+  padding: 2px;
   border-radius: 999px;
   background: var(--fundo-escuro);
+  border: 1px solid var(--vidro-borda);
   overflow: hidden;
 }
 
 .nivel__preenchido {
   width: 0;
   height: 100%;
-  background: var(--sucesso);
   border-radius: 999px;
+  background: linear-gradient(90deg, var(--sucesso), var(--brilho));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--sucesso) 70%, transparent);
   transition: width 0.4s ease;
 }
 
@@ -1068,39 +1132,93 @@ figure {
   font-size: 0.95rem;
 }
 
+/* Medalhas */
 .medalhas {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 10px;
 }
 
 .medalha {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 12px;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
   border-radius: 16px;
-  font-size: 0.95rem;
-}
-
-.medalha span {
-  font-size: 0.85rem;
-}
-
-.medalha--ganha {
-  background: var(--atencao);
-  color: var(--fundo);
-}
-
-.medalha--bloqueada {
   background: var(--vidro);
-  border: 1px dashed var(--vidro-borda);
+  border: 1px solid var(--vidro-borda);
+  text-align: center;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.medalha__detalhe {
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+}
+
+.medalha--bloqueada strong {
   color: var(--texto-suave);
 }
 
+/* Distintivo em SVG */
+.distintivo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  overflow: visible;
+}
+
+.distintivo__fita {
+  fill: var(--cor-modo);
+  opacity: 0.7;
+}
+
+.distintivo__fundo {
+  fill: var(--cor-modo);
+}
+
+.distintivo__aro {
+  stroke: var(--fundo);
+  opacity: 0.25;
+}
+
+.distintivo__simbolo {
+  fill: var(--fundo);
+  stroke: var(--fundo);
+}
+
+/* Bloqueado: cinza (tons da própria paleta) com cadeado */
+.distintivo--bloqueado .distintivo__fita,
+.distintivo--bloqueado .distintivo__fundo {
+  fill: var(--borda);
+  opacity: 1;
+}
+
+.distintivo--bloqueado .distintivo__simbolo {
+  fill: var(--texto-suave);
+  stroke: var(--texto-suave);
+  opacity: 0.45;
+}
+
+.distintivo__cadeado rect:first-child {
+  fill: var(--fundo-escuro);
+  stroke: var(--vidro-borda);
+}
+
+.distintivo__cadeado rect:nth-child(2) {
+  fill: var(--texto-suave);
+}
+
+.distintivo__cadeado path {
+  stroke: var(--texto-suave);
+}
+
+/* Modos */
 .modos {
   display: flex;
   flex-direction: column;
@@ -1110,29 +1228,67 @@ figure {
 .modo {
   appearance: none;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
+  gap: 14px;
   width: 100%;
-  min-height: 64px;
-  padding: 14px 16px;
+  min-height: 80px;
+  padding: 14px 16px 14px 14px;
+  border-left: 5px solid var(--cor-modo);
   color: var(--texto);
   font: inherit;
   text-align: left;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.modo strong {
+.modo__icone {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: var(--cor-modo);
+  color: var(--fundo);
+}
+
+.modo__icone svg {
+  width: 32px;
+  height: 32px;
+}
+
+.modo__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modo__texto strong {
   font-size: 1.1rem;
+  line-height: 1.25;
 }
 
-.modo span {
+.modo__texto span {
   color: var(--texto-suave);
   font-size: 0.95rem;
 }
 
-.modo:hover:not(:disabled) {
-  border-color: var(--texto-suave);
+/* Sombra ao passar o mouse (computador) */
+@media (hover: hover) {
+  .modo:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--cor-modo);
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--fundo-escuro) 70%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--cor-modo) 45%, transparent);
+  }
+}
+
+/* Toque (celular) */
+.modo:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 0 0 2px var(--cor-modo);
 }
 
 .modo:focus-visible {
@@ -1143,6 +1299,47 @@ figure {
 .modo:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* Distintivo com zoom ao conquistar */
+.conquista-distintivo .distintivo {
+  width: 112px;
+  height: 112px;
+}
+
+.conquista-distintivo--zoom {
+  animation: zoom-distintivo 1s ease-out both;
+}
+
+@keyframes zoom-distintivo {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .conquista-distintivo--zoom {
+    animation: none;
+  }
+
+  .modo,
+  .nivel__preenchido {
+    transition: none;
+  }
+
+  .modo:hover:not(:disabled),
+  .modo:active:not(:disabled) {
+    transform: none;
+  }
 }
 
 .grade-numeros {
