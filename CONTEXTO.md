@@ -64,9 +64,8 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 7. Narração com a voz gravada pela mãe
 
 **Se sobrar tempo:**
-8. Clonagem de voz (ElevenLabs), com as regras da seção 6
-9. Calendário de provas: cadastro de matéria e data, lista de revisão diária, check de tarefas feitas com pontos
-10. Painel dos pais com dados fictícios
+8. Calendário de provas: cadastro de matéria e data, lista de revisão diária, check de tarefas feitas com pontos
+9. Painel dos pais com dados fictícios
 
 **Em breve (aparece no vídeo com selo "Em breve"):**
 - Pagamento e assinatura
@@ -95,19 +94,30 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 - **Nenhum dado real de criança** no repositório, nos commits, nas imagens de demonstração ou no vídeo. Usar apenas dados fictícios.
 - Não mostrar rostos de crianças nem nomes reais de escolas no vídeo.
 - **Chave da API do Claude nunca no código.** Fica na variável `ANTHROPIC_API_KEY`, na Vercel, e é lida somente em `api/questoes.js`.
-- **Chave do ElevenLabs** fica na variável `ELEVENLABS_API_KEY`, na Vercel, e é lida somente em `api/voz.js`.
+- **Chave da ElevenLabs nunca no código.** Fica na variável `ELEVENLABS_API_KEY`, na Vercel, e é lida somente em `api/voz.js` e `api/narrar.js`. Nunca no frontend, nunca em log, nunca no repositório.
 - Arquivo `.env` sempre no `.gitignore`.
+- **Google Agenda:** OAuth 2.0 com o escopo `https://www.googleapis.com/auth/calendar.events`, variáveis `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI` na Vercel. O refresh token fica só num cookie httpOnly, Secure, SameSite=Lax e criptografado (AES-256-GCM, chave derivada de `GOOGLE_CLIENT_SECRET`), limitado a `/api/google`. Nunca em localStorage e nunca em log. O título do evento tem só a matéria e o nome da prova. "Apagar dados da família" também revoga o acesso no Google.
 - Foto enviada pela criança é processada na função e não é armazenada no servidor na versão de demonstração.
 - Para o piloto real (Corujinha), será necessário termo de consentimento dos responsáveis, conforme a LGPD (art. 14). Isso fica fora do link de domingo.
 
 ### Voz da responsável
 
-- Cada responsável clona apenas a própria voz. Voz nunca é compartilhada entre contas.
-- Antes de gravar, a tela pede consentimento: "Esta é a minha voz e autorizo o uso para narrar as missões." A data do consentimento é registrada.
-- Botão "Apagar minha voz" remove a gravação e o identificador de voz.
-- Nunca clonar voz de criança ou de terceiros. O app recusa e explica o motivo.
-- No protótipo, a voz clonada fica somente no navegador da usuária, sem envio a banco de dados.
-- Se a clonagem não estiver disponível no plano da conta, usar a gravação original como narração.
+- As frases de incentivo são gravadas no próprio aparelho, sem serviço externo e sem envio a servidor. Voz nunca é compartilhada entre famílias.
+- Frases gravadas: "Oi! Vamos estudar juntos?", "Vamos lá!", quatro frases de acerto que se revezam sem repetir ("Muito bem!", "Isso mesmo!", "Que orgulho de você!" e "Você aprendeu direitinho!"), frases para 3, 5 e 10 acertos seguidos ("Três seguidas! Continue assim!", "Cinco seguidas! Você está brilhando!" e "Dez seguidas! Que luz forte!") e "Quase! Tente de novo". Um erro zera a sequência.
+- Antes da primeira gravação, a tela pede consentimento com uma caixa de marcação: "Esta é a minha voz. Ela será usada só para narrar as missões da minha família, e posso apagar quando quiser." A data do consentimento é registrada.
+- Cada frase pode ser ouvida, regravada e apagada. O botão "Apagar dados da família" também apaga os áudios.
+- Os áudios ficam no IndexedDB do navegador, não no localStorage.
+- As perguntas criadas pela IA são lidas com a voz do navegador em português. A gravação nunca é tocada para uma pergunta.
+
+### Voz digital da família (ElevenLabs)
+
+- Na página inicial, "Ouvir a voz da sua família": a responsável grava de 30 a 45 segundos (sem os filtros de chamada do navegador), e o app cria uma voz digital instantânea na ElevenLabs para narrar um fato curto da última missão.
+- Antes da primeira gravação, a tela exige a marcação da caixa: "Esta é a minha voz. Ela será enviada à ElevenLabs para criar uma voz digital, usada só para narrar as missões da minha família. Posso apagar a voz a qualquer momento, e ela também será apagada no serviço."
+- O áudio gravado vai só para a ElevenLabs e não fica guardado no app. No aparelho fica só o ID da voz, ligado à família. Uma família tem no máximo uma voz digital (nome `lumi-<ID da família>`).
+- O fato (até duas frases, no máximo 300 caracteres, sem nomes de pessoas, escolas ou professoras) é criado pelo Claude na mesma leitura das fotos que gera as perguntas. As fotos não são enviadas de novo.
+- Limite: 5 narrações por família por dia, contado no aparelho (constante em `js/narracao.js`). A chave da ElevenLabs também deve ter limite de crédito no painel do serviço.
+- Se a voz digital não existir ou o serviço falhar, o app lê com a voz do aparelho e avisa: "Não consegui usar a voz da sua família agora. Vou ler com a voz do aparelho."
+- O botão "Apagar dados da família" também apaga a voz digital na ElevenLabs e o ID guardado no aparelho.
 
 ## 7. Estrutura de arquivos
 
@@ -121,11 +131,13 @@ lumi/
 │ ├── quiz.js perguntas, respostas e feedback
 │ ├── tabuada.js treinos de multiplicação (contas no código)
 │ ├── pontos.js pontos, níveis e medalhas
-│ ├── voz.js gravação, consentimento e narração (se houver tempo: clonagem)
-│ └── calendario.js provas e revisão (se houver tempo)
+│ ├── voz.js gravação, consentimento e narração
+│ ├── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
 ├── api/
-│ ├── questoes.js função no servidor que chama o Claude
-│ └── voz.js função no servidor que chama o ElevenLabs (se houver tempo)
+│ ├── questoes.js função no servidor que chama o Claude (perguntas e fato)
+│ ├── voz.js função no servidor que cria e apaga a voz digital na ElevenLabs
+│ ├── narrar.js função no servidor que narra o fato com a voz digital (ElevenLabs)
+│ └── google/ login, callback, criar-evento e desconectar (Google Agenda)
 ├── assets/ imagens da Lumi, da Dóris e da referência
 ├── CONTEXTO.md este arquivo
 └── README.md
@@ -192,6 +204,6 @@ lumi/
 
 - **0:00–0:20, problema:** a criança não gosta de revisar o caderno, e a mãe não tem método nem tempo para isso todo dia.
 - **0:20–1:20, demonstração:** foto → FotoQuest → quiz → pontos → narração (e tabuada, se estiver pronta).
-- **1:20–2:00, como foi construído:** Claude (leitura da foto e perguntas), ElevenLabs (voz), Claude Design ou Lovable (landing), GitHub e Vercel (publicação).
+- **1:20–2:00, como foi construído:** Claude (leitura da foto, perguntas e fato), voz gravada no aparelho e voz digital da família (ElevenLabs), Claude Design ou Lovable (landing), GitHub e Vercel (publicação).
 - **2:00–2:30, próximos passos:** Turminha, assinatura, calendário, piloto na Escola Corujinha e adequação à LGPD.
 - Marcar "Em breve" nas funções que não estão no link.

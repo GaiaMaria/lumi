@@ -27,11 +27,12 @@ const TEXTO = { type: 'string' };
 const ESQUEMA = {
   type: 'object',
   additionalProperties: false,
-  required: ['disciplina_detectada', 'legivel', 'aviso', 'perguntas'],
+  required: ['disciplina_detectada', 'legivel', 'aviso', 'fato', 'perguntas'],
   properties: {
     disciplina_detectada: { type: 'string', enum: DISCIPLINAS },
     legivel: { type: 'boolean' },
     aviso: TEXTO,
+    fato: TEXTO,
     perguntas: {
       type: 'array',
       items: {
@@ -134,6 +135,7 @@ Você recebeu ${paginas} ${paginas === 1 ? 'página' : 'páginas'}. Leia todas e
 10. Toda pergunta tem "explicacao": uma frase curta e gentil que ajuda a criança a entender.
 11. Use frases curtas e tom de aventura, sem gírias. Não cite marcas nem jogos.
 12. Em contas de matemática, só monte o enunciado. O app confere o resultado no código.
+13. Em "fato", escreva um fato curioso e verdadeiro sobre o conteúdo das fotos, para uma criança ouvir: no máximo duas frases e 300 caracteres, com suas próprias palavras. Nunca coloque nomes de pessoas, escolas ou professoras. Se as fotos estiverem ilegíveis, deixe "fato" vazio.
 
 Responda somente com o JSON no formato pedido.`;
 }
@@ -206,6 +208,20 @@ function validarPergunta(p) {
   }
 }
 
+// Fato para narrar: no máximo duas frases e 300 caracteres.
+const MAX_CARACTERES_FATO = 300;
+function limparFato(valor) {
+  const texto = textoLimpo(valor, 1000);
+  if (!texto) return '';
+  const frases = texto.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [texto];
+  let fato = frases.slice(0, 2).join(' ').replace(/\s+/g, ' ').trim();
+  if (fato.length > MAX_CARACTERES_FATO) {
+    // Corta na última palavra inteira e fecha a frase.
+    fato = fato.slice(0, MAX_CARACTERES_FATO - 1).replace(/\s+\S*$/, '').replace(/[,;:\s]+$/, '') + '.';
+  }
+  return fato;
+}
+
 // Monta a missão: metade múltipla escolha (a sobra do ímpar vai para ela) e
 // metade dos outros tipos, sem passar do máximo. Intercala os tipos.
 function comporMissao(perguntas, paginas) {
@@ -271,6 +287,7 @@ function validarResposta(bruto, paginas = 1) {
   if (typeof bruto.legivel !== 'boolean') return { ok: false, erro: 'resposta_invalida' };
 
   const aviso = textoLimpo(bruto.aviso, 300);
+  const fato = limparFato(bruto.fato);
   if (!bruto.legivel) return { ok: false, erro: 'nao_foi_possivel_ler' };
 
   const disciplina = DISCIPLINAS.includes(bruto.disciplina_detectada) ? bruto.disciplina_detectada : 'outra';
@@ -290,7 +307,7 @@ function validarResposta(bruto, paginas = 1) {
 
   return {
     ok: true,
-    dados: { disciplina_detectada: disciplina, aviso, perguntas },
+    dados: { disciplina_detectada: disciplina, aviso, fato, perguntas },
   };
 }
 
@@ -416,6 +433,7 @@ module.exports._interno = {
   validarPedido,
   variarTipos,
   comporMissao,
+  limparFato,
   limitesDePerguntas,
   instrucoes,
   ESQUEMA,

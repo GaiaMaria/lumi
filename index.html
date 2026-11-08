@@ -12,6 +12,9 @@
   <script src="js/voz.js" defer></script>
   <script src="js/quiz.js" defer></script>
   <script src="js/tabuada.js" defer></script>
+  <script src="js/curiosidades.js" defer></script>
+  <script src="js/narracao.js" defer></script>
+  <script src="js/calendario.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -37,6 +40,7 @@
         </button>
 
         <button type="button" class="botao-secundario" data-ir="tabuada">Treinar tabuada</button>
+        <button type="button" class="botao-secundario" id="botao-voz-familia" data-ir="narracao" hidden>Ouvir a voz da sua família</button>
 
         <section class="area-doris vidro" aria-labelledby="titulo-doris">
           <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
@@ -48,8 +52,206 @@
           <ul class="missoes__lista" id="lista-missoes"></ul>
         </section>
 
+        <button type="button" class="botao-apagar" data-ir="pais">Área dos pais</button>
         <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
         <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Voz da família: gravar, gerar e ouvir a narração -->
+    <section class="tela" id="tela-narracao" aria-labelledby="titulo-narracao" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-narracao">Voz da família</h1>
+      </div>
+
+      <div class="conteudo">
+        <p class="aviso-gravacao" id="narracao-mensagem" role="status" aria-live="polite" hidden></p>
+
+        <!-- 1. Gravar a voz para criar a voz digital -->
+        <div class="narracao-bloco" id="narracao-gravar" hidden>
+          <figure class="quadro-ilustracao">
+            <img src="assets/doris-lumi-lapis.png" alt="Dóris segurando um lápis, com a Lumi na ponta" width="440" height="412">
+          </figure>
+          <h2 class="tabuada-subtitulo">Crie a voz digital da família</h2>
+          <p class="campo__ajuda">Grave de 30 a 45 segundos lendo o texto abaixo, num lugar silencioso, com o celular a um palmo da boca. Fale com a sua voz de sempre, sem pressa. Com essa gravação, o app cria uma voz parecida com a sua para narrar um fato das missões.</p>
+
+          <p class="aviso-gravacao" id="narracao-sem-suporte" role="alert" hidden></p>
+
+          <div class="narracao-bloco" id="narracao-area-gravacao">
+            <label class="declaracao" for="narracao-aceite">
+              <input type="checkbox" id="narracao-aceite">
+              <span>Esta é a minha voz. Ela será enviada à ElevenLabs para criar uma voz digital, usada só para narrar as missões da minha família. Posso apagar a voz a qualquer momento, e ela também será apagada no serviço.</span>
+            </label>
+
+            <div class="roteiro vidro">
+              <h3 class="roteiro__titulo">Texto para ler em voz alta</h3>
+              <p>Oi! Hoje vamos estudar juntos. Cada missão é uma aventura nova, e cada acerto acende uma luz no caminho.</p>
+              <p>Quando a gente erra, não tem problema. O erro mostra o que ainda falta aprender, e a próxima tentativa fica mais fácil.</p>
+              <p>Você sabia que a água do mar sobe para o céu, vira nuvem e volta como chuva? O mundo está cheio de perguntas curiosas esperando por você.</p>
+              <p>Eu estou aqui, torcendo por você. Vamos lá!</p>
+            </div>
+
+            <p class="cronometro" id="narracao-cronometro" aria-live="off" hidden>0:00</p>
+            <button type="button" class="botao-principal" id="narracao-botao-gravar" disabled>Começar a gravar</button>
+          </div>
+        </div>
+
+        <!-- 2. Esperando: criando a voz ou gerando a narração -->
+        <div class="narracao-bloco narracao-bloco--centro" id="narracao-esperando" hidden>
+          <figure class="quadro-ilustracao quadro-ilustracao--pequeno">
+            <img src="assets/doris-livro-olhos-fechados.jpg" alt="" width="300" height="364">
+          </figure>
+          <p class="narracao-titulo" id="narracao-esperando-titulo"></p>
+          <div class="progresso-estimado" id="narracao-progresso" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progresso-estimado__barra" id="narracao-progresso-barra"></div>
+          </div>
+          <p class="campo__ajuda" id="narracao-tempo"></p>
+        </div>
+
+        <!-- 3. Ouvir o fato, estilo teleprompter -->
+        <div class="narracao-bloco" id="narracao-ouvir" hidden>
+          <figure class="quadro-ilustracao">
+            <img src="assets/doris-lumi-livro.png" alt="Dóris lendo um livro com a Lumi" width="430" height="452">
+          </figure>
+          <p class="campo__ajuda" id="narracao-origem"></p>
+          <div class="teleprompter vidro" id="narracao-teleprompter"></div>
+          <button type="button" class="botao-principal botao-principal--grande" id="narracao-tocar">
+            <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+            <span id="narracao-tocar-texto">Ouvir</span>
+          </button>
+          <button type="button" class="botao-secundario" id="narracao-aleatoria">Curiosidade aleatória</button>
+          <p class="campo__ajuda" id="narracao-restantes"></p>
+
+          <details class="outro-texto vidro" id="narracao-outro">
+            <summary class="outro-texto__titulo">Ler outra curiosidade</summary>
+            <div class="outro-texto__conteudo">
+              <label class="dissertativa__rotulo" for="narracao-texto-livre">Escreva uma curiosidade ou envie a foto de uma:</label>
+              <textarea class="dissertativa__campo" id="narracao-texto-livre" rows="4" maxlength="300" placeholder="Ex.: O polvo tem três corações."></textarea>
+              <p class="campo__ajuda"><span id="narracao-contador">0</span> de 300 caracteres. Não escreva nomes de pessoas, escolas ou professoras.</p>
+
+              <input type="file" id="narracao-imagem" class="visualmente-oculto" accept="image/*">
+              <label class="botao-secundario botao-arquivo" for="narracao-imagem" id="narracao-imagem-rotulo">Enviar uma imagem com a curiosidade</label>
+
+              <button type="button" class="botao-principal" id="narracao-ler-texto">Ler esta curiosidade</button>
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Provas: calendário mensal -->
+    <section class="tela" id="tela-provas" aria-labelledby="titulo-provas" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="pais">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-provas">Provas</h1>
+      </div>
+
+      <div class="conteudo">
+        <figure class="quadro-ilustracao quadro-ilustracao--pequeno">
+          <img src="assets/doris-livro.jpg" alt="Dóris lendo um livro" width="300" height="384">
+        </figure>
+
+        <p class="aviso-gravacao" id="provas-mensagem" role="status" aria-live="polite" hidden></p>
+
+        <div class="calendario vidro">
+          <div class="calendario__topo">
+            <button type="button" class="calendario__seta" id="provas-anterior" aria-label="Mês anterior"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <h2 class="calendario__mes" id="provas-mes" aria-live="polite"></h2>
+            <button type="button" class="calendario__seta" id="provas-seguinte" aria-label="Próximo mês"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="calendario__semana calendario__semana--nomes" aria-hidden="true">
+            <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+          </div>
+          <div class="calendario__grade" id="provas-grade" role="grid" aria-labelledby="provas-mes"></div>
+        </div>
+
+        <button type="button" class="botao-secundario" id="provas-proxima">Próxima prova</button>
+
+        <section class="cartao-dia vidro" id="provas-cartao" aria-live="polite" hidden></section>
+
+        <button type="button" class="botao-principal" id="provas-nova">Adicionar prova</button>
+
+        <form class="campo vidro" id="provas-formulario" novalidate hidden>
+          <h2 class="campo__titulo">Nova prova</h2>
+          <label class="campo-rotulo" for="prova-materia">Prova de</label>
+          <select class="campo-texto" id="prova-materia">
+            <option value="">Escolha...</option>
+            <option value="portugues">Português</option>
+            <option value="matematica">Matemática</option>
+            <option value="ciencias">Ciências</option>
+            <option value="historia">História</option>
+            <option value="geografia">Geografia</option>
+            <option value="outra">Outra</option>
+          </select>
+          <div class="campo-outra" id="prova-outra-caixa" hidden>
+            <label for="prova-outra">Qual é a prova?</label>
+            <input type="text" id="prova-outra" maxlength="40" placeholder="Ex.: Inglês" autocomplete="off">
+            <p class="campo__ajuda">Não escreva o nome da criança nem da escola.</p>
+          </div>
+          <div class="campos-lado-a-lado">
+            <div>
+              <label class="campo-rotulo" for="prova-data">Dia</label>
+              <input class="campo-texto" type="date" id="prova-data">
+            </div>
+            <div>
+              <label class="campo-rotulo" for="prova-hora">Horário</label>
+              <input class="campo-texto" type="time" id="prova-hora" value="08:00">
+            </div>
+          </div>
+          <button type="submit" class="botao-principal">Salvar prova</button>
+          <button type="button" class="botao-secundario" id="prova-cancelar">Cancelar</button>
+        </form>
+
+        <div class="provas-google vidro">
+          <button type="button" class="botao-principal" id="provas-enviar-todas">Enviar todas as provas para o Google Agenda</button>
+          <p class="provas-google__situacao" id="provas-google-situacao" role="status" aria-live="polite" hidden></p>
+          <div class="provas-google__acoes">
+            <button type="button" class="botao-principal botao-pequeno" id="provas-google-entrar" hidden>Entrar com Google</button>
+            <button type="button" class="botao-secundario botao-pequeno" id="provas-google-ics" hidden>Baixar .ics com todas as provas</button>
+          </div>
+          <button type="button" class="botao-apagar" id="provas-desconectar">Desconectar Google Agenda</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Área dos pais -->
+    <section class="tela" id="tela-pais" aria-labelledby="titulo-pais" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-pais">Área dos pais</h1>
+      </div>
+
+      <div class="conteudo">
+        <button type="button" class="botao-secundario" data-ir="provas">Provas: datas e Google Agenda</button>
+
+        <section class="campo vidro" aria-labelledby="titulo-voz-digital">
+          <h2 class="campo__titulo" id="titulo-voz-digital">Voz digital da família</h2>
+          <p class="campo__ajuda" id="pais-voz-digital-estado"></p>
+          <button type="button" class="botao-secundario" id="narracao-regravar" hidden>Gravar a voz de novo</button>
+          <button type="button" class="botao-apagar" id="narracao-apagar-voz" hidden>Apagar a voz digital</button>
+        </section>
+
+        <section class="campo vidro" aria-labelledby="titulo-minha-voz">
+          <h2 class="campo__titulo" id="titulo-minha-voz">Minha voz</h2>
+          <p class="campo__ajuda">Grave as frases com a sua voz. Elas tocam durante as missões. Os áudios ficam só neste aparelho.</p>
+
+          <p class="aviso-gravacao" id="voz-sem-suporte" role="alert" hidden></p>
+
+          <div class="voz-area" id="voz-area" hidden>
+            <div class="consentimento" id="voz-consentimento">
+              <p class="dica" id="voz-dica">Antes de gravar, procure um lugar silencioso e fale perto do microfone do celular.</p>
+              <label class="declaracao" for="voz-aceite">
+                <input type="checkbox" id="voz-aceite">
+                <span>Esta é a minha voz. Ela será usada só para narrar as missões da minha família, e posso apagar quando quiser.</span>
+              </label>
+              <p class="campo__ajuda" id="voz-aceite-data" hidden></p>
+            </div>
+
+            <ul class="frases" id="voz-frases" aria-label="Frases para gravar"></ul>
+            <p class="mensagem" id="voz-mensagem" role="status" aria-live="polite"></p>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -204,6 +406,7 @@
         <section class="aviso-privacidade vidro" aria-labelledby="titulo-privacidade">
           <h2 class="aviso-privacidade__titulo" id="titulo-privacidade">Sua privacidade</h2>
           <p>Suas fotos são usadas só para criar as perguntas da missão e são descartadas logo depois. As perguntas ficam guardadas somente para a sua família, para você estudar quando quiser. Nenhuma outra família tem acesso a elas, e elas não são usadas para treinar sistemas. Você pode apagar tudo a qualquer momento no botão 'Apagar dados da família'.</p>
+          <p>Se você criar a voz digital da família, a gravação da sua voz é enviada à ElevenLabs, que cria e guarda essa voz até a família apagar. O botão 'Apagar dados da família' também apaga a voz digital no serviço.</p>
         </section>
 
         <label class="declaracao" for="declaracao">

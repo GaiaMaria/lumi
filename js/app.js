@@ -12,6 +12,14 @@ const App = (() => {
     Voz.parar(); // não deixa a leitura continuar em outra tela
     if (nome === 'tabuada') Tabuada.abrir();
     else Tabuada.parar(); // para o relógio do desafio ao sair
+    if (nome === 'pais') {
+      MinhaVoz.abrir();
+      Narracao.atualizarAreaDosPais();
+    }
+    else MinhaVoz.sair(); // para uma gravação em andamento ao sair
+    if (nome === 'provas') Calendario.abrir();
+    if (nome === 'narracao') Narracao.abrir();
+    else Narracao.sair();
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
   }
@@ -284,6 +292,7 @@ const FotoQuest = (() => {
         disciplinaNome: missao.disciplina.nome,
         perguntas: missao.perguntas,
         aviso: missao.aviso,
+        fato: missao.fato,
       });
     jogar(missao.perguntas, { demo: missao.demo, aviso: missao.aviso, id });
   }
@@ -313,7 +322,7 @@ const FotoQuest = (() => {
   // disponível (sem chave configurada, rodando local ou fora do ar),
   // usa as perguntas de exemplo em modo demonstração.
   function modoDemonstracao() {
-    return { perguntas: Quiz.PERGUNTAS_DEMO, demo: true, aviso: '', disciplinaDetectada: null };
+    return { perguntas: Quiz.PERGUNTAS_DEMO, demo: true, aviso: '', fato: Quiz.FATO_DEMO, disciplinaDetectada: null };
   }
 
   async function buscarPerguntas(disciplina) {
@@ -366,6 +375,7 @@ const FotoQuest = (() => {
       perguntas,
       demo: false,
       aviso: typeof dados.aviso === 'string' ? dados.aviso : '',
+      fato: typeof dados.fato === 'string' ? dados.fato.slice(0, 300) : '',
       disciplinaDetectada: dados.disciplina_detectada,
     };
     ultimaResposta = { chave, resultado };
@@ -395,6 +405,7 @@ const Inicio = (() => {
   const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
 
   function atualizar() {
+    Narracao.atualizarBotaoInicio();
     const missoes = Familia.missoes();
     el.caixa.hidden = missoes.length === 0;
     el.lista.replaceChildren(...missoes.map((missao) => {
@@ -425,16 +436,37 @@ const Inicio = (() => {
     }));
   }
 
-  el.apagar.addEventListener('click', () => {
+  el.apagar.addEventListener('click', async () => {
     const ok = window.confirm(
-      'Apagar todas as perguntas e o progresso da família neste aparelho? Isso não pode ser desfeito.',
+      'Apagar todas as perguntas, o progresso, as provas, as gravações de voz e a voz digital da família (também na ElevenLabs), e desconectar o Google Agenda? Isso não pode ser desfeito.',
     );
     if (!ok) return;
+    const familia = Familia.id(); // guarda antes de apagar, para achar os áudios
+    Voz.parar();
+    // Primeiro a voz digital na ElevenLabs: se falhar, não apaga nada (para não perder o ID dela).
+    el.mensagem.textContent = 'Apagando...';
+    const vozDigital = await Narracao.apagarVozDigital();
+    if (!vozDigital.ok) {
+      el.mensagem.textContent = vozDigital.mensagem;
+      return;
+    }
+    await Calendario.desconectarGoogle({ silencioso: true }); // cancela o acesso ao Google Agenda, se houver
     Familia.apagarTudo();
+    let audiosApagados = true;
+    try {
+      await Voz.apagarDaFamilia(familia); // áudios no IndexedDB
+    } catch (erro) {
+      audiosApagados = false;
+    }
     atualizar();
-    el.mensagem.textContent = 'Pronto. Os dados da família foram apagados deste aparelho.';
+    el.mensagem.textContent = audiosApagados
+      ? 'Pronto. Os dados, as provas, as gravações e a voz digital da família foram apagados, e o Google Agenda foi desconectado.'
+      : 'Os dados foram apagados, mas não consegui apagar as gravações. Tente de novo.';
   });
 
   atualizar();
   return { atualizar };
 })();
+
+// Volta do login do Google Agenda (?google=...).
+Calendario.aoVoltarDoGoogle();

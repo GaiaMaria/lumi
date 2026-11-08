@@ -86,7 +86,7 @@ const Familia = (() => {
     }
   }
 
-  function salvarMissao({ disciplina, disciplinaNome, perguntas, aviso }) {
+  function salvarMissao({ disciplina, disciplinaNome, perguntas, aviso, fato }) {
     const dados = ler();
     const missao = {
       id: gerarId(),
@@ -94,6 +94,7 @@ const Familia = (() => {
       disciplina,
       disciplinaNome,
       aviso: aviso || '',
+      fato: fato || '', // fato curto para a narração (sem a foto)
       perguntas,
       vezes: 0,
       melhorPontuacao: 0,
@@ -165,8 +166,130 @@ const Familia = (() => {
     memoria = null;
   }
 
+  // Data em que a responsável autorizou gravar a própria voz.
+  function consentimentoVoz() {
+    return ler().consentimentoVoz || null;
+  }
+
+  function registrarConsentimentoVoz() {
+    const dados = ler();
+    dados.consentimentoVoz = new Date().toISOString();
+    gravar();
+    return dados.consentimentoVoz;
+  }
+
+  // ---------- voz digital (ElevenLabs) ----------
+  // No aparelho fica só o ID da voz, nunca o áudio.
+
+  function vozDigital() {
+    const voz = ler().vozDigital;
+    return voz && typeof voz.id === 'string' ? voz : null;
+  }
+
+  function salvarVozDigital(id) {
+    const dados = ler();
+    dados.vozDigital = { id, criadaEm: new Date().toISOString() };
+    gravar();
+  }
+
+  function removerVozDigital() {
+    const dados = ler();
+    delete dados.vozDigital;
+    gravar();
+  }
+
+  function hoje() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  // Quantas narrações com a voz digital a família já fez hoje.
+  function narracoesHoje() {
+    const n = ler().narracoes;
+    return n && n.dia === hoje() ? n.quantidade : 0;
+  }
+
+  function registrarNarracao() {
+    const dados = ler();
+    const quantidade = narracoesHoje() + 1;
+    dados.narracoes = { dia: hoje(), quantidade };
+    gravar();
+    return quantidade;
+  }
+
+  // Fato da missão mais recente que tem fato.
+  function ultimoFato() {
+    const missao = ler().missoes.find((m) => typeof m.fato === 'string' && m.fato.trim());
+    return missao ? { texto: missao.fato, disciplinaNome: missao.disciplinaNome, criadaEm: missao.criadaEm } : null;
+  }
+
+  // Curiosidade que a família enviou por uma imagem na tela de leitura (só o texto).
+  function salvarCuriosidadeEnviada(texto) {
+    const dados = ler();
+    dados.curiosidadeEnviada = { texto, criadaEm: new Date().toISOString() };
+    gravar();
+  }
+
+  // A curiosidade mais recente que veio das fotos da família: da missão ou de uma imagem enviada.
+  function curiosidadeDasFotos() {
+    const daMissao = ultimoFato();
+    const enviada = ler().curiosidadeEnviada;
+    const opcoes = [];
+    if (daMissao) opcoes.push({ texto: daMissao.texto, criadaEm: daMissao.criadaEm, origem: `Um fato da sua missão de ${daMissao.disciplinaNome}:` });
+    if (enviada && typeof enviada.texto === 'string' && enviada.texto.trim()) {
+      opcoes.push({ texto: enviada.texto, criadaEm: enviada.criadaEm, origem: 'A curiosidade que vocês enviaram:' });
+    }
+    opcoes.sort((a, b) => String(b.criadaEm).localeCompare(String(a.criadaEm)));
+    return opcoes[0] || null;
+  }
+
+  // ---------- datas de prova ----------
+  // Só o que a família digitou: nome da prova, matéria, dia e horário (sem foto, sem nomes).
+
+  function provas() {
+    const dados = ler();
+    if (!Array.isArray(dados.provas)) dados.provas = [];
+    return dados.provas;
+  }
+
+  function salvarProva({ nome, materia, materiaNome, data, hora }) {
+    const prova = { id: gerarId(), nome, materia, materiaNome, data, hora, criadaEm: new Date().toISOString(), noGoogle: false };
+    provas().push(prova);
+    gravar();
+    return prova;
+  }
+
+  function marcarProvaNoGoogle(id) {
+    const prova = provas().find((p) => p.id === id);
+    if (prova) {
+      prova.noGoogle = true;
+      gravar();
+    }
+  }
+
+  function removerProva(id) {
+    const dados = ler();
+    dados.provas = provas().filter((p) => p.id !== id);
+    gravar();
+  }
+
   return {
     id: lerId,
+    garantirId,
+    provas,
+    salvarProva,
+    marcarProvaNoGoogle,
+    removerProva,
+    vozDigital,
+    salvarVozDigital,
+    removerVozDigital,
+    narracoesHoje,
+    registrarNarracao,
+    ultimoFato,
+    salvarCuriosidadeEnviada,
+    curiosidadeDasFotos,
+    consentimentoVoz,
+    registrarConsentimentoVoz,
     salvarMissao,
     concluirMissao,
     missoes,

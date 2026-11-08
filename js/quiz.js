@@ -145,6 +145,9 @@ const Quiz = (() => {
     },
   ];
 
+  // Fato de exemplo do modo demonstração (escrito por nós).
+  const FATO_DEMO = 'A água que você bebe hoje já pode ter sido nuvem, chuva e até gelo muitas vezes. Ela vive dando voltas pelo planeta!';
+
   const TENTATIVAS_LACUNA = 3;
 
   const PONTOS_PRIMEIRA_TENTATIVA = 10;
@@ -196,8 +199,12 @@ const Quiz = (() => {
 
   if (temVoz) {
     // Sem voz em português: esconde o botão e mostra o aviso.
+    const AVISO_SEM_VOZ = el.avisoVoz.textContent;
+    const AVISO_FALHOU = 'Não consegui ler em voz alta agora. Confira o volume e tente de novo.';
+
     Voz.aoVerificar((disponivel) => {
       el.leia.hidden = !disponivel;
+      el.avisoVoz.textContent = AVISO_SEM_VOZ;
       el.avisoVoz.hidden = disponivel;
     });
 
@@ -208,10 +215,17 @@ const Quiz = (() => {
         mostrarBotaoLeitura(false);
         return;
       }
+      el.avisoVoz.hidden = true;
       mostrarBotaoLeitura(true);
       const indice = estado.indice;
-      await Voz.ler(textoParaLer(estado.perguntas[indice]));
-      if (estado.indice === indice) mostrarBotaoLeitura(false);
+      // Pergunta: sempre a voz do navegador, nunca a gravação da família.
+      const resultado = await Voz.lerPergunta(textoParaLer(estado.perguntas[indice]));
+      if (estado.indice !== indice) return;
+      mostrarBotaoLeitura(false);
+      if (resultado === 'erro') {
+        el.avisoVoz.textContent = AVISO_FALHOU;
+        el.avisoVoz.hidden = false;
+      }
     });
   }
 
@@ -322,13 +336,18 @@ const Quiz = (() => {
 
     el.pontos.textContent = textoPontos(estado.pontos);
     atualizarBarra(estado.indice + 1);
-    mostrarFeedback('sucesso', `Isso! +${ganhos} pontos`, pergunta.explicacao);
+    // Frase de incentivo variada (e especial em 3, 5 e 10 acertos seguidos).
+    const incentivo = temVoz ? Incentivo.acerto() : { frase: null, texto: 'Isso!' };
+    mostrarFeedback('sucesso', `${incentivo.texto} +${ganhos} pontos`, pergunta.explicacao);
+    if (temVoz) Voz.tocarFrase(incentivo.frase); // gravação da família, se existir
     mostrarProxima();
   }
 
   function errou() {
     estado.tentativas += 1;
+    if (temVoz) Incentivo.erro(); // zera a sequência de acertos
     mostrarFeedback('erro', 'Quase! Tente de novo.');
+    if (temVoz) Voz.tocarFrase('quase'); // gravação da família, se existir
   }
 
   // ---------- tipos ----------
@@ -532,13 +551,20 @@ const Quiz = (() => {
     el.aviso.hidden = !aviso;
     el.pontos.textContent = textoPontos(0);
     mostrarPergunta();
+    if (temVoz) {
+      Incentivo.reiniciar(); // cada missão começa uma sequência nova
+      Voz.tocarFrase('oi'); // "Oi! Vamos estudar juntos?" na voz da família, se gravada
+    }
   }
 
   function mostrarPergunta() {
     const p = estado.perguntas[estado.indice];
     estado.tentativas = 0;
     estado.respondida = false;
-    if (temVoz) Voz.parar();
+    if (temVoz) {
+      Voz.parar();
+      if (Voz.disponivel()) el.avisoVoz.hidden = true; // tira o aviso de falha da pergunta anterior
+    }
     mostrarBotaoLeitura(false);
 
     el.progresso.textContent = `Pergunta ${estado.indice + 1} de ${estado.perguntas.length}`;
@@ -576,6 +602,7 @@ const Quiz = (() => {
 
   return {
     PERGUNTAS_DEMO,
+    FATO_DEMO,
     textoParaLer,
     iniciar,
     suportadas,
