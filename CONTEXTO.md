@@ -39,6 +39,24 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 | `--info` | `#38BDF8` | Dicas e links |
 | `--gradiente-marca` | `linear-gradient(135deg, #7C3AED, #34D399)` | Só no topo da landing e na tela de conquista |
 
+**Visual "adesivo" (layout de 8/11/2026, também em `css/estilo.css`):**
+
+| Variável | Valor | Uso |
+|---|---|---|
+| `--contorno` | `#0B0920` | Contorno quase preto dos botões e cartões |
+| `--sombra-dura` / `--sombra-dura-pressionada` | `3px 3px 0` / `1px 1px 0` | Sombra dura deslocada; ao tocar, o botão "afunda" |
+| `--borda-adesivo` | `2.5px solid var(--contorno)` | Borda dos botões, chips e balões |
+| `--texto-escuro` | `var(--fundo)` | Texto índigo sobre cores claras |
+| `--balao` | `var(--creme)` | Balões de fala das mascotes |
+| `--trilha-apagada` | `var(--borda)` | Pontinhos da trilha do Início |
+| `--fundo-ceu` | gradiente radial | Céu de fundo de todas as telas |
+| `--fonte-titulo` / `--fonte-texto` | Fredoka / Nunito | Títulos e botões / texto |
+| `--largura-coluna` | `480px` | Coluna central do app no desktop |
+
+- Botões coloridos: classes `botao--laranja`, `botao--sol`, `botao--menta` e `botao--info`, sempre com texto índigo.
+- Fontes Fredoka e Nunito carregadas do Google Fonts por um `<link>` no `index.html` (autorizado; não é biblioteca de código).
+- Os demais tamanhos novos (trilha, paradas, barra de baixo etc.) também são variáveis em `:root`.
+
 **Regras de cor:**
 - Texto sobre menta, laranja ou sol sempre em índigo, nunca em branco.
 - Violeta só como fundo de botão, com texto branco.
@@ -49,6 +67,23 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 - **Lumi:** vaga-lume verde-menta, com asas violeta. Aparece nos acertos, nas medalhas e no guia das missões. Arquivos: `assets/lumi.jpg` e `assets/lumi-comemorando.jpg`.
 - **Dóris:** coruja laranja com barriga creme, que lê um livro em voz alta. Aparece na área de fotos e na leitura. Arquivo: `assets/doris.jpg`.
 - **Referência de cena:** `assets/referencia-cena.jpeg`, com as duas juntas. Usar como base da landing.
+- **Recortes sem fundo (`assets/recortes/`):** as mascotes aparecem sempre soltas, sem moldura, círculo ou quadrado.
+
+| Recorte | Onde |
+|---|---|
+| `lumi-comemorando.png` | Abertura, painel de acerto do quiz e da Tabuada |
+| `lumi-lapis.png` | Início, com o balão |
+| `lumi-abraco-lapis.png` | Topo da Tabuada |
+| `lumi-lendo.png` | Reserva |
+| `doris-acenando.png` | FotoQuest, com o balão |
+| `doris-livro.png` | Tela "Hmm, será a matéria certa?" |
+| `doris-olhos-fechados.png` | Narração: esperando e ouvindo |
+| `doris-joinha.png` | Área dos pais e Provas |
+| `duas-comemorando.png` | Missão completa e fim do treino da Tabuada |
+| `duas-lapis.png` | Narração: gravar a voz |
+
+- **Rede de neurônios:** `assets/rede-neuronios.svg`, com animação própria, na tela de abertura.
+- **Referências do layout:** `docs/referencias/` (abertura, rascunho escuro e mapa) e a especificação em `docs/PROMPT-LAYOUT.md`.
 
 ## 4. Funções do app
 
@@ -136,7 +171,10 @@ lumi/
 │ ├── voz.js Leia comigo, frases gravadas pela família (IndexedDB)
 │ ├── narracao.js voz digital da família (ElevenLabs) e teleprompter
 │ ├── curiosidades.js sorteio e busca de curiosidades sem repetir
-│ └── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
+│ ├── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
+│ ├── abertura.js tela de abertura (só na primeira visita da aba)
+│ ├── trilha.js textos e estado (nova ou feita) das paradas da trilha
+│ └── resultado.js cartões, barra de nível e regra do "Ouvir o fato da Dóris"
 ├── api/ funções no servidor (Vercel), as únicas que leem chaves
 │ ├── questoes.js chama o Claude (perguntas e fato curto)
 │ ├── curiosidade.js lê uma curiosidade a partir de imagem (Claude)
@@ -146,19 +184,24 @@ lumi/
 │ └── google/ _comum, login, callback, estado, criar-evento,
 │ criar-eventos (todas as provas) e desconectar
 ├── data/curiosidades.json banco de 150 curiosidades
-├── assets/ imagens da Lumi e da Dóris (doris-livro.jpg na tela Provas)
+├── assets/ imagens da Lumi e da Dóris; recortes/ (mascotes sem fundo) e rede-neuronios.svg
 ├── testes/ testes automáticos: node --test testes/
 ├── docs/PROXIMA-SESSAO.md prompt para começar uma nova conversa
+├── docs/PROMPT-LAYOUT.md especificação do layout (seções A a I)
+├── docs/referencias/ imagens de referência do layout
 ├── CONTEXTO.md este arquivo
 └── README.md
 ```
 
-**Telas em `index.html`:** inicio, fotoquest, disciplina, quiz, resultado, tabuada, narracao, pais (Área dos pais) e provas.
+**Telas em `index.html`:** abertura, inicio (trilha), fotoquest, disciplina, quiz, resultado, tabuada, narracao, pais (Área dos pais) e provas.
+
+**Navegação:** a barra de baixo (`#nav-principal`: Trilha, Tabuada, Ouvir e Pais) aparece só no Início, no menu da Tabuada, na Narração e na Área dos pais, controlada por `App.mostrarTela`. O item "Ouvir" é o `#botao-voz-familia` e segue a regra de `Narracao.atualizarBotaoInicio()`. O botão "Apagar dados da família" (`#botao-apagar`) fica no fim da Área dos pais, longe da criança.
 
 **Onde cada dado fica:**
 - `localStorage`: `lumi.familia` guarda o ID da família, e `lumi.familia.<id>` guarda pontos, missões, tabuada, provas e o ID da voz digital.
 - `IndexedDB` (`lumi-voz`): frases gravadas pela família.
 - `sessionStorage` (`lumi.google.pendente`): lembra de enviar as provas depois do login no Google.
+- `sessionStorage` (`lumi.abertura.vista`): a abertura já apareceu nesta aba. Na volta do login do Google (`?google=...`), a abertura não aparece.
 - Cookies httpOnly em `/api/google`: estado do login (10 min) e refresh token criptografado (180 dias).
 
 ## 8. Contrato da API de questões (`api/questoes.js`)
@@ -214,7 +257,7 @@ lumi/
   Claude-Session: https://claude.ai/code/session_01MVYyXg6UiaydGP5yx6gGYm
   ```
 - Antes de qualquer `git push`, mostrar o diff e os comandos e aguardar confirmação.
-- Rodar `node --test testes/` antes de cada commit (119 testes passando em 8/11/2026).
+- Rodar `node --test testes/` antes de cada commit (137 testes passando em 8/11/2026). Se aparecer 1 falha estranha no Node 22, rodar `node --test testes/*.test.js`.
 - Testar primeiro na prévia da branch e mostrar o resultado antes do merge.
 - Não criar bibliotecas novas sem perguntar antes.
 - Manter tudo em HTML, CSS e JavaScript puros, sem framework, a menos que a usuária autorize.
@@ -248,7 +291,7 @@ lumi/
 - O app do Google está em modo de teste: só os e-mails de teste cadastrados conseguem entrar.
 - `/api/google/estado` mostra, sem segredos, se o Google está configurado, se há login e para qual endereço o Google volta.
 
-## 13. Estado atual (8/11/2026)
+## 13. Estado atual (8/11/2026, depois do layout)
 
 **Em produção (merge do PR #6) e funcionando:**
 - FotoQuest e quiz com cinco tipos de pergunta, pontos e medalhas.
@@ -259,4 +302,17 @@ lumi/
 - Google Agenda: um botão "Enviar N provas para o Google Agenda", um login só, sem duplicar provas já enviadas. Se falhar, oferece `.ics` com todas as provas. Mensagens de erro mostram um código curto (ex.: `invalid_client`).
 - Testado na prévia: login, criação dos eventos, login cancelado e token expirado.
 
-**Próxima etapa:** layout (melhorar a aparência das telas), usando só as variáveis de `css/estilo.css`.
+**Layout novo (branch `estrutura-inicial`, etapas 1 a 10 de `docs/PROMPT-LAYOUT.md`):**
+- Tema escuro com céu índigo, botões "adesivo", fontes Fredoka e Nunito e mascotes soltas (recortes sem fundo).
+- Tela de abertura com a rede de neurônios (só na primeira visita da aba).
+- Início em forma de trilha: topo com nível e pontos, missões salvas como paradas (nova ou feita), chip da próxima prova e barra de navegação de baixo.
+- FotoQuest com a Dóris e balão, privacidade em uma linha com "Saiba mais" (texto completo) e botão "Criar minha missão".
+- Quiz com barra em segmentos (um por pergunta), selo "N seguidas" (a partir de 2, some no erro) e painel de resposta preso embaixo.
+- Missão completa com cartões (pontos, acertos de primeira e "sua melhor"), barra de nível e "Ouvir o fato da Dóris" (só com voz digital da família e com o fato desta missão).
+- Tabuada, Narração, Área dos pais e Provas no visual novo; selo "Google Agenda conectado" em Provas.
+- No desktop, o app fica numa coluna central de 480px. Contraste de 4.5:1 ou mais, área de toque de 44px e animações desligadas com movimento reduzido.
+- Testado na prévia com foto fictícia e a API real: matéria diferente, quiz, resultado, trilha, Tabuada, Provas e Apagar dados.
+
+**Falta:** testar na prévia o envio ao Google Agenda, a voz digital (ElevenLabs), "Minha voz" e o "Leia comigo"; depois, PR da `estrutura-inicial` para a `main` com a confirmação da usuária.
+
+**Fica para depois ("Em breve" no vídeo):** mapa dos Mundos, Chefão, sequência de dias, medalhas de missão, Turminha, login e assinatura, reforço automático. O teclado numérico na tela da Tabuada (opcional) não foi feito.
