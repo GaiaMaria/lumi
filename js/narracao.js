@@ -223,6 +223,14 @@ const Narracao = (() => {
 
   // ---------- teleprompter ----------
 
+  // Antes de tocar: uma dica no lugar do texto (as linhas aparecem durante a leitura).
+  function mostrarDica() {
+    const dica = document.createElement('p');
+    dica.className = 'teleprompter__dica';
+    dica.textContent = 'Toque em Ouvir. As palavras aparecem aqui enquanto o fato é lido.';
+    el.teleprompter.replaceChildren(dica);
+  }
+
   function montarTeleprompter(texto) {
     const lista = TextoNarrado.palavras(texto);
     const grupos = TextoNarrado.linhas(lista);
@@ -334,7 +342,7 @@ const Narracao = (() => {
     if (narracao && narracao.url && narracao.url !== url) URL.revokeObjectURL(narracao.url);
     narracao = { texto, origem, url, tempos: TextoNarrado.tempos(texto, alinhamento) };
     el.origem.textContent = origem;
-    montarTeleprompter(texto);
+    mostrarDica();
     el.tocarTexto.textContent = 'Ouvir';
     atualizarRestantes();
     mostrarBloco('ouvir');
