@@ -18,6 +18,7 @@
   <script src="js/curiosidades.js" defer></script>
   <script src="js/narracao.js" defer></script>
   <script src="js/calendario.js" defer></script>
+  <script src="js/trilha.js" defer></script>
   <script src="js/abertura.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -45,39 +46,55 @@
 
     <!-- Tela inicial -->
     <section class="tela" id="tela-inicio">
-      <header class="cabecalho">
-        <div class="cabecalho__luz">
-          <img class="cabecalho__lumi flutuar" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="180" height="180">
-        </div>
+      <header class="cabecalho visualmente-oculto">
         <h1 class="cabecalho__nome">Lumi</h1>
         <p class="cabecalho__frase">Cada acerto acende uma luz</p>
       </header>
 
       <div class="inicio">
+        <!-- Topo: nível, barra do nível e total de pontos -->
+        <div class="inicio-topo">
+          <span class="pilula pilula--nivel">Nível <span id="inicio-nivel">1</span></span>
+          <div class="barra-nivel" id="inicio-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+            <div class="barra-nivel__preenchido" id="inicio-nivel-preenchido"></div>
+          </div>
+          <span class="inicio-topo__conta" id="inicio-nivel-conta">0/50</span>
+          <span class="pilula pilula--pontos">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span id="inicio-pontos">0</span><span class="visualmente-oculto"> pontos</span>
+          </span>
+        </div>
+
+        <!-- Lumi com balão de fala -->
+        <div class="guia guia--lumi">
+          <img class="mascote mascote--lumi guia__mascote" src="assets/recortes/lumi-lapis.png" alt="Lumi segurando um lápis" width="666" height="900">
+          <p class="balao guia__balao">Oi! Bora transformar o caderno em missão?</p>
+        </div>
+
         <button type="button" class="botao-principal botao-principal--grande" data-ir="fotoquest">
           <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
             <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-1.8A1.5 1.5 0 0 1 10.5 3.5h3a1.5 1.5 0 0 1 1.2.7L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
             <circle cx="12" cy="12.5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
           </svg>
-          <span>Tirar foto e começar a missão</span>
+          <span>Nova missão</span>
         </button>
 
-        <button type="button" class="botao-secundario" data-ir="tabuada">Treinar tabuada</button>
-        <button type="button" class="botao-secundario" id="botao-voz-familia" data-ir="narracao" hidden>Ouvir a voz da sua família</button>
-
-        <section class="area-doris vidro" aria-labelledby="titulo-doris">
-          <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
+        <!-- O card grande saiu. A narração fica no item "Ouvir" da barra de baixo. -->
+        <section class="area-doris" aria-labelledby="titulo-doris" hidden>
           <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
         </section>
 
-        <section class="missoes vidro" id="missoes" aria-labelledby="titulo-missoes" hidden>
-          <h2 class="missoes__titulo" id="titulo-missoes">Suas missões</h2>
-          <ul class="missoes__lista" id="lista-missoes"></ul>
+        <!-- Trilha: cada missão salva é uma parada -->
+        <section class="missoes" id="missoes" aria-labelledby="titulo-missoes">
+          <h2 class="missoes__titulo visualmente-oculto" id="titulo-missoes">Suas missões</h2>
+          <ul class="missoes__lista trilha" id="lista-missoes"></ul>
         </section>
 
-        <button type="button" class="botao-apagar" data-ir="pais">Área dos pais</button>
-        <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
-        <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
+        <!-- Próxima prova (some quando não há prova marcada) -->
+        <button type="button" class="chip-prova" id="inicio-prova" data-ir="provas" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="inicio-prova-texto"></span>
+        </button>
       </div>
     </section>
 
@@ -275,6 +292,10 @@
             <p class="mensagem" id="voz-mensagem" role="status" aria-live="polite"></p>
           </div>
         </section>
+
+        <!-- Apagar tudo: fica aqui, longe da criança (mesmo id e mesmo comportamento de antes) -->
+        <button type="button" class="botao-apagar botao-apagar--perigo" id="botao-apagar">Apagar dados da família</button>
+        <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -515,6 +536,27 @@
     </section>
 
   </main>
+
+  <!-- Barra de navegação de baixo (só no Início, menu da Tabuada, Narração e Área dos pais) -->
+  <nav class="nav-principal" id="nav-principal" aria-label="Navegação principal" hidden>
+    <button type="button" class="nav-principal__item" data-ir="inicio" data-nav="inicio">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6 20c0-4 12-3 12-7.5S6 9 6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3.2"/><circle cx="6" cy="20" r="2" fill="currentColor"/><path d="M6 3.2l1.1 2.2 2.4.3-1.8 1.6.5 2.4L6 8.5 3.8 9.7l.5-2.4-1.8-1.6 2.4-.3z" fill="currentColor"/></svg>
+      <span>Trilha</span>
+    </button>
+    <button type="button" class="nav-principal__item" data-ir="tabuada" data-nav="tabuada">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span>Tabuada</span>
+    </button>
+    <!-- Mesmo id de antes: Narracao.atualizarBotaoInicio() esconde quando não há voz -->
+    <button type="button" class="nav-principal__item" id="botao-voz-familia" data-ir="narracao" data-nav="narracao" hidden>
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Ouvir</span>
+    </button>
+    <button type="button" class="nav-principal__item" data-ir="pais" data-nav="pais">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="9.5" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0M14.5 15.2a4.5 4.5 0 0 1 6 4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Pais</span>
+    </button>
+  </nav>
 
   <footer class="rodape">
     <p>Lumi</p>

@@ -71,6 +71,23 @@ const DatasDeProva = (() => {
     return nome.toLowerCase().includes(materia.toLowerCase()) ? nome : `${materia} – ${nome}`;
   }
 
+  // Quantos dias faltam até a data (AAAA-MM-DD), contando pelo calendário (0 = hoje).
+  function diasAte(data, agora = new Date()) {
+    const [a, m, d] = data.split('-').map(Number);
+    const alvo = Date.UTC(a, m - 1, d);
+    const hoje = Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate());
+    return Math.round((alvo - hoje) / 86400000);
+  }
+
+  // Texto do chip da próxima prova no Início: "Prova de Ciências em 4 dias".
+  function textoProxima(prova, agora = new Date()) {
+    const dias = diasAte(prova.data, agora);
+    let quando = `em ${dias} dias`;
+    if (dias <= 0) quando = 'hoje';
+    else if (dias === 1) quando = 'amanhã';
+    return `${prova.nome} ${quando}`;
+  }
+
   function dataPorExtenso(data) {
     const [a, m, d] = data.split('-').map(Number);
     return `${d} de ${MESES[m - 1]} de ${a}`;
@@ -140,7 +157,7 @@ const DatasDeProva = (() => {
     ].join('\r\n');
   }
 
-  return { MATERIAS, chaveDoDia, hojeTexto, grade, nomeDoMes, porDia, proxima, titulo, dataPorExtenso, gerarIcs };
+  return { MATERIAS, chaveDoDia, hojeTexto, grade, nomeDoMes, porDia, proxima, diasAte, textoProxima, titulo, dataPorExtenso, gerarIcs };
 })();
 
 // ---------- tela ----------

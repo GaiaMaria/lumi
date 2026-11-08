@@ -50,6 +50,11 @@
   --flutuacao-abertura: 8px;
   --largura-coluna: 480px;
   --largura-abertura: 420px;
+  --tamanho-mascote-guia: 112px;
+  --tamanho-parada: 72px;
+  --tamanho-ponto: 6px;
+  --espaco-trilha: 28px;
+  --altura-nav: 60px;
   --fundo-ceu: radial-gradient(120% 60% at 50% 0%, var(--superficie) 0%, var(--fundo) 55%, var(--fundo-escuro) 100%);
   --brilho-mascote: drop-shadow(0 0 12px color-mix(in srgb, var(--brilho) 25%, transparent));
   --halo-lumi: radial-gradient(circle, color-mix(in srgb, var(--brilho) 35%, transparent) 0%, transparent 65%);
@@ -478,11 +483,11 @@ figure {
   width: 100%;
   max-width: var(--largura-conteudo);
   margin: 0 auto;
-  padding: var(--espaco-6) var(--espaco-4) var(--espaco-10);
+  padding: var(--espaco-4) var(--espaco-4) var(--espaco-8);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--espaco-6);
+  gap: var(--espaco-5);
 }
 
 /* Botão principal */
@@ -604,67 +609,185 @@ figure {
   outline-offset: var(--foco-distancia-3);
 }
 
-/* Área da Dóris */
-.area-doris {
-  padding: var(--espaco-4);
+/* Topo do Início: nível, barra e pontos */
+.inicio-topo {
   display: flex;
   align-items: center;
-  gap: var(--espaco-4-5);
+  gap: var(--espaco-2);
 }
 
-.area-doris__imagem {
-  width: var(--tamanho-96);
-  height: var(--tamanho-96);
+.pilula {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1);
   flex-shrink: 0;
-  object-fit: cover;
-  border-radius: var(--raio-lg);
+  min-height: var(--altura-chip);
+  padding: 0 var(--espaco-3);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-xs);
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-.area-doris__titulo {
-  color: var(--doris);
-  font-size: clamp(var(--fonte-1-4), 5.5vw, var(--fonte-1-8));
+.pilula--nivel {
+  background: var(--primaria);
+  color: var(--texto);
+}
+
+.pilula--pontos {
+  background: var(--sucesso);
+  color: var(--texto-escuro);
+  box-shadow: var(--sombra-dura);
+}
+
+.barra-nivel {
+  flex: 1;
+  min-width: 0;
+  height: var(--tamanho-14);
+  padding: var(--espaco-0-5);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-escuro);
+  border: var(--traco-medio) solid var(--contorno);
+  overflow: hidden;
+}
+
+.barra-nivel__preenchido {
+  width: 0;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: var(--sucesso);
+  transition: width var(--duracao-media) ease;
+}
+
+.inicio-topo__conta {
+  flex-shrink: 0;
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-9);
   font-weight: 800;
-  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Missões guardadas */
+/* Mascote solta com balão de fala (Início e outras telas) */
+.guia {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+.guia__mascote {
+  width: var(--tamanho-mascote-guia);
+  flex-shrink: 0;
+}
+
+.guia__balao {
+  flex: 1;
+  font-size: var(--fonte-1-05);
+}
+
+/* Trilha: missões salvas como paradas em zigue-zague */
 .missoes {
-  padding: var(--espaco-4);
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-3);
-}
-
-.missoes__titulo {
-  font-size: var(--fonte-1-15);
-  font-weight: 800;
 }
 
 .missoes__lista {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 var(--espaco-2);
   display: flex;
   flex-direction: column;
-  gap: var(--espaco-2-5);
+  gap: var(--espaco-trilha);
 }
 
 .missao {
+  --desvio: 0%;
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: var(--espaco-3);
-  padding: var(--espaco-2-5) 0;
-  border-top: var(--traco-medio) solid var(--borda);
+  margin-left: var(--desvio);
 }
 
-.missao:first-child {
-  border-top: 0;
-  padding-top: 0;
+/* Zigue-zague: esquerda, direita, meio */
+.missao:nth-child(3n + 2) { --desvio: 32%; }
+.missao:nth-child(3n) { --desvio: 12%; }
+
+/* Pontinhos ligando uma parada à anterior */
+.missao:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  bottom: 100%;
+  left: calc(var(--tamanho-parada) / 2 - var(--tamanho-ponto) / 2);
+  width: var(--tamanho-ponto);
+  height: var(--espaco-trilha);
+  background: radial-gradient(circle, var(--trilha-apagada) 45%, transparent 50%) center top / var(--tamanho-ponto) calc(var(--tamanho-ponto) * 2) repeat-y;
+}
+
+.missao__parada {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: var(--tamanho-parada);
+  height: var(--tamanho-parada);
+  flex-shrink: 0;
+  padding: 0;
+  border: var(--borda-adesivo);
+  border-radius: 50%;
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
+  cursor: pointer;
+  transition: transform var(--duracao-toque) ease, box-shadow var(--duracao-toque) ease;
+}
+
+.missao__parada svg {
+  width: var(--tamanho-32);
+  height: var(--tamanho-32);
+}
+
+.missao__parada:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
+}
+
+.missao__parada:focus-visible {
+  outline-offset: var(--foco-distancia-3);
+}
+
+/* Nova: sol com halo */
+.missao--nova .missao__parada {
+  background: var(--atencao);
+  box-shadow: var(--sombra-dura), 0 0 0 var(--espaco-1-5) color-mix(in srgb, var(--atencao) 30%, transparent);
+}
+
+/* Feita: menta com ✓ */
+.missao--feita .missao__parada {
+  background: var(--sucesso);
+}
+
+/* Sem missões: parada apagada */
+.missao--vazia .missao__parada {
+  background: var(--superficie);
+  border-color: var(--borda);
+  color: var(--texto-suave);
+  box-shadow: none;
+  cursor: default;
+}
+
+.missao__textos {
+  min-width: 0;
 }
 
 .missao__nome {
-  font-weight: 800;
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-1);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.missao--vazia .missao__nome {
+  color: var(--texto-suave);
+  font-size: var(--fonte-1);
 }
 
 .missao__detalhe {
@@ -672,11 +795,34 @@ figure {
   font-size: var(--fonte-0-9);
 }
 
-.missao .botao-secundario {
+/* Chip da próxima prova */
+.chip-prova {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-2);
+  width: 100%;
+  min-height: var(--altura-48);
+  padding: var(--espaco-2) var(--espaco-4);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
+  background: var(--atencao);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chip-prova:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
+}
+
+.chip-prova svg {
   flex-shrink: 0;
-  min-height: var(--altura-44);
-  padding: var(--espaco-2) var(--espaco-3-5);
-  font-size: var(--fonte-0-95);
 }
 
 .botao-apagar,
@@ -706,6 +852,71 @@ figure {
 .botao-link:focus-visible {
   outline: var(--foco-largura) solid var(--brilho);
   outline-offset: var(--foco-distancia-2);
+}
+
+/* Apagar dados da família: link vermelho, no fim da Área dos pais */
+.botao-apagar--perigo,
+.botao-apagar--perigo:hover {
+  color: var(--erro);
+}
+
+/* Barra de navegação de baixo */
+.nav-principal {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 3;
+  width: 100%;
+  max-width: var(--largura-coluna);
+  transform: translateX(-50%);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  min-height: var(--altura-nav);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--fundo-escuro);
+  border-top: var(--traco-medio) solid var(--borda);
+}
+
+.nav-principal__item {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-0-5);
+  min-height: var(--altura-nav);
+  padding: var(--espaco-1);
+  border: 0;
+  background: transparent;
+  color: var(--texto-suave);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-0-8);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-principal__item:hover,
+.nav-principal__item[aria-current="page"] {
+  color: var(--brilho);
+}
+
+.nav-principal__item:focus-visible {
+  outline-offset: calc(-1 * var(--foco-largura));
+}
+
+/* Espaço no fim da página para a barra não cobrir nada */
+body.com-nav {
+  padding-bottom: calc(var(--altura-nav) + env(safe-area-inset-bottom));
+}
+
+/* Na Tabuada, a barra só aparece no menu (some no jogo, na escolha do número e no fim) */
+body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) .nav-principal {
+  display: none;
+}
+
+body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
+  padding-bottom: 0;
 }
 
 /* Barra do topo (telas internas) */
@@ -2392,6 +2603,23 @@ figure {
   .botao-secundario:active,
   .botao-foto:active,
   .opcao:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Com a barra de baixo, o rodapé "Lumi" sai (a barra já ocupa o fim da tela) */
+body.com-nav .rodape {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra-nivel__preenchido,
+  .missao__parada {
+    transition: none;
+  }
+
+  .missao__parada:active,
+  .chip-prova:active {
     transform: none;
   }
 }
