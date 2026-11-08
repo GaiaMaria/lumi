@@ -199,6 +199,7 @@ const Calendario = (() => {
     hora: $('prova-hora'),
     cancelar: $('prova-cancelar'),
     desconectar: $('provas-desconectar'),
+    seloGoogle: $('provas-google-conectado'),
     enviarTodas: $('provas-enviar-todas'),
     googleSituacao: $('provas-google-situacao'),
     googleEntrar: $('provas-google-entrar'),
@@ -389,6 +390,12 @@ const Calendario = (() => {
     }
   }
 
+  // Selo "Google Agenda conectado": só aparece quando o servidor confirma a conexão.
+  async function atualizarSeloGoogle() {
+    const estado = await estadoDoGoogle();
+    el.seloGoogle.hidden = !(estado && estado.conectado);
+  }
+
   // O Google sempre volta para um endereço fixo. Se o app estiver aberto por outro
   // (por exemplo, o endereço de um deploy), o login não "pega": avisa em vez de entrar em loop.
   function avisoDeEndereco(endereco) {
@@ -532,6 +539,7 @@ const Calendario = (() => {
   async function desconectarGoogle({ silencioso = false } = {}) {
     try {
       await fetch('/api/google/desconectar', { method: 'POST' });
+      el.seloGoogle.hidden = true;
       if (!silencioso) avisar('Google Agenda desconectado. O acesso foi cancelado no Google.');
     } catch (erro) {
       if (!silencioso) avisar('Não consegui desconectar agora. Tente de novo.');
@@ -615,6 +623,7 @@ const Calendario = (() => {
     fecharCartao();
     const hoje = new Date();
     irPara(hoje.getFullYear(), hoje.getMonth());
+    atualizarSeloGoogle();
   }
 
   return { abrir, aoVoltarDoGoogle, desconectarGoogle };

@@ -1988,11 +1988,17 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   place-items: center;
   width: var(--altura-44);
   height: var(--altura-44);
-  border: var(--traco-medio) solid var(--borda);
-  border-radius: var(--raio-pilula);
-  background: var(--vidro-forte);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
+  background: var(--superficie);
+  box-shadow: var(--sombra-dura);
   color: var(--texto);
   cursor: pointer;
+}
+
+.calendario__seta:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
 }
 
 .calendario__seta:focus-visible {
@@ -2055,17 +2061,26 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 /* Hoje: um anel */
-.calendario__dia--hoje {
-  box-shadow: inset 0 0 0 var(--traco-medio) var(--brilho);
+.calendario__dia--prova {
+  background: var(--atencao);
+  border-color: var(--contorno);
+  color: var(--texto-escuro);
 }
 
-.calendario__dia--prova {
-  background: var(--vidro-forte);
-  border-color: var(--vidro-borda);
+/* Hoje: violeta com texto branco (vem depois, para valer mesmo em dia de prova) */
+.calendario__dia--hoje {
+  background: var(--primaria);
+  border-color: var(--contorno);
+  color: var(--texto);
 }
 
 .calendario__dia--aberto {
-  border-color: var(--texto);
+  box-shadow: var(--sombra-dura);
+  border: var(--traco-medio) solid var(--contorno);
+}
+
+.calendario__dia--prova .calendario__mais {
+  color: var(--texto-escuro);
 }
 
 .calendario__marcas {
@@ -2112,9 +2127,10 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   flex-direction: column;
   gap: var(--espaco-2-5);
   padding: var(--espaco-3);
-  border-radius: var(--raio-lg);
-  background: var(--vidro-forte);
+  border: var(--traco-cartao) solid var(--borda);
   border-left: var(--traco-grosso) solid var(--cor-materia);
+  border-radius: var(--raio-sm);
+  background: var(--fundo-escuro);
 }
 
 .cartao-prova__cabeca {
@@ -2259,8 +2275,8 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   flex-direction: column;
   gap: var(--espaco-1-5);
   padding: var(--espaco-3) var(--espaco-3-5);
-  border-radius: var(--raio-md);
-  background: var(--vidro-forte);
+  border-radius: var(--raio-sm);
+  background: var(--fundo-escuro);
   border: var(--traco-medio) solid var(--borda);
 }
 
@@ -2937,4 +2953,78 @@ body.com-nav .rodape {
   .numero:active {
     transform: none;
   }
+}
+
+/* Área dos pais: Dóris com joinha no canto do topo */
+.barra-topo__mascote {
+  width: var(--tamanho-56);
+  flex-shrink: 0;
+  margin-block: calc(-1 * var(--espaco-1));
+}
+
+/* Cartão-botão (ex.: Provas na Área dos pais) */
+.botao-cartao {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+  width: 100%;
+  min-height: var(--altura-64);
+  padding: var(--espaco-3) var(--espaco-4);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-cartao);
+  box-shadow: var(--sombra-dura);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-15);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.botao-cartao svg {
+  flex-shrink: 0;
+}
+
+.botao-cartao:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
+}
+
+/* Provas: Dóris solta */
+.provas__mascote {
+  align-self: center;
+  width: min(40%, var(--tamanho-160));
+}
+
+/* Selo menta quando o Google Agenda está conectado */
+.selo-google {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaco-1-5);
+  justify-self: start;
+  padding: var(--espaco-1) var(--espaco-3);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-xs);
+  background: var(--sucesso);
+  color: var(--texto-escuro);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-0-9);
+  font-weight: 600;
+}
+
+.provas-google {
+  padding: var(--espaco-4);
+  border-radius: var(--raio-cartao);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao-cartao:active,
+  .calendario__seta:active {
+    transform: none;
+  }
+}
+
+/* Ícone da matéria dentro do dia amarelo: índigo, para ter contraste */
+.calendario__dia--prova .icone-materia {
+  stroke: var(--texto-escuro);
 }
