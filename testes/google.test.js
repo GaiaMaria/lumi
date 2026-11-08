@@ -149,8 +149,9 @@ test('callback: estado diferente (ou sem cookie) é recusado', async () => {
   });
   assert.strictEqual(res.headers.location, 'https://lumi-teste.vercel.app/?google=erro');
   assert.strictEqual(pedidos.length, 0);
+  // Sem o cookie do estado: o login começou em outro endereço.
   const semCookie = await rodar(callback, { query: { code: 'c', state: 'x' } });
-  assert.strictEqual(semCookie.res.headers.location, 'https://lumi-teste.vercel.app/?google=erro');
+  assert.strictEqual(semCookie.res.headers.location, 'https://lumi-teste.vercel.app/?google=outro_endereco');
 });
 
 test('callback: permissão da agenda desmarcada volta com "sem_permissao"', async () => {
@@ -287,4 +288,21 @@ test('criar evento: cookie de outra chave (ex.: segredo trocado) pede login', as
   });
   assert.strictEqual(res.corpo.erro, 'sem_login');
   assert.strictEqual(pedidos.length, 0);
+});
+
+// ---------- estado ----------
+const estado = require(path.join(pasta, 'estado.js'));
+
+test('estado: diz se está configurado, se o login chegou e o endereço de retorno, sem segredos', async () => {
+  const semLogin = await rodar(estado, {});
+  assert.deepStrictEqual(semLogin.res.corpo, {
+    configurado: true, conectado: false, cookieRecebido: false, enderecoDoRetorno: 'https://lumi-teste.vercel.app',
+  });
+  const { cookieToken } = await entrar();
+  const comLogin = await rodar(estado, { headers: { cookie: `${G.COOKIE_TOKEN}=${encodeURIComponent(cookieToken)}` } });
+  assert.strictEqual(comLogin.res.corpo.conectado, true);
+  const texto = JSON.stringify(comLogin.res.corpo);
+  for (const segredo of [REFRESH, AMBIENTE.GOOGLE_CLIENT_SECRET, AMBIENTE.GOOGLE_CLIENT_ID]) assert.ok(!texto.includes(segredo));
+  const semConfig = await rodar(estado, {}, [], {});
+  assert.deepStrictEqual(semConfig.res.corpo, { configurado: false, conectado: false, cookieRecebido: false, enderecoDoRetorno: null });
 });

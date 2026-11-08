@@ -24,8 +24,10 @@ module.exports = async function handler(req, res) {
     && Date.now() - estado.criadoEm <= G.DURACAO_ESTADO_S * 1000
     && typeof consulta.code === 'string';
   if (!valido) {
-    console.error('google: estado inválido no retorno');
-    return G.redirecionar(res, G.urlDoApp(cfg, 'erro'), [limparEstado]);
+    // Sem o cookie do estado: o login começou num endereço diferente do de retorno.
+    const resultado = estado ? 'erro' : 'outro_endereco';
+    console.error('google: estado inválido no retorno', resultado);
+    return G.redirecionar(res, G.urlDoApp(cfg, resultado), [limparEstado]);
   }
 
   const resultado = await G.chamar(G.URL_TOKEN, G.formulario({

@@ -177,6 +177,7 @@ const Calendario = (() => {
   };
 
   const CHAVE_PENDENTE = 'lumi.google.pendente';
+  let acabouDeConectar = false; // para não entrar em loop logo depois do login
   const agora = new Date();
   let ano = agora.getFullYear();
   let mes = agora.getMonth();
@@ -351,7 +352,34 @@ const Calendario = (() => {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  function entrarNoGoogle(idProva) {
+  // Situação do Google no servidor (sem segredos). null se não houver resposta.
+  async function estadoDoGoogle() {
+    try {
+      const resposta = await fetch('/api/google/estado', { cache: 'no-store' });
+      return resposta.ok ? await resposta.json() : null;
+    } catch (erro) {
+      return null;
+    }
+  }
+
+  // O Google sempre volta para um endereço fixo. Se o app estiver aberto por outro
+  // (por exemplo, o endereço de um deploy), o login não "pega": avisa em vez de entrar em loop.
+  function avisoDeEndereco(endereco) {
+    return `Para conectar o Google Agenda, abra o app por este endereço: ${endereco}`;
+  }
+
+  async function entrarNoGoogle(idProva) {
+    const estado = await estadoDoGoogle();
+    const prova = Familia.provas().find((p) => p.id === idProva);
+    if (estado && !estado.configurado) {
+      if (prova) abrirCartao(prova.data, { [idProva]: { texto: 'O Google Agenda ainda não está configurado neste app. Você pode baixar o arquivo .ics.' } });
+      return;
+    }
+    if (estado && estado.enderecoDoRetorno && estado.enderecoDoRetorno !== window.location.origin) {
+      avisar(avisoDeEndereco(estado.enderecoDoRetorno));
+      if (prova) abrirCartao(prova.data, { [idProva]: { texto: avisoDeEndereco(estado.enderecoDoRetorno) } });
+      return;
+    }
     try {
       sessionStorage.setItem(CHAVE_PENDENTE, idProva); // para criar o evento na volta
     } catch (erro) {
@@ -382,6 +410,16 @@ const Calendario = (() => {
     if (resposta && resposta.ok && dados && dados.criado) {
       Familia.marcarProvaNoGoogle(prova.id);
       recado('Pronto! A prova está no Google Agenda.');
+      return;
+    }
+    if (resposta && resposta.status === 401 && acabouDeConectar) {
+      // O login acabou de dar certo, mas o acesso não chegou: evita o loop e explica.
+      acabouDeConectar = false;
+      const estado = await estadoDoGoogle();
+      const texto = estado && estado.enderecoDoRetorno && estado.enderecoDoRetorno !== window.location.origin
+        ? avisoDeEndereco(estado.enderecoDoRetorno)
+        : 'O login no Google foi feito, mas este navegador não guardou o acesso. Confira se os cookies estão permitidos para este site e tente de novo. Você também pode baixar o arquivo .ics.';
+      recado(texto);
       return;
     }
     if (resposta && resposta.status === 401) {
@@ -424,8 +462,10 @@ const Calendario = (() => {
       sem_permissao: 'Para adicionar provas, permita o acesso à agenda na tela do Google.',
       nao_configurado: 'O Google Agenda ainda não está configurado neste app. Você pode baixar o arquivo .ics.',
       erro: 'Não consegui conectar ao Google agora. Tente de novo ou baixe o arquivo .ics.',
+      outro_endereco: 'O login no Google começou num endereço diferente do app. Abra o app pelo endereço desta página e tente de novo.',
     };
     avisar(textos[resultado] || textos.erro);
+    if (resultado === 'conectado') acabouDeConectar = true;
     if (prova) {
       if (resultado === 'conectado') adicionarAoGoogle(prova.id);
       else abrirCartao(prova.data);
