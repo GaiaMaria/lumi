@@ -210,7 +210,8 @@ const Quiz = (() => {
       }
       mostrarBotaoLeitura(true);
       const indice = estado.indice;
-      await Voz.ler(textoParaLer(estado.perguntas[indice]));
+      // Pergunta: sempre a voz do navegador, nunca a gravação da família.
+      await Voz.lerPergunta(textoParaLer(estado.perguntas[indice]));
       if (estado.indice === indice) mostrarBotaoLeitura(false);
     });
   }

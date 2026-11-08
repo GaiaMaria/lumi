@@ -165,8 +165,23 @@ const Familia = (() => {
     memoria = null;
   }
 
+  // Data em que a responsável autorizou gravar a própria voz.
+  function consentimentoVoz() {
+    return ler().consentimentoVoz || null;
+  }
+
+  function registrarConsentimentoVoz() {
+    const dados = ler();
+    dados.consentimentoVoz = new Date().toISOString();
+    gravar();
+    return dados.consentimentoVoz;
+  }
+
   return {
     id: lerId,
+    garantirId,
+    consentimentoVoz,
+    registrarConsentimentoVoz,
     salvarMissao,
     concluirMissao,
     missoes,

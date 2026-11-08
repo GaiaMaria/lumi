@@ -1,11 +1,14 @@
-// Leitura em voz alta.
-// Se a mãe ou responsável gravou uma das frases padrão, toca a gravação.
-// Se não, usa a voz do navegador (speechSynthesis) em português do Brasil.
-// As gravações ficam no IndexedDB deste aparelho, ligadas à família.
+// Voz: gravação da voz da família, narração e leitura das perguntas.
+// Tudo fica neste aparelho: os áudios vão para o IndexedDB, sem serviço externo
+// e sem envio a servidor.
+//
+// - Frases fixas (oi, muito bem, quase, vamos lá): tocam a gravação da família, se existir.
+// - Perguntas (criadas pela IA ou de exemplo): sempre com a voz do navegador em português.
+//   A gravação nunca é tocada para uma pergunta.
 
 const Voz = (() => {
-  // Frases que podem ter gravação da família.
   const FRASES = {
+    oi: 'Oi! Vamos estudar juntos?',
     muito_bem: 'Muito bem!',
     quase: 'Quase! Tente de novo',
     vamos_la: 'Vamos lá!',
@@ -14,13 +17,49 @@ const Voz = (() => {
   const BANCO = 'lumi-voz';
   const LOJA = 'gravacoes';
 
+  // Formatos tentados em ordem: WebM (Chrome, Android) e MP4 (Safari, iPhone).
+  const FORMATOS = [
+    'audio/webm;codecs=opus',
+    'audio/webm',
+    'audio/mp4;codecs=mp4a.40.2',
+    'audio/mp4',
+    'audio/aac',
+  ];
+
   const temSintese = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
 
   let vozPt = null;
   let verificada = false;
   let audioAtual = null;
-  let urlAtual = null;
   const ouvintes = [];
+
+  // Áudios já carregados na memória (chave → endereço do blob), para tocar na hora do toque.
+  const carregadas = new Map();
+
+  // ---------- suporte do aparelho ----------
+
+  // Navegador dentro de outro app (WhatsApp, Instagram, Facebook...).
+  function navegadorDentroDeApp() {
+    const ua = navigator.userAgent || '';
+    if (/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|Line\/|MicroMessenger|TikTok|musical_ly|Snapchat|; wv\)/i.test(ua)) return true;
+    // No iPhone, os navegadores de verdade (Safari, Chrome, Firefox, Edge) têm "Safari" no nome.
+    return /(iPhone|iPad|iPod)/.test(ua) && /AppleWebKit/.test(ua) && !/Safari/.test(ua);
+  }
+
+  function podeGravar() {
+    return Boolean(
+      navigator.mediaDevices
+      && typeof navigator.mediaDevices.getUserMedia === 'function'
+      && typeof window.MediaRecorder === 'function'
+      && 'indexedDB' in window,
+    );
+  }
+
+  // Primeiro formato que este aparelho grava, ou '' para usar o padrão do navegador.
+  function formatoGravacao() {
+    if (typeof window.MediaRecorder !== 'function' || typeof MediaRecorder.isTypeSupported !== 'function') return '';
+    return FORMATOS.find((tipo) => MediaRecorder.isTypeSupported(tipo)) || '';
+  }
 
   // ---------- voz do navegador ----------
 
@@ -32,18 +71,13 @@ const Voz = (() => {
       || null;
   }
 
-  function avisarOuvintes() {
-    ouvintes.forEach((fn) => fn(disponivel()));
-  }
-
   function atualizarVoz() {
     vozPt = escolherVoz();
     verificada = true;
-    avisarOuvintes();
+    ouvintes.forEach((fn) => fn(disponivel()));
   }
 
-  // As vozes chegam depois no Chrome; no Safari já vêm na hora.
-  function iniciar() {
+  function iniciarSintese() {
     if (!temSintese) {
       verificada = true;
       return;
@@ -51,12 +85,8 @@ const Voz = (() => {
     vozPt = escolherVoz();
     if (vozPt) verificada = true;
     const sintese = window.speechSynthesis;
-    if (typeof sintese.addEventListener === 'function') {
-      sintese.addEventListener('voiceschanged', atualizarVoz);
-    } else {
-      sintese.onvoiceschanged = atualizarVoz;
-    }
-    // Se as vozes nunca chegarem, decide assim mesmo.
+    if (typeof sintese.addEventListener === 'function') sintese.addEventListener('voiceschanged', atualizarVoz);
+    else sintese.onvoiceschanged = atualizarVoz;
     setTimeout(() => {
       if (!verificada) atualizarVoz();
     }, 1500);
@@ -66,13 +96,12 @@ const Voz = (() => {
     return Boolean(vozPt);
   }
 
-  // fn(disponivel) é chamada quando se sabe se há voz em português.
   function aoVerificar(fn) {
     ouvintes.push(fn);
     if (verificada) fn(disponivel());
   }
 
-  // ---------- gravações da família (IndexedDB) ----------
+  // ---------- IndexedDB ----------
 
   function abrirBanco() {
     return new Promise((resolver, rejeitar) => {
@@ -87,43 +116,90 @@ const Voz = (() => {
     });
   }
 
-  function chaveDaFamilia(frase) {
-    const familia = Familia.id();
-    return familia ? `${familia}:${frase}` : null;
+  function transacao(modo, trabalho) {
+    return abrirBanco().then((banco) => new Promise((resolver, rejeitar) => {
+      const tx = banco.transaction(LOJA, modo);
+      let resultado;
+      tx.oncomplete = () => {
+        banco.close();
+        resolver(resultado);
+      };
+      tx.onerror = () => {
+        banco.close();
+        rejeitar(tx.error);
+      };
+      resultado = trabalho(tx.objectStore(LOJA));
+    }));
   }
 
-  async function lerGravacao(frase) {
-    const chave = chaveDaFamilia(frase);
-    if (!chave) return null;
+  function chave(familia, frase) {
+    return `${familia}:${frase}`;
+  }
+
+  async function salvarGravacao(frase, blob) {
+    const familia = Familia.garantirId();
+    await transacao('readwrite', (loja) => {
+      loja.put({ blob, tipo: blob.type, gravadaEm: new Date().toISOString() }, chave(familia, frase));
+    });
+    await carregarGravacoes();
+  }
+
+  async function apagarGravacao(frase) {
+    const familia = Familia.id();
+    if (!familia) return;
+    await transacao('readwrite', (loja) => {
+      loja.delete(chave(familia, frase));
+    });
+    await carregarGravacoes();
+  }
+
+  // Apaga todos os áudios de uma família (botão "Apagar dados da família").
+  async function apagarDaFamilia(familia) {
+    limparCarregadas();
+    if (!familia || !('indexedDB' in window)) return;
+    await transacao('readwrite', (loja) => {
+      const pedido = loja.openCursor();
+      pedido.onsuccess = () => {
+        const cursor = pedido.result;
+        if (!cursor) return;
+        if (String(cursor.key).startsWith(`${familia}:`)) cursor.delete();
+        cursor.continue();
+      };
+    });
+  }
+
+  function limparCarregadas() {
+    carregadas.forEach((item) => URL.revokeObjectURL(item.url));
+    carregadas.clear();
+  }
+
+  // Carrega as gravações da família na memória, para tocar sem esperar.
+  async function carregarGravacoes() {
+    limparCarregadas();
+    const familia = Familia.id();
+    if (!familia || !('indexedDB' in window)) return;
     try {
-      const banco = await abrirBanco();
-      return await new Promise((resolver) => {
-        const pedido = banco.transaction(LOJA, 'readonly').objectStore(LOJA).get(chave);
-        pedido.onsuccess = () => {
-          const valor = pedido.result;
-          resolver(valor && valor.blob instanceof Blob ? valor.blob : null);
-        };
-        pedido.onerror = () => resolver(null);
+      const itens = await transacao('readonly', (loja) => {
+        const lista = [];
+        Object.keys(FRASES).forEach((frase) => {
+          const pedido = loja.get(chave(familia, frase));
+          pedido.onsuccess = () => {
+            const valor = pedido.result;
+            if (valor && valor.blob instanceof Blob) lista.push([frase, valor]);
+          };
+        });
+        return lista;
+      });
+      itens.forEach(([frase, valor]) => {
+        carregadas.set(frase, { url: URL.createObjectURL(valor.blob), gravadaEm: valor.gravadaEm });
       });
     } catch (erro) {
-      return null;
+      // Sem IndexedDB: segue sem gravações.
     }
   }
 
-  // Qual frase padrão é este texto (sem ligar para acento e pontuação).
-  function normalizar(texto) {
-    return String(texto)
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z ]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
-
-  function fraseDoTexto(texto) {
-    const alvo = normalizar(texto);
-    return Object.keys(FRASES).find((chave) => normalizar(FRASES[chave]) === alvo) || null;
+  function temGravacao(frase) {
+    return carregadas.has(frase);
   }
 
   // ---------- tocar e falar ----------
@@ -134,71 +210,278 @@ const Voz = (() => {
       audioAtual.pause();
       audioAtual = null;
     }
-    if (urlAtual) {
-      URL.revokeObjectURL(urlAtual);
-      urlAtual = null;
-    }
   }
 
-  function tocar(blob) {
+  // Toca a gravação da família para uma frase fixa. Chamar direto no toque
+  // (sem esperar nada antes), para o celular deixar tocar.
+  // Devolve uma promessa que termina com o áudio, ou null se não houver gravação.
+  function tocarFrase(frase) {
+    const item = carregadas.get(frase);
+    if (!item) return null;
+    parar();
+    const audio = new Audio(item.url);
+    audioAtual = audio;
     return new Promise((resolver) => {
-      urlAtual = URL.createObjectURL(blob);
-      audioAtual = new Audio(urlAtual);
       const fim = () => {
-        parar();
+        if (audioAtual === audio) audioAtual = null;
         resolver();
       };
-      audioAtual.addEventListener('ended', fim);
-      audioAtual.addEventListener('error', fim);
-      audioAtual.play().catch(fim);
+      audio.addEventListener('ended', fim);
+      audio.addEventListener('error', fim);
+      audio.play().catch(fim);
     });
   }
 
-  function sintetizar(texto) {
+  // Lê uma pergunta com a voz do navegador. Nunca usa gravação.
+  function lerPergunta(texto) {
+    parar();
+    if (!disponivel()) return Promise.resolve('indisponivel');
     return new Promise((resolver) => {
       const fala = new SpeechSynthesisUtterance(texto);
       fala.lang = 'pt-BR';
       fala.voice = vozPt;
       fala.rate = 0.95;
-      fala.onend = resolver;
-      fala.onerror = resolver;
+      fala.onend = () => resolver('sintetizada');
+      fala.onerror = () => resolver('sintetizada');
       window.speechSynthesis.speak(fala);
     });
-  }
-
-  // Lê o texto. Devolve 'gravacao', 'sintetizada' ou 'indisponivel'
-  // e termina quando a leitura acaba.
-  async function ler(texto) {
-    parar();
-    const frase = fraseDoTexto(texto);
-    if (frase) {
-      const gravacao = await lerGravacao(frase);
-      if (gravacao) {
-        await tocar(gravacao);
-        return 'gravacao';
-      }
-    }
-    if (!disponivel()) return 'indisponivel';
-    await sintetizar(texto);
-    return 'sintetizada';
   }
 
   function lendo() {
     return Boolean(audioAtual) || (temSintese && window.speechSynthesis.speaking);
   }
 
-  iniciar();
+  iniciarSintese();
+  carregarGravacoes();
 
   return {
     FRASES,
-    ler,
+    navegadorDentroDeApp,
+    podeGravar,
+    formatoGravacao,
+    salvarGravacao,
+    apagarGravacao,
+    apagarDaFamilia,
+    carregarGravacoes,
+    temGravacao,
+    tocarFrase,
+    lerPergunta,
     parar,
     lendo,
     disponivel,
     aoVerificar,
-    // Usados pelo painel "Minha voz".
-    abrirBanco,
-    chaveDaFamilia,
-    LOJA,
   };
+})();
+
+// Painel dos pais: área "Minha voz".
+const MinhaVoz = (() => {
+  const DURACAO_MAXIMA_MS = 10000;
+
+  const MENSAGENS = {
+    negado: 'Para gravar sua voz, permita o uso do microfone nas configurações do navegador.',
+    semSuporte: 'Seu navegador não permite gravar a voz. Tente pelo Chrome ou pelo Safari.',
+    dentroDeApp: 'Você abriu o Lumi dentro de outro app (como WhatsApp ou Instagram). Para gravar sua voz, abra o link no Chrome ou no Safari.',
+    semMicrofone: 'Não encontramos um microfone neste aparelho.',
+    falhou: 'Não consegui gravar agora. Tente de novo.',
+    curta: 'A gravação ficou muito curta. Tente de novo, falando a frase inteira.',
+    marqueAceite: 'Marque a caixa de autorização para começar a gravar.',
+  };
+
+  const $ = (id) => document.getElementById(id);
+  const el = {
+    area: $('voz-area'),
+    semSuporte: $('voz-sem-suporte'),
+    consentimento: $('voz-consentimento'),
+    dica: $('voz-dica'),
+    aceite: $('voz-aceite'),
+    aceiteData: $('voz-aceite-data'),
+    lista: $('voz-frases'),
+    mensagem: $('voz-mensagem'),
+  };
+
+  const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  let gravando = null; // { frase, gravador, fluxo, relogio, inicio }
+
+  function avisar(texto) {
+    el.mensagem.textContent = texto || '';
+  }
+
+  function consentiu() {
+    return Boolean(Familia.consentimentoVoz());
+  }
+
+  function desenharConsentimento() {
+    const data = Familia.consentimentoVoz();
+    el.aceite.checked = Boolean(data);
+    el.aceite.disabled = Boolean(data);
+    el.aceiteData.hidden = !data;
+    el.aceiteData.textContent = data ? `Autorizado em ${formatoData.format(new Date(data))}.` : '';
+  }
+
+  function botao(texto, classe, aoClicar, desativado = false) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = classe;
+    b.textContent = texto;
+    b.disabled = desativado;
+    b.addEventListener('click', aoClicar);
+    return b;
+  }
+
+  function desenharFrases() {
+    desenharDica();
+    const pode = consentiu();
+    el.lista.replaceChildren(...Object.entries(Voz.FRASES).map(([frase, texto]) => {
+      const item = document.createElement('li');
+      item.className = 'frase';
+
+      const titulo = document.createElement('p');
+      titulo.className = 'frase__texto';
+      titulo.textContent = `“${texto}”`;
+
+      const estado = document.createElement('p');
+      estado.className = 'frase__estado';
+
+      const acoes = document.createElement('div');
+      acoes.className = 'frase__acoes';
+
+      if (gravando && gravando.frase === frase) {
+        item.classList.add('frase--gravando');
+        estado.textContent = 'Gravando... toque em Parar quando terminar.';
+        acoes.append(botao('Parar', 'botao-principal botao-pequeno', pararGravacao));
+      } else {
+        const gravada = Voz.temGravacao(frase);
+        estado.textContent = gravada ? 'Gravada' : 'Ainda não gravada';
+        const ocupado = !pode || Boolean(gravando);
+        acoes.append(botao(gravada ? 'Regravar' : 'Gravar', 'botao-principal botao-pequeno', () => comecarGravacao(frase), ocupado));
+        if (gravada) {
+          acoes.append(
+            botao('Ouvir', 'botao-secundario botao-pequeno', () => Voz.tocarFrase(frase), Boolean(gravando)),
+            botao('Apagar', 'botao-secundario botao-pequeno', () => apagar(frase, texto), Boolean(gravando)),
+          );
+        }
+      }
+
+      item.append(titulo, estado, acoes);
+      return item;
+    }));
+  }
+
+  function desenhar() {
+    desenharConsentimento();
+    desenharFrases();
+  }
+
+  // A dica de ambiente silencioso aparece até a primeira gravação.
+  function desenharDica() {
+    el.dica.hidden = Object.keys(Voz.FRASES).some((frase) => Voz.temGravacao(frase));
+  }
+
+  // Precisa ser chamada direto do toque no botão "Gravar".
+  async function comecarGravacao(frase) {
+    if (gravando) return;
+    if (!consentiu()) {
+      avisar(MENSAGENS.marqueAceite);
+      return;
+    }
+    avisar('');
+    Voz.parar();
+
+    let fluxo;
+    try {
+      fluxo = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+    } catch (erro) {
+      if (erro && (erro.name === 'NotAllowedError' || erro.name === 'SecurityError')) avisar(MENSAGENS.negado);
+      else if (erro && (erro.name === 'NotFoundError' || erro.name === 'OverconstrainedError')) avisar(MENSAGENS.semMicrofone);
+      else avisar(MENSAGENS.falhou);
+      return;
+    }
+
+    const tipo = Voz.formatoGravacao();
+    let gravador;
+    try {
+      gravador = tipo ? new MediaRecorder(fluxo, { mimeType: tipo }) : new MediaRecorder(fluxo);
+    } catch (erro) {
+      gravador = new MediaRecorder(fluxo);
+    }
+
+    const pedacos = [];
+    gravador.addEventListener('dataavailable', (evento) => {
+      if (evento.data && evento.data.size) pedacos.push(evento.data);
+    });
+    gravador.addEventListener('stop', async () => {
+      fluxo.getTracks().forEach((faixa) => faixa.stop());
+      const duracao = Date.now() - gravando.inicio;
+      clearTimeout(gravando.relogio);
+      gravando = null;
+      const blob = new Blob(pedacos, { type: gravador.mimeType || tipo || 'audio/webm' });
+      if (duracao < 500 || blob.size === 0) {
+        avisar(MENSAGENS.curta);
+        desenharFrases();
+        return;
+      }
+      try {
+        await Voz.salvarGravacao(frase, blob);
+        avisar('Gravação salva neste aparelho.');
+      } catch (erro) {
+        avisar(MENSAGENS.falhou);
+      }
+      desenharFrases();
+    });
+
+    gravando = {
+      frase,
+      gravador,
+      fluxo,
+      inicio: Date.now(),
+      relogio: setTimeout(pararGravacao, DURACAO_MAXIMA_MS),
+    };
+    gravador.start();
+    desenharFrases();
+  }
+
+  function pararGravacao() {
+    if (gravando && gravando.gravador.state !== 'inactive') gravando.gravador.stop();
+  }
+
+  async function apagar(frase, texto) {
+    if (!window.confirm(`Apagar a gravação de “${texto}”?`)) return;
+    await Voz.apagarGravacao(frase);
+    avisar('Gravação apagada.');
+    desenharFrases();
+  }
+
+  el.aceite.addEventListener('change', () => {
+    if (el.aceite.checked && !consentiu()) {
+      Familia.registrarConsentimentoVoz();
+      avisar('');
+      desenhar();
+    }
+  });
+
+  // Ao abrir a tela: confere se dá para gravar neste navegador.
+  async function abrir() {
+    avisar('');
+    let problema = '';
+    if (Voz.navegadorDentroDeApp()) problema = MENSAGENS.dentroDeApp;
+    else if (!Voz.podeGravar()) problema = MENSAGENS.semSuporte;
+
+    el.semSuporte.textContent = problema;
+    el.semSuporte.hidden = !problema;
+    el.area.hidden = Boolean(problema);
+    if (problema) return;
+
+    await Voz.carregarGravacoes();
+    desenhar();
+  }
+
+  function sair() {
+    pararGravacao();
+    Voz.parar();
+  }
+
+  return { abrir, sair };
 })();

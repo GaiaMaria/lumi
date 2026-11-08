@@ -12,6 +12,8 @@ const App = (() => {
     Voz.parar(); // não deixa a leitura continuar em outra tela
     if (nome === 'tabuada') Tabuada.abrir();
     else Tabuada.parar(); // para o relógio do desafio ao sair
+    if (nome === 'pais') MinhaVoz.abrir();
+    else MinhaVoz.sair(); // para uma gravação em andamento ao sair
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
   }

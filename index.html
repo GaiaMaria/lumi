@@ -48,8 +48,40 @@
           <ul class="missoes__lista" id="lista-missoes"></ul>
         </section>
 
+        <button type="button" class="botao-apagar" data-ir="pais">Área dos pais</button>
         <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
         <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Área dos pais -->
+    <section class="tela" id="tela-pais" aria-labelledby="titulo-pais" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-pais">Área dos pais</h1>
+      </div>
+
+      <div class="conteudo">
+        <section class="campo vidro" aria-labelledby="titulo-minha-voz">
+          <h2 class="campo__titulo" id="titulo-minha-voz">Minha voz</h2>
+          <p class="campo__ajuda">Grave as frases com a sua voz. Elas tocam durante as missões. Os áudios ficam só neste aparelho.</p>
+
+          <p class="aviso-gravacao" id="voz-sem-suporte" role="alert" hidden></p>
+
+          <div class="voz-area" id="voz-area" hidden>
+            <div class="consentimento" id="voz-consentimento">
+              <p class="dica" id="voz-dica">Antes de gravar, procure um lugar silencioso e fale perto do microfone do celular.</p>
+              <label class="declaracao" for="voz-aceite">
+                <input type="checkbox" id="voz-aceite">
+                <span>Esta é a minha voz. Ela será usada só para narrar as missões da minha família, e posso apagar quando quiser.</span>
+              </label>
+              <p class="campo__ajuda" id="voz-aceite-data" hidden></p>
+            </div>
+
+            <ul class="frases" id="voz-frases" aria-label="Frases para gravar"></ul>
+            <p class="mensagem" id="voz-mensagem" role="status" aria-live="polite"></p>
+          </div>
+        </section>
       </div>
     </section>
 
