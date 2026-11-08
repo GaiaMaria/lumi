@@ -162,9 +162,58 @@ const Quiz = (() => {
     pontos: document.getElementById('quiz-pontos'),
     barra: document.getElementById('quiz-progresso-barra'),
     barraPreenchida: document.getElementById('quiz-progresso-preenchido'),
+    leia: document.getElementById('botao-leia'),
+    leiaTexto: document.getElementById('botao-leia-texto'),
+    avisoVoz: document.getElementById('aviso-voz'),
   };
 
   let estado = null;
+
+  // ---------- Leia comigo ----------
+
+  const temVoz = typeof Voz !== 'undefined';
+
+  // Texto que a voz lê para a pergunta atual.
+  function textoParaLer(p) {
+    // A lacuna vira uma pausa na leitura.
+    const enunciado = p.enunciado.replace(/\s*_{3,}\s*/g, ' ... ');
+    switch (p.tipo) {
+      case 'verdadeiro_falso':
+        return `${enunciado} Verdadeiro ou falso?`;
+      case 'multipla_escolha':
+        return `${enunciado} ${p.alternativas.map((alt, i) => `${LETRAS[i].toUpperCase()}: ${alt}.`).join(' ')}`;
+      case 'relacionar':
+        return `${enunciado} ${p.pares.map((par) => `${par.item}.`).join(' ')}`;
+      default:
+        return enunciado;
+    }
+  }
+
+  function mostrarBotaoLeitura(lendo) {
+    el.leiaTexto.textContent = lendo ? 'Parar leitura' : 'Leia comigo';
+    el.leia.setAttribute('aria-pressed', String(lendo));
+  }
+
+  if (temVoz) {
+    // Sem voz em português: esconde o botão e mostra o aviso.
+    Voz.aoVerificar((disponivel) => {
+      el.leia.hidden = !disponivel;
+      el.avisoVoz.hidden = disponivel;
+    });
+
+    el.leia.addEventListener('click', async () => {
+      if (!estado) return;
+      if (Voz.lendo()) {
+        Voz.parar();
+        mostrarBotaoLeitura(false);
+        return;
+      }
+      mostrarBotaoLeitura(true);
+      const indice = estado.indice;
+      await Voz.ler(textoParaLer(estado.perguntas[indice]));
+      if (estado.indice === indice) mostrarBotaoLeitura(false);
+    });
+  }
 
   // ---------- validação ----------
 
@@ -489,6 +538,8 @@ const Quiz = (() => {
     const p = estado.perguntas[estado.indice];
     estado.tentativas = 0;
     estado.respondida = false;
+    if (temVoz) Voz.parar();
+    mostrarBotaoLeitura(false);
 
     el.progresso.textContent = `Pergunta ${estado.indice + 1} de ${estado.perguntas.length}`;
     el.enunciado.textContent = p.enunciado;
@@ -525,6 +576,7 @@ const Quiz = (() => {
 
   return {
     PERGUNTAS_DEMO,
+    textoParaLer,
     iniciar,
     suportadas,
     textoPontos,

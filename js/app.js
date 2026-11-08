@@ -9,6 +9,7 @@ const App = (() => {
       tela.hidden = tela.id !== `tela-${nome}`;
     });
     window.scrollTo(0, 0);
+    Voz.parar(); // não deixa a leitura continuar em outra tela
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
   }

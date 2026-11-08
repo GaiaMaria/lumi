@@ -771,6 +771,46 @@ figure {
   outline: none;
 }
 
+/* Leia comigo */
+.leia-comigo {
+  margin-top: -8px;
+}
+
+.botao-leia {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--vidro-forte);
+  border: 1px solid var(--vidro-borda);
+  border-radius: 999px;
+  color: var(--texto);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.botao-leia:hover {
+  border-color: var(--texto-suave);
+}
+
+.botao-leia:focus-visible {
+  outline: 3px solid var(--texto);
+  outline-offset: 2px;
+}
+
+.botao-leia[aria-pressed="true"] {
+  border-color: var(--texto);
+}
+
+.aviso-voz {
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
 .quiz-opcoes {
   display: flex;
   flex-direction: column;

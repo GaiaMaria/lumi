@@ -9,6 +9,7 @@
   <script src="js/familia.js" defer></script>
   <script src="js/pontos.js" defer></script>
   <script src="js/fotos.js" defer></script>
+  <script src="js/voz.js" defer></script>
   <script src="js/quiz.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -144,6 +145,17 @@
 
         <p class="quiz-progresso" id="quiz-progresso"></p>
         <h2 class="quiz-enunciado" id="quiz-enunciado"></h2>
+
+        <div class="leia-comigo">
+          <button type="button" class="botao-leia" id="botao-leia" hidden>
+            <svg class="icone" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+              <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+              <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            <span id="botao-leia-texto">Leia comigo</span>
+          </button>
+          <p class="aviso-voz" id="aviso-voz" hidden>Este navegador não tem voz em português para ler em voz alta.</p>
+        </div>
 
         <div class="quiz-opcoes" id="quiz-opcoes"></div>
 

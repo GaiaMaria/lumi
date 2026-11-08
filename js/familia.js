@@ -148,6 +148,7 @@ const Familia = (() => {
   }
 
   return {
+    id: lerId,
     salvarMissao,
     concluirMissao,
     missoes,
