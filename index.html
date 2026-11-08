@@ -119,6 +119,20 @@
             <span id="narracao-tocar-texto">Ouvir</span>
           </button>
           <p class="campo__ajuda" id="narracao-restantes"></p>
+
+          <details class="outro-texto vidro" id="narracao-outro">
+            <summary class="outro-texto__titulo">Ler outra curiosidade</summary>
+            <div class="outro-texto__conteudo">
+              <label class="dissertativa__rotulo" for="narracao-texto-livre">Escreva uma curiosidade ou envie a foto de uma:</label>
+              <textarea class="dissertativa__campo" id="narracao-texto-livre" rows="4" maxlength="300" placeholder="Ex.: O polvo tem três corações."></textarea>
+              <p class="campo__ajuda"><span id="narracao-contador">0</span> de 300 caracteres. Não escreva nomes de pessoas, escolas ou professoras.</p>
+
+              <input type="file" id="narracao-imagem" class="visualmente-oculto" accept="image/*">
+              <label class="botao-secundario botao-arquivo" for="narracao-imagem" id="narracao-imagem-rotulo">Enviar uma imagem com a curiosidade</label>
+
+              <button type="button" class="botao-principal" id="narracao-ler-texto">Ler esta curiosidade</button>
+            </div>
+          </details>
           <button type="button" class="botao-apagar" id="narracao-apagar-voz" hidden>Apagar a voz digital</button>
         </div>
       </div>

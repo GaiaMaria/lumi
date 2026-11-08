@@ -1283,6 +1283,65 @@ figure {
   }
 }
 
+/* Ler outra curiosidade */
+.outro-texto {
+  padding: var(--espaco-3) var(--espaco-4);
+}
+
+.outro-texto__titulo {
+  list-style: none;
+  min-height: var(--altura-44);
+  display: flex;
+  align-items: center;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.outro-texto__titulo::-webkit-details-marker {
+  display: none;
+}
+
+/* Sinal de abrir e fechar (o display: flex esconde a seta padrão) */
+.outro-texto__titulo::after {
+  content: "+";
+  margin-left: auto;
+  font-size: var(--fonte-1-4);
+  color: var(--texto-suave);
+}
+
+.outro-texto[open] .outro-texto__titulo::after {
+  content: "−";
+}
+
+.outro-texto__titulo:focus-visible {
+  outline: var(--foco-largura) solid var(--texto);
+  outline-offset: var(--foco-distancia-2);
+}
+
+.outro-texto__conteudo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding-top: var(--espaco-3);
+}
+
+.botao-arquivo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.visualmente-oculto:focus-visible + .botao-arquivo {
+  outline: var(--foco-largura) solid var(--texto);
+  outline-offset: var(--foco-distancia-3);
+}
+
+.botao-arquivo--ocupado {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 /* Área dos pais: Minha voz */
 .voz-area {
   display: flex;

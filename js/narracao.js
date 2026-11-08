@@ -142,6 +142,12 @@ const Narracao = (() => {
     tocar: $('narracao-tocar'),
     tocarTexto: $('narracao-tocar-texto'),
     restantes: $('narracao-restantes'),
+    outro: $('narracao-outro'),
+    textoLivre: $('narracao-texto-livre'),
+    contador: $('narracao-contador'),
+    imagem: $('narracao-imagem'),
+    imagemRotulo: $('narracao-imagem-rotulo'),
+    lerTexto: $('narracao-ler-texto'),
     apagarVoz: $('narracao-apagar-voz'),
     botaoInicio: $('botao-voz-familia'),
   };
@@ -375,8 +381,8 @@ const Narracao = (() => {
   }
 
   // Gera a narração com a voz digital. Sem voz, no limite ou com falha, usa a voz do aparelho.
-  async function gerarNarracao() {
-    const fato = fatoAtual();
+  // fato: { texto, origem }. Sem nada, usa o fato da última missão.
+  async function gerarNarracao(fato = fatoAtual()) {
     const voz = Familia.vozDigital();
 
     if (!voz) {
@@ -589,6 +595,58 @@ const Narracao = (() => {
   });
   el.gravar.addEventListener('click', comecarGravacao);
   el.tocar.addEventListener('click', tocar);
+
+  // ---------- outra curiosidade: escrita ou lida de uma imagem ----------
+
+  const MAX_CARACTERES_TEXTO = 300;
+
+  function atualizarContador() {
+    el.contador.textContent = String(el.textoLivre.value.length);
+  }
+
+  el.textoLivre.addEventListener('input', atualizarContador);
+
+  el.lerTexto.addEventListener('click', () => {
+    const texto = el.textoLivre.value.replace(/\s+/g, ' ').trim().slice(0, MAX_CARACTERES_TEXTO);
+    if (!texto) {
+      avisar('Escreva uma curiosidade ou envie uma imagem.');
+      el.textoLivre.focus();
+      return;
+    }
+    pararTudo();
+    avisar('');
+    el.outro.open = false;
+    gerarNarracao({ texto, origem: 'A curiosidade que vocês escolheram:' });
+  });
+
+  el.imagem.addEventListener('change', async () => {
+    const arquivo = el.imagem.files && el.imagem.files[0];
+    el.imagem.value = '';
+    if (!arquivo) return;
+    const rotulo = el.imagemRotulo.textContent;
+    el.imagemRotulo.textContent = 'Lendo a imagem...';
+    el.imagemRotulo.classList.add('botao-arquivo--ocupado');
+    try {
+      // Mesma redução das fotos da missão: 1024 px, JPEG. A imagem não fica guardada.
+      const { blob } = await Fotos.reduzir(arquivo);
+      const imagem = await base64DoBlob(blob);
+      const resposta = await enviarJSON('/api/curiosidade', 'POST', { imagem });
+      if (resposta.ok && resposta.dados && typeof resposta.dados.texto === 'string') {
+        el.textoLivre.value = resposta.dados.texto.slice(0, MAX_CARACTERES_TEXTO);
+        atualizarContador();
+        avisar('Confira o texto e toque em "Ler esta curiosidade".');
+      } else {
+        avisar((resposta.dados && resposta.dados.mensagem) || 'Não consegui ler a imagem agora. Escreva a curiosidade no campo.');
+      }
+    } catch (erro) {
+      avisar(Fotos.ehHeic(arquivo)
+        ? 'Este navegador não abre fotos HEIC. Tente uma foto em JPG ou escreva a curiosidade.'
+        : 'Não consegui abrir esta imagem. Tente outra ou escreva a curiosidade.');
+    } finally {
+      el.imagemRotulo.textContent = rotulo;
+      el.imagemRotulo.classList.remove('botao-arquivo--ocupado');
+    }
+  });
 
   Voz.aoVerificar(atualizarBotaoInicio);
 
