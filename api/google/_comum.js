@@ -149,8 +149,11 @@ function limpar(texto, maximo) {
 }
 
 // Título só com a matéria e o nome da prova (nunca nome de criança ou de escola).
+// Se o nome já tem a matéria ("Prova de Matemática"), não repete.
 function tituloDoEvento(materia, nome) {
-  return `${limpar(materia, 40)} – ${limpar(nome, 60)}`;
+  const m = limpar(materia, 40);
+  const n = limpar(nome, 60);
+  return n.toLowerCase().includes(m.toLowerCase()) ? n : `${m} – ${n}`;
 }
 
 function dataValida(data) {

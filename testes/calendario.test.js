@@ -77,3 +77,8 @@ test('.ics: prova às 23:30 termina no dia seguinte', () => {
   const ics = D.gerarIcs({ ...provas[2], hora: '23:30' });
   assert.match(ics, /DTEND;TZID=America\/Sao_Paulo:20261201T003000/);
 });
+
+test('título não repete a matéria quando o nome já tem ("Prova de Matemática")', () => {
+  assert.strictEqual(D.titulo({ materiaNome: 'Matemática', nome: 'Prova de Matemática' }), 'Prova de Matemática');
+  assert.strictEqual(D.titulo({ materiaNome: 'Inglês', nome: 'Prova de Inglês' }), 'Prova de Inglês');
+});

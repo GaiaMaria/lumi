@@ -174,10 +174,7 @@
 
         <form class="campo vidro" id="provas-formulario" novalidate hidden>
           <h2 class="campo__titulo">Nova prova</h2>
-          <p class="campo__ajuda">Não escreva o nome da criança nem da escola.</p>
-          <label class="campo-rotulo" for="prova-nome">Nome da prova</label>
-          <input class="campo-texto" type="text" id="prova-nome" maxlength="60" placeholder="Ex.: Prova de frações" autocomplete="off">
-          <label class="campo-rotulo" for="prova-materia">Matéria</label>
+          <label class="campo-rotulo" for="prova-materia">Prova de</label>
           <select class="campo-texto" id="prova-materia">
             <option value="">Escolha...</option>
             <option value="portugues">Português</option>
@@ -188,8 +185,9 @@
             <option value="outra">Outra</option>
           </select>
           <div class="campo-outra" id="prova-outra-caixa" hidden>
-            <label for="prova-outra">Qual matéria?</label>
+            <label for="prova-outra">Qual é a prova?</label>
             <input type="text" id="prova-outra" maxlength="40" placeholder="Ex.: Inglês" autocomplete="off">
+            <p class="campo__ajuda">Não escreva o nome da criança nem da escola.</p>
           </div>
           <div class="campos-lado-a-lado">
             <div>

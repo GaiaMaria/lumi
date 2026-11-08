@@ -62,10 +62,13 @@ const DatasDeProva = (() => {
     return ordenar(lista).find((p) => `${p.data}T${p.hora}` >= agoraTexto) || null;
   }
 
-  // Título só com a matéria e o nome da prova (o mesmo do servidor).
+  // Título só com a matéria e o nome da prova (a mesma regra do servidor).
+  // Se o nome já tem a matéria ("Prova de Matemática"), não repete.
   function titulo(prova) {
     const limpar = (t, max) => String(t || '').replace(/\s+/g, ' ').trim().slice(0, max);
-    return `${limpar(prova.materiaNome, 40)} – ${limpar(prova.nome, 60)}`;
+    const materia = limpar(prova.materiaNome, 40);
+    const nome = limpar(prova.nome, 60);
+    return nome.toLowerCase().includes(materia.toLowerCase()) ? nome : `${materia} – ${nome}`;
   }
 
   function dataPorExtenso(data) {
@@ -164,7 +167,6 @@ const Calendario = (() => {
     cartao: $('provas-cartao'),
     novaBotao: $('provas-nova'),
     formulario: $('provas-formulario'),
-    nome: $('prova-nome'),
     materia: $('prova-materia'),
     outraCaixa: $('prova-outra-caixa'),
     outra: $('prova-outra'),
@@ -447,7 +449,7 @@ const Calendario = (() => {
     el.formulario.reset();
     el.outraCaixa.hidden = true;
     el.data.value = data || DatasDeProva.hojeTexto();
-    el.nome.focus();
+    el.materia.focus();
   }
 
   function fecharFormulario() {
@@ -457,21 +459,34 @@ const Calendario = (() => {
 
   el.materia.addEventListener('change', () => {
     el.outraCaixa.hidden = el.materia.value !== 'outra';
+    if (el.materia.value === 'outra') el.outra.focus();
   });
 
   el.formulario.addEventListener('submit', (evento) => {
     evento.preventDefault();
-    const nome = el.nome.value.replace(/\s+/g, ' ').trim();
+    // Basta escolher a matéria: o nome da prova é "Prova de <matéria>".
+    // Em "Outra", a família escreve qual é a prova.
     const materia = el.materia.value;
     const materiaNome = materia === 'outra'
       ? el.outra.value.replace(/\s+/g, ' ').trim()
       : DatasDeProva.MATERIAS[materia];
     const data = el.data.value;
     const hora = el.hora.value;
-    if (!nome || !materia || !materiaNome || !data || !hora) {
-      avisar('Preencha o nome da prova, a matéria, o dia e o horário.');
+    if (!materia) {
+      avisar('Escolha de qual matéria é a prova.');
+      el.materia.focus();
       return;
     }
+    if (!materiaNome) {
+      avisar('Escreva qual é a prova.');
+      el.outra.focus();
+      return;
+    }
+    if (!data || !hora) {
+      avisar('Escolha o dia e o horário da prova.');
+      return;
+    }
+    const nome = `Prova de ${materiaNome}`;
     const prova = Familia.salvarProva({ nome, materia, materiaNome, data, hora });
     avisar('');
     fecharFormulario();

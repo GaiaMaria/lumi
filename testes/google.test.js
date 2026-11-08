@@ -264,3 +264,8 @@ test('logs nunca têm tokens, código ou segredo', async () => {
     assert.ok(!tudo.includes(segredo), segredo);
   }
 });
+
+test('título do evento não repete a matéria quando o nome já tem', () => {
+  assert.strictEqual(G.tituloDoEvento('Matemática', 'Prova de Matemática'), 'Prova de Matemática');
+  assert.strictEqual(G.tituloDoEvento('Matemática', 'Prova de frações'), 'Matemática – Prova de frações');
+});
