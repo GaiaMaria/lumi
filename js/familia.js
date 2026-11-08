@@ -3,9 +3,12 @@
 // só as perguntas criadas e o progresso.
 
 const Familia = (() => {
-  const CHAVE_ID = 'lumi.familia';
-  const PREFIXO = 'lumi.familia.';
-  const CHAVE_ANTIGA_PONTOS = 'lumi.pontos';
+  // Na vitrine (app dentro da landing), os dados ficam em outra chave,
+  // para nunca misturar nem apagar os dados de verdade da família.
+  const NA_VITRINE = (typeof Vitrine !== 'undefined' && Vitrine.ativa());
+  const CHAVE_ID = NA_VITRINE ? 'lumi.vitrine.familia' : 'lumi.familia';
+  const PREFIXO = NA_VITRINE ? 'lumi.vitrine.familia.' : 'lumi.familia.';
+  const CHAVE_ANTIGA_PONTOS = NA_VITRINE ? 'lumi.vitrine.pontos' : 'lumi.pontos';
   const MAX_MISSOES = 30;
 
   // Cópia em memória, para o app funcionar mesmo sem armazenamento (ex.: aba anônima).

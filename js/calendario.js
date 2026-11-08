@@ -392,6 +392,7 @@ const Calendario = (() => {
 
   // Selo "Google Agenda conectado": só aparece quando o servidor confirma a conexão.
   async function atualizarSeloGoogle() {
+    if (Vitrine.ativa()) return; // o Google Agenda não funciona dentro da landing
     const estado = await estadoDoGoogle();
     el.seloGoogle.hidden = !(estado && estado.conectado);
   }
@@ -439,6 +440,7 @@ const Calendario = (() => {
 
   // Envia de uma vez todas as provas que ainda não estão no Google Agenda.
   async function enviarTodas() {
+    if (Vitrine.ativa()) return;
     const pendentes = Familia.provas().filter((p) => !p.noGoogle);
     if (!pendentes.length) {
       mostrarSituacao(Familia.provas().length ? 'Todas as provas já estão no Google Agenda.' : 'Adicione uma prova antes de enviar.');

@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilo.css">
+  <script src="js/vitrine.js" defer></script>
   <script src="js/familia.js" defer></script>
   <script src="js/pontos.js" defer></script>
   <script src="js/fotos.js" defer></script>
@@ -159,7 +160,7 @@
           </button>
           <button type="button" class="botao-secundario" id="narracao-aleatoria">Curiosidade aleatória</button>
           <!-- Sem voz digital: as curiosidades continuam (voz do aparelho) e este botão leva à gravação -->
-          <button type="button" class="botao-principal botao--laranja" id="narracao-criar-voz" hidden>Criar a voz da família</button>
+          <button type="button" class="botao-principal botao--laranja" id="narracao-criar-voz" hidden data-vitrine-esconder>Criar a voz da família</button>
           <p class="campo__ajuda" id="narracao-restantes"></p>
 
           <details class="outro-texto vidro" id="narracao-outro">
@@ -169,8 +170,8 @@
               <textarea class="dissertativa__campo" id="narracao-texto-livre" rows="4" maxlength="300" placeholder="Ex.: O polvo tem três corações."></textarea>
               <p class="campo__ajuda"><span id="narracao-contador">0</span> de 300 caracteres. Não escreva nomes de pessoas, escolas ou professoras.</p>
 
-              <input type="file" id="narracao-imagem" class="visualmente-oculto" accept="image/*">
-              <label class="botao-secundario botao-arquivo" for="narracao-imagem" id="narracao-imagem-rotulo">Enviar uma imagem com a curiosidade</label>
+              <input type="file" id="narracao-imagem" class="visualmente-oculto" accept="image/*" data-vitrine-esconder>
+              <label class="botao-secundario botao-arquivo" for="narracao-imagem" id="narracao-imagem-rotulo" data-vitrine-esconder>Enviar uma imagem com a curiosidade</label>
 
               <button type="button" class="botao-principal" id="narracao-ler-texto">Ler esta curiosidade</button>
             </div>
@@ -240,7 +241,7 @@
           <button type="button" class="botao-secundario" id="prova-cancelar">Cancelar</button>
         </form>
 
-        <div class="provas-google vidro">
+        <div class="provas-google vidro" data-vitrine-esconder>
           <p class="selo-google" id="provas-google-conectado" hidden>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Google Agenda conectado
@@ -474,6 +475,8 @@
           <span>Declaro que as fotos enviadas são de cadernos ou materiais de estudo meus ou do meu filho, e que serão usadas apenas para estudo da nossa família.</span>
         </label>
 
+        <p class="aviso-vitrine" data-vitrine-mostrar>Na vitrine, usamos uma missão de exemplo. Suas fotos não saem do aparelho.</p>
+
         <button type="submit" class="botao-principal" id="botao-enviar" disabled>Criar minha missão</button>
 
         <p class="mensagem" id="mensagem-foto" role="status" aria-live="polite"></p>
@@ -607,6 +610,9 @@
       <span>Pais</span>
     </button>
   </nav>
+
+  <!-- Só na vitrine (app dentro da landing) -->
+  <a class="faixa-vitrine" href="/conheca/" target="_top" data-vitrine-mostrar>Versão de demonstração · Conheça o Lumi</a>
 
   <footer class="rodape">
     <p>Lumi</p>

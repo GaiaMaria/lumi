@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lumi · O caderno vira missão</title>
+  <meta name="description" content="App que transforma a foto do caderno em missão com perguntas, pontos e a voz da família. Para crianças de 9 a 12 anos.">
+  <meta name="theme-color" content="#1E1B4B">
+  <link rel="canonical" href="https://lumi-psi-nine.vercel.app/conheca/">
+  <!-- Compartilhamento (WhatsApp, redes): imagem provisória com a Dóris e a Lumi -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="Lumi">
+  <meta property="og:title" content="Lumi · O caderno vira missão">
+  <meta property="og:description" content="A foto do caderno vira uma missão com perguntas, pontos e a voz da família. Para crianças de 9 a 12 anos.">
+  <meta property="og:url" content="https://lumi-psi-nine.vercel.app/conheca/">
+  <meta property="og:image" content="https://lumi-psi-nine.vercel.app/assets/recortes/duas-comemorando.png">
+  <meta property="og:image:width" content="900">
+  <meta property="og:image:height" content="890">
+  <meta property="og:image:alt" content="Dóris, a coruja, e Lumi, o vaga-lume, comemorando">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Lumi · O caderno vira missão">
+  <meta name="twitter:description" content="A foto do caderno vira uma missão com perguntas, pontos e a voz da família.">
+  <meta name="twitter:image" content="https://lumi-psi-nine.vercel.app/assets/recortes/duas-comemorando.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <!-- Variáveis e botões do app (cores, tamanhos, estilo adesivo) -->
+  <link rel="stylesheet" href="../css/estilo.css">
+  <link rel="stylesheet" href="landing.css">
+  <script src="landing.js" defer></script>
+  <!-- Vercel Web Analytics (sem biblioteca): visitas, para calcular leads ÷ visitantes -->
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<!-- Lista de espera desligada por enquanto (sem banco de dados).
+     Para ligar: tirar "sem-lista" do body e configurar a Upstash na Vercel. -->
+<body class="landing sem-lista">
+  <a class="pular" href="#lista" data-lista>Pular para a lista de espera</a>
+  <a class="pular" href="#experimente" data-sem-lista>Pular para o app</a>
+  <header class="barra-landing">
+    <a class="barra-landing__marca" href="#topo">Lumi</a>
+    <a class="barra-landing__link" href="/">Abrir o app</a>
+  </header>
+
+  <main id="topo">
+    <!-- Hero: a promessa, o e-mail e o app funcionando -->
+    <section class="hero" aria-labelledby="hero-titulo">
+      <div class="hero__texto">
+        <h1 class="hero__titulo" id="hero-titulo">Use a tela a favor do estudo.</h1>
+        <p class="hero__sub">O Lumi transforma a foto do caderno em uma missão com perguntas, pontos e a voz da família. Seu filho revisa para a prova jogando, e você acompanha sem virar professora à noite.</p>
+
+        <div class="hero__acoes" data-sem-lista>
+          <a class="botao-principal" href="#experimente">Experimente agora</a>
+          <a class="botao-secundario" href="/">Abrir o app</a>
+        </div>
+
+        <form class="form-curto" id="form-curto" novalidate data-lista>
+          <label class="rotulo" for="curto-email">Seu e-mail</label>
+          <div class="form-curto__linha">
+            <input class="campo" type="email" id="curto-email" name="email" autocomplete="email" inputmode="email" placeholder="voce@email.com" required aria-describedby="curto-erro">
+            <button type="submit" class="botao-principal" id="curto-enviar">Entrar na lista de espera</button>
+          </div>
+          <label class="aceite aceite--curto" for="curto-aceite">
+            <input type="checkbox" id="curto-aceite" name="consentimento" required aria-describedby="curto-erro">
+            <span>Aceito receber novidades do Lumi por e-mail. Posso sair quando quiser.</span>
+          </label>
+          <p class="campo-erro" id="curto-erro" aria-live="polite"></p>
+          <p class="nota">Grátis para começar. Lançamento em breve. Ninguém é cobrado agora.</p>
+        </form>
+
+        <a class="link-seta" href="#experimente" data-lista>Experimente agora ↓</a>
+      </div>
+
+      <div class="hero__app" id="experimente">
+        <img class="hero__rede" src="../assets/rede-neuronios.svg" alt="" width="390" height="470">
+        <div class="celular">
+          <iframe class="celular__tela" src="/?vitrine=1" title="Experimente o app Lumi" allow="microphone; autoplay" loading="lazy" decoding="async"></iframe>
+        </div>
+        <p class="nota nota--centro">Toque e jogue uma missão de exemplo.</p>
+      </div>
+    </section>
+
+    <!-- Como funciona: 3 passos -->
+    <section class="secao" id="como-funciona" aria-labelledby="como-titulo">
+      <h2 class="secao__titulo secao__titulo--centro" id="como-titulo">Do caderno para a missão em um minuto.</h2>
+      <ol class="passos">
+        <li class="passo">
+          <img class="passo__img" src="../assets/recortes/doris-acenando.png" alt="" width="812" height="900" loading="lazy" decoding="async">
+          <h3 class="passo__titulo">Fotografe o caderno.</h3>
+          <p class="passo__texto">Até 10 fotos da matéria da prova.</p>
+        </li>
+        <li class="passo">
+          <img class="passo__img" src="../assets/recortes/lumi-lapis.png" alt="" width="666" height="900" loading="lazy" decoding="async">
+          <h3 class="passo__titulo">Responda a missão.</h3>
+          <p class="passo__texto">Perguntas de 5 tipos, criadas a partir do que a criança estudou.</p>
+        </li>
+        <li class="passo">
+          <img class="passo__img" src="../assets/recortes/duas-comemorando.png" alt="" width="900" height="890" loading="lazy" decoding="async">
+          <h3 class="passo__titulo">Cada acerto acende uma luz.</h3>
+          <p class="passo__texto">Pontos, medalhas, tabuada e a voz da família comemorando.</p>
+        </li>
+      </ol>
+      <p class="nota nota--centro passos__extra">Também tem: tabuada com 4 modos · Leia comigo · calendário de provas com Google Agenda.</p>
+    </section>
+
+    <!-- A voz da família (o diferencial) e os planos -->
+    <section class="secao" id="planos" aria-labelledby="voz-titulo">
+      <div class="voz">
+        <h2 class="secao__titulo" id="voz-titulo">A voz que ela já conhece, torcendo a cada acerto.</h2>
+        <p class="secao__texto">Grave frases de incentivo com a sua voz. Elas tocam quando seu filho acerta, como se você estivesse ao lado.</p>
+        <p class="voz__ciencia">Cada acerto acende uma luz e fortalece uma conexão no cérebro.</p>
+      </div>
+
+      <div class="planos">
+        <article class="plano" aria-labelledby="plano-gratuito">
+          <h3 class="plano__nome" id="plano-gratuito">Gratuito</h3>
+          <p class="plano__preco" data-preco="gratuito">R$ 0</p>
+          <ul class="plano__lista">
+            <li>Missões com foto: 3 por semana</li>
+            <li>Tabuada ilimitada, com medalhas e níveis</li>
+            <li>Leia comigo (voz do aparelho)</li>
+            <li>Frases de incentivo gravadas com a voz da família</li>
+            <li>Calendário de provas e Google Agenda</li>
+          </ul>
+          <button type="button" class="botao-secundario plano__botao" data-plano="gratuito" data-lista>Quero o gratuito</button>
+        </article>
+
+        <article class="plano plano--destaque" aria-labelledby="plano-voz">
+          <p class="plano__selo">Mais completo</p>
+          <h3 class="plano__nome" id="plano-voz">Voz da Família</h3>
+          <p class="plano__preco"><span data-preco="vozFamilia">R$ 14,90/mês</span> <span class="plano__lancamento">preço de lançamento</span></p>
+          <ul class="plano__lista">
+            <li>Tudo do Gratuito, com missões ilimitadas</li>
+            <li>Voz digital da família, criada a partir de 30 segundos de gravação</li>
+            <li>Os fatos das missões e as curiosidades narrados com essa voz (até 5 por dia)</li>
+          </ul>
+          <button type="button" class="botao-principal plano__botao" data-plano="voz_familia" data-lista>Quero a Voz da Família</button>
+        </article>
+      </div>
+      <p class="nota nota--centro planos__nota" data-sem-lista>Preços de lançamento em teste. Ainda não há assinatura. A voz digital só é criada com autorização de quem grava e pode ser apagada a qualquer momento.</p>
+      <p class="nota nota--centro planos__nota" data-lista>Lista de espera: ninguém é cobrado agora. A voz digital só é criada com autorização de quem grava e pode ser apagada a qualquer momento.</p>
+    </section>
+
+    <!-- Lista de espera: formulário completo (só dados de quem é responsável) -->
+    <section class="secao lista" id="lista" aria-labelledby="lista-titulo" data-lista>
+      <div class="lista__conteudo" id="lista-formulario">
+        <h2 class="secao__titulo" id="lista-titulo">Seja das primeiras famílias.</h2>
+
+        <form class="form-completo" id="form-completo" novalidate>
+          <div class="campo-grupo">
+            <label class="rotulo" for="lista-email">E-mail</label>
+            <input class="campo" type="email" id="lista-email" name="email" autocomplete="email" inputmode="email" required aria-describedby="lista-email-erro">
+            <p class="campo-erro" id="lista-email-erro" aria-live="polite"></p>
+          </div>
+
+          <div class="campo-grupo">
+            <label class="rotulo" for="lista-uf">Estado</label>
+            <select class="campo" id="lista-uf" name="uf" required aria-describedby="lista-uf-erro">
+              <option value="">Escolha...</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MT">MT</option>
+              <option value="MS">MS</option>
+              <option value="MG">MG</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PR">PR</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RS">RS</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="SC">SC</option>
+              <option value="SP">SP</option>
+              <option value="SE">SE</option>
+              <option value="TO">TO</option>
+            </select>
+            <p class="campo-erro" id="lista-uf-erro" aria-live="polite"></p>
+          </div>
+
+          <fieldset class="campo-grupo grupo-opcoes">
+            <legend class="rotulo">Ano escolar dos filhos <span class="opcional">(opcional)</span></legend>
+            <div class="opcoes">
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="4"><span>4º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="5"><span>5º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="6"><span>6º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="7"><span>7º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="outro"><span>Outro</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="campo-grupo grupo-opcoes">
+            <legend class="rotulo">Plano de interesse</legend>
+            <div class="opcoes">
+              <label class="opcao-chip"><input type="radio" name="plano" value="gratuito"><span>Gratuito</span></label>
+              <label class="opcao-chip"><input type="radio" name="plano" value="voz_familia"><span>Voz da Família</span></label>
+            </div>
+          </fieldset>
+
+          <div class="campo-grupo">
+            <label class="rotulo" for="lista-whatsapp">WhatsApp <span class="opcional">(opcional)</span></label>
+            <input class="campo" type="tel" id="lista-whatsapp" name="whatsapp" autocomplete="tel-national" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" aria-describedby="lista-whatsapp-erro">
+            <p class="campo-erro" id="lista-whatsapp-erro" aria-live="polite"></p>
+          </div>
+
+          <!-- Campo escondido contra robôs: pessoas não veem nem preenchem -->
+          <div class="pote-de-mel" aria-hidden="true">
+            <label for="lista-site">Site</label>
+            <input type="text" id="lista-site" name="site" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="campo-grupo">
+            <label class="aceite" for="lista-aceite">
+              <input type="checkbox" id="lista-aceite" name="consentimento" required aria-describedby="lista-aceite-erro">
+              <span>Aceito receber novidades do Lumi por e-mail ou WhatsApp. Posso sair quando quiser.</span>
+            </label>
+            <p class="campo-erro" id="lista-aceite-erro" aria-live="polite"></p>
+            <details class="politica" id="privacidade">
+              <summary>Como usamos seus dados</summary>
+              <ul>
+                <li>Guardamos só o que você digitou aqui, para avisar do lançamento e entender o interesse.</li>
+                <li>Não vendemos nem compartilhamos seus dados.</li>
+                <li>Não pedimos dados de crianças.</li>
+                <li>Para sair da lista ou apagar seus dados, responda qualquer e-mail nosso. (LGPD)</li>
+              </ul>
+            </details>
+          </div>
+
+          <button type="submit" class="botao-principal botao-principal--grande" id="lista-enviar">Entrar na lista de espera</button>
+          <p class="campo-erro campo-erro--geral" id="lista-erro" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- Sucesso -->
+      <div class="lista__sucesso" id="lista-sucesso" tabindex="-1" hidden>
+        <img class="lista__lumi" src="../assets/recortes/lumi-comemorando.png" alt="" width="695" height="896" loading="lazy" decoding="async">
+        <h2 class="secao__titulo">Pronto! Você está na lista.</h2>
+        <p class="secao__texto">Avisamos você assim que o Lumi abrir. Enquanto isso, que tal chamar outra mãe?</p>
+        <a class="botao-principal botao--menta" id="lista-compartilhar" href="#" target="_blank" rel="noopener">Compartilhar com outra mãe</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape-landing">
+    <p>Lumi · Cada acerto acende uma luz.</p>
+    <nav class="rodape-landing__links" aria-label="Links do rodapé">
+      <a href="/">Abrir o app</a>
+      <a href="#privacidade" data-lista>Privacidade</a>
+    </nav>
+    <p class="rodape-landing__copia">© 2026</p>
+  </footer>
+</body>
+</html>
