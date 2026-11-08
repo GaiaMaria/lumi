@@ -361,7 +361,8 @@ const Narracao = (() => {
   // fato: { texto, origem }. Sem nada, usa a curiosidade das fotos ou uma sorteada.
   async function gerarNarracao(fatoEscolhido) {
     const fato = fatoEscolhido || await fatoAtual();
-    const voz = Familia.vozDigital();
+    // Vitrine: nunca chama a ElevenLabs; lê com a voz do aparelho.
+    const voz = Vitrine.ativa() ? null : Familia.vozDigital();
 
     if (!voz) {
       prepararOuvir(fato);
@@ -432,6 +433,7 @@ const Narracao = (() => {
   // ---------- gravação (30 a 45 segundos) ----------
 
   async function comecarGravacao() {
+    if (Vitrine.ativa()) return; // criar voz digital fica no plano Voz da Família
     if (gravacao) {
       pararGravacao();
       return;
@@ -553,6 +555,12 @@ const Narracao = (() => {
   // Área dos pais: situação da voz digital e os botões de gravar de novo e apagar.
   const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   function atualizarAreaDosPais(mensagem) {
+    if (Vitrine.ativa()) {
+      el.regravar.hidden = true;
+      el.apagarVoz.hidden = true;
+      el.estadoNosPais.textContent = 'A voz digital da família está disponível no plano Voz da Família.';
+      return;
+    }
     const voz = Familia.vozDigital();
     el.regravar.hidden = !voz;
     el.apagarVoz.hidden = !voz;
@@ -571,6 +579,13 @@ const Narracao = (() => {
     pararTudo();
     if (!manterMensagem) avisar('');
     narracao = null;
+
+    // Vitrine: lê a curiosidade com a voz do aparelho e avisa do plano Voz da Família.
+    if (Vitrine.ativa()) {
+      await gerarNarracao();
+      avisar(Vitrine.MENSAGEM_VOZ);
+      return;
+    }
 
     if (Familia.vozDigital()) {
       await gerarNarracao();
@@ -637,6 +652,7 @@ const Narracao = (() => {
   });
 
   el.imagem.addEventListener('change', async () => {
+    if (Vitrine.ativa()) return; // ler curiosidade de imagem usa a API: desligado na vitrine
     const arquivo = el.imagem.files && el.imagem.files[0];
     el.imagem.value = '';
     if (!arquivo) return;

@@ -360,6 +360,9 @@ const FotoQuest = (() => {
   }
 
   async function buscarPerguntas(disciplina) {
+    // Vitrine: nada é enviado. As fotos não saem do aparelho e a missão é a de exemplo.
+    if (Vitrine.ativa()) return modoDemonstracao();
+
     const chave = chaveDasFotos();
     if (ultimaResposta && ultimaResposta.chave === chave) {
       return ultimaResposta.resultado;
@@ -580,7 +583,8 @@ const Inicio = (() => {
       el.mensagem.textContent = vozDigital.mensagem;
       return;
     }
-    await Calendario.desconectarGoogle({ silencioso: true }); // cancela o acesso ao Google Agenda, se houver
+    // Na vitrine, o Google Agenda não é usado: não mexe no acesso de verdade deste navegador.
+    if (!Vitrine.ativa()) await Calendario.desconectarGoogle({ silencioso: true }); // cancela o acesso ao Google Agenda, se houver
     Familia.apagarTudo();
     let audiosApagados = true;
     try {
@@ -589,6 +593,10 @@ const Inicio = (() => {
       audiosApagados = false;
     }
     atualizar();
+    if (Vitrine.ativa()) {
+      el.mensagem.textContent = 'Pronto. Os dados desta demonstração foram apagados.';
+      return;
+    }
     el.mensagem.textContent = audiosApagados
       ? 'Pronto. Os dados, as provas, as gravações e a voz digital da família foram apagados, e o Google Agenda foi desconectado.'
       : 'Os dados foram apagados, mas não consegui apagar as gravações. Tente de novo.';

@@ -3051,3 +3051,70 @@ body.com-nav .rodape {
     display: none;
   }
 }
+
+/* ---------- Modo vitrine (/?vitrine=1, o app dentro da landing) ---------- */
+:root {
+  --altura-faixa: 32px;
+}
+
+/* Fora da vitrine, os avisos dela não aparecem */
+[data-vitrine-mostrar] {
+  display: none;
+}
+
+body.vitrine [data-vitrine-mostrar] {
+  display: block;
+}
+
+/* Na vitrine, some o que usa serviços pagos ou não funciona dentro da landing */
+body.vitrine [data-vitrine-esconder] {
+  display: none !important;
+}
+
+.aviso-vitrine {
+  padding: var(--espaco-3) var(--espaco-4);
+  border: var(--traco-medio) dashed var(--borda);
+  border-radius: var(--raio-sm);
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-95);
+}
+
+/* Faixa fina no rodapé, abaixo da barra de navegação */
+.faixa-vitrine {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  z-index: 4;
+  width: 100%;
+  max-width: var(--largura-coluna);
+  transform: translateX(-50%);
+  min-height: var(--altura-faixa);
+  padding: var(--espaco-1-5) var(--espaco-3);
+  background: var(--primaria);
+  color: var(--texto);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-0-8);
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+}
+
+body.vitrine .faixa-vitrine:hover {
+  background: var(--primaria-hover);
+}
+
+body.vitrine {
+  padding-bottom: var(--altura-faixa);
+}
+
+body.vitrine.com-nav {
+  padding-bottom: calc(var(--altura-nav) + var(--altura-faixa) + env(safe-area-inset-bottom));
+}
+
+body.vitrine .nav-principal {
+  bottom: var(--altura-faixa);
+}
+
+body.vitrine .painel-resposta {
+  bottom: var(--altura-faixa);
+}
