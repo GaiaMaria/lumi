@@ -20,6 +20,7 @@
   <script src="js/calendario.js" defer></script>
   <script src="js/trilha.js" defer></script>
   <script src="js/resultado.js" defer></script>
+  <script src="js/navegacao.js" defer></script>
   <script src="js/abertura.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -55,6 +56,7 @@
       <div class="inicio">
         <!-- Topo: nível, barra do nível e total de pontos -->
         <div class="inicio-topo">
+          <button type="button" class="botao-voltar" data-ir="abertura"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar para a abertura</span></button>
           <span class="pilula pilula--nivel">Nível <span id="inicio-nivel">1</span></span>
           <div class="barra-nivel" id="inicio-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
             <div class="barra-nivel__preenchido" id="inicio-nivel-preenchido"></div>
@@ -178,7 +180,7 @@
     <!-- Provas: calendário mensal -->
     <section class="tela" id="tela-provas" aria-labelledby="titulo-provas" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="pais"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
+        <button type="button" class="botao-voltar" id="provas-voltar" data-ir="pais"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-provas">Provas</h1>
       </div>
 
@@ -579,7 +581,7 @@
 
   </main>
 
-  <!-- Barra de navegação de baixo (só no Início, menu da Tabuada, Narração e Área dos pais) -->
+  <!-- Barra de navegação de baixo (só no Início, menu da Tabuada, Provas, Narração e Área dos pais) -->
   <nav class="nav-principal" id="nav-principal" aria-label="Navegação principal" hidden>
     <button type="button" class="nav-principal__item" data-ir="inicio" data-nav="inicio">
       <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6 20c0-4 12-3 12-7.5S6 9 6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3.2"/><circle cx="6" cy="20" r="2" fill="currentColor"/><path d="M6 3.2l1.1 2.2 2.4.3-1.8 1.6.5 2.4L6 8.5 3.8 9.7l.5-2.4-1.8-1.6 2.4-.3z" fill="currentColor"/></svg>
@@ -588,6 +590,10 @@
     <button type="button" class="nav-principal__item" data-ir="tabuada" data-nav="tabuada">
       <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       <span>Tabuada</span>
+    </button>
+    <button type="button" class="nav-principal__item" data-ir="provas" data-nav="provas">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Provas</span>
     </button>
     <!-- Mesmo id de antes: Narracao.atualizarBotaoInicio() esconde quando não há voz -->
     <button type="button" class="nav-principal__item" id="botao-voz-familia" data-ir="narracao" data-nav="narracao" hidden>
