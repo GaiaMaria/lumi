@@ -134,6 +134,24 @@ const Familia = (() => {
     return ler().pontos;
   }
 
+  // Progresso da tabuada: medalhas por modo, tabuadas concluídas e contas erradas.
+  function tabuada() {
+    const dados = ler();
+    if (!dados.tabuada || typeof dados.tabuada !== 'object') {
+      dados.tabuada = { medalhas: {}, numeros: [], erros: [] };
+    }
+    const t = dados.tabuada;
+    if (!t.medalhas || typeof t.medalhas !== 'object') t.medalhas = {};
+    if (!Array.isArray(t.numeros)) t.numeros = [];
+    if (!Array.isArray(t.erros)) t.erros = [];
+    return t;
+  }
+
+  function salvar() {
+    ler();
+    gravar();
+  }
+
   // Remove perguntas, progresso e o próprio ID deste aparelho.
   function apagarTudo() {
     const id = lerId();
@@ -155,6 +173,8 @@ const Familia = (() => {
     missao,
     adicionarPontos,
     pontos,
+    tabuada,
+    salvar,
     apagarTudo,
   };
 })();

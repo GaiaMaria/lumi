@@ -11,6 +11,7 @@
   <script src="js/fotos.js" defer></script>
   <script src="js/voz.js" defer></script>
   <script src="js/quiz.js" defer></script>
+  <script src="js/tabuada.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -35,6 +36,8 @@
           <span>Tirar foto e começar a missão</span>
         </button>
 
+        <button type="button" class="botao-secundario" data-ir="tabuada">Treinar tabuada</button>
+
         <section class="area-doris vidro" aria-labelledby="titulo-doris">
           <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
           <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
@@ -47,6 +50,81 @@
 
         <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
         <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <!-- Tabuada -->
+    <section class="tela" id="tela-tabuada" aria-labelledby="titulo-tabuada" hidden>
+      <div class="barra-topo">
+        <button type="button" class="botao-voltar" id="tabuada-voltar">← Voltar</button>
+        <h1 class="barra-topo__titulo" id="titulo-tabuada">Tabuada</h1>
+      </div>
+
+      <div class="conteudo">
+        <!-- Menu dos modos -->
+        <div class="tabuada-bloco" id="tabuada-menu">
+          <div class="nivel vidro">
+            <p class="nivel__titulo">Nível <span id="tabuada-nivel">1</span></p>
+            <div class="nivel__barra" id="tabuada-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+              <div class="nivel__preenchido" id="tabuada-nivel-preenchido"></div>
+            </div>
+            <p class="nivel__detalhe" id="tabuada-nivel-detalhe"></p>
+          </div>
+
+          <h2 class="tabuada-subtitulo">Medalhas</h2>
+          <ul class="medalhas" id="tabuada-medalhas"></ul>
+
+          <h2 class="tabuada-subtitulo">Escolha o modo</h2>
+          <div class="modos">
+            <button type="button" class="modo vidro" data-modo="falta">
+              <strong>Qual é o número que falta</strong>
+              <span>Ex.: 7 × ___ = 56</span>
+            </button>
+            <button type="button" class="modo vidro" data-modo="numero">
+              <strong>Tabuada de um número</strong>
+              <span>Escolha de 1 a 10 e responda a sequência</span>
+            </button>
+            <button type="button" class="modo vidro" data-modo="desafio">
+              <strong>Desafio contra o tempo</strong>
+              <span>10 contas em 60 segundos</span>
+            </button>
+            <button type="button" class="modo vidro" data-modo="revisao" id="modo-revisao">
+              <strong>Revisão de erros</strong>
+              <span id="revisao-detalhe"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Escolher o número -->
+        <div class="tabuada-bloco" id="tabuada-numeros" hidden>
+          <h2 class="tabuada-subtitulo">Qual tabuada?</h2>
+          <div class="grade-numeros" id="grade-numeros"></div>
+        </div>
+
+        <!-- Rodada -->
+        <form class="tabuada-bloco" id="tabuada-jogo" novalidate hidden>
+          <div class="tabuada-topo">
+            <span id="tabuada-progresso"></span>
+            <span class="tabuada-tempo" id="tabuada-tempo" role="timer" aria-live="off" hidden></span>
+          </div>
+          <p class="tabuada-conta" id="tabuada-conta"></p>
+          <label class="visualmente-oculto" for="tabuada-resposta">Sua resposta</label>
+          <input class="tabuada-resposta" id="tabuada-resposta" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off">
+          <button type="submit" class="botao-principal" id="tabuada-conferir">Conferir</button>
+          <div class="feedback" id="tabuada-feedback" role="status" aria-live="polite" hidden></div>
+          <button type="button" class="botao-principal" id="tabuada-proxima" hidden>Próxima</button>
+        </form>
+
+        <!-- Fim da rodada -->
+        <div class="tabuada-bloco resultado" id="tabuada-fim" hidden>
+          <h2 class="resultado__titulo" id="tabuada-fim-titulo"></h2>
+          <p class="pontos pontos--grande"><span id="tabuada-fim-pontos">0</span> pontos</p>
+          <p class="resultado__detalhe" id="tabuada-fim-detalhe"></p>
+          <p class="conquista" id="tabuada-fim-medalha" hidden></p>
+          <p class="conquista conquista--nivel" id="tabuada-fim-nivel" hidden></p>
+          <button type="button" class="botao-principal" id="tabuada-de-novo">Jogar de novo</button>
+          <button type="button" class="botao-secundario" id="tabuada-menu-voltar">Escolher outro modo</button>
+        </div>
       </div>
     </section>
 

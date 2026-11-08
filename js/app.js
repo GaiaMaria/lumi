@@ -10,6 +10,8 @@ const App = (() => {
     });
     window.scrollTo(0, 0);
     Voz.parar(); // não deixa a leitura continuar em outra tela
+    if (nome === 'tabuada') Tabuada.abrir();
+    else Tabuada.parar(); // para o relógio do desafio ao sair
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
   }
