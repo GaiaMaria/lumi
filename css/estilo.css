@@ -323,6 +323,9 @@ figure {
 /* Telas */
 .app {
   flex: 1;
+  width: 100%;
+  max-width: var(--largura-coluna);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
 }
@@ -2845,6 +2848,9 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 /* Rodapé */
 .rodape {
+  width: 100%;
+  max-width: var(--largura-coluna);
+  margin: 0 auto;
   background: var(--fundo-escuro);
   border-top: var(--traco-medio) solid var(--borda);
   color: var(--texto-suave);
@@ -2853,24 +2859,15 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   padding: var(--espaco-4);
 }
 
-/* Telas maiores */
-@media (min-width: 768px) {
-  .cabecalho {
-    padding-top: var(--espaco-14);
+/* Telas maiores (desktop): a coluna ganha bordas, como um celular no meio do céu */
+@media (min-width: 520px) {
+  .app {
+    border-inline: var(--traco-medio) solid var(--borda);
+    background: color-mix(in srgb, var(--fundo) 55%, transparent);
   }
 
-  .cabecalho__lumi {
-    width: var(--tamanho-200);
-    height: var(--tamanho-200);
-  }
-
-  .inicio {
-    padding-top: var(--espaco-8);
-  }
-
-  .area-doris__imagem {
-    width: var(--tamanho-120);
-    height: var(--tamanho-120);
+  .rodape {
+    border-inline: var(--traco-medio) solid var(--borda);
   }
 }
 
@@ -3027,4 +3024,23 @@ body.com-nav .rodape {
 /* Ícone da matéria dentro do dia amarelo: índigo, para ter contraste */
 .calendario__dia--prova .icone-materia {
   stroke: var(--texto-escuro);
+}
+
+/* Botão de remover foto: o círculo continua pequeno, mas a área de toque tem 44px */
+.miniatura__remover::after {
+  content: "";
+  position: absolute;
+  inset: calc((var(--altura-44) - var(--tamanho-32)) / -2);
+}
+
+/* Movimento reduzido: rede de segurança para qualquer animação ou transição que sobrar */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
