@@ -196,8 +196,12 @@ const Quiz = (() => {
 
   if (temVoz) {
     // Sem voz em português: esconde o botão e mostra o aviso.
+    const AVISO_SEM_VOZ = el.avisoVoz.textContent;
+    const AVISO_FALHOU = 'Não consegui ler em voz alta agora. Confira o volume e tente de novo.';
+
     Voz.aoVerificar((disponivel) => {
       el.leia.hidden = !disponivel;
+      el.avisoVoz.textContent = AVISO_SEM_VOZ;
       el.avisoVoz.hidden = disponivel;
     });
 
@@ -208,11 +212,17 @@ const Quiz = (() => {
         mostrarBotaoLeitura(false);
         return;
       }
+      el.avisoVoz.hidden = true;
       mostrarBotaoLeitura(true);
       const indice = estado.indice;
       // Pergunta: sempre a voz do navegador, nunca a gravação da família.
-      await Voz.lerPergunta(textoParaLer(estado.perguntas[indice]));
-      if (estado.indice === indice) mostrarBotaoLeitura(false);
+      const resultado = await Voz.lerPergunta(textoParaLer(estado.perguntas[indice]));
+      if (estado.indice !== indice) return;
+      mostrarBotaoLeitura(false);
+      if (resultado === 'erro') {
+        el.avisoVoz.textContent = AVISO_FALHOU;
+        el.avisoVoz.hidden = false;
+      }
     });
   }
 
@@ -548,7 +558,10 @@ const Quiz = (() => {
     const p = estado.perguntas[estado.indice];
     estado.tentativas = 0;
     estado.respondida = false;
-    if (temVoz) Voz.parar();
+    if (temVoz) {
+      Voz.parar();
+      if (Voz.disponivel()) el.avisoVoz.hidden = true; // tira o aviso de falha da pergunta anterior
+    }
     mostrarBotaoLeitura(false);
 
     el.progresso.textContent = `Pergunta ${estado.indice + 1} de ${estado.perguntas.length}`;

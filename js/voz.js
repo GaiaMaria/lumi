@@ -84,11 +84,21 @@ const Voz = (() => {
 
   // ---------- voz do navegador ----------
 
+  function vozesPortugues() {
+    if (!temSintese) return [];
+    return window.speechSynthesis.getVoices().filter((v) => /^pt\b/i.test(v.lang));
+  }
+
+  // Ordem: pt-BR instalada no aparelho, pt-BR online, outra pt instalada, outra pt.
+  // As vozes instaladas são mais confiáveis (as online do Chrome cortam textos longos).
   function escolherVoz() {
-    if (!temSintese) return null;
-    const vozes = window.speechSynthesis.getVoices();
-    return vozes.find((v) => /^pt[-_]br$/i.test(v.lang))
-      || vozes.find((v) => /^pt\b/i.test(v.lang))
+    const vozes = vozesPortugues();
+    const br = (v) => /^pt[-_]br$/i.test(v.lang);
+    const local = (v) => v.localService !== false;
+    return vozes.find((v) => br(v) && local(v))
+      || vozes.find(br)
+      || vozes.find(local)
+      || vozes[0]
       || null;
   }
 
@@ -228,7 +238,19 @@ const Voz = (() => {
 
   // ---------- tocar e falar ----------
 
+  // Leitura de pergunta em andamento (guardada aqui para o Chrome não descartar a fala).
+  let leitura = null;
+
+  function encerrarLeitura(resultado) {
+    const atual = leitura;
+    if (!atual) return;
+    leitura = null;
+    clearTimeout(atual.vigia);
+    atual.resolver(resultado);
+  }
+
   function parar() {
+    encerrarLeitura('parada');
     if (temSintese) window.speechSynthesis.cancel();
     if (audioAtual) {
       audioAtual.pause();
@@ -268,28 +290,98 @@ const Voz = (() => {
 
   const VELOCIDADE = 0.9;
 
+  const TAMANHO_PEDACO = 160; // caracteres por fala (o Chrome corta falas longas)
+  const ESPERA_PARA_COMECAR_MS = 2500;
+
+  // Divide em frases curtas, juntando as muito pequenas.
+  function dividir(texto) {
+    const frases = limparTexto(texto).split(/(?<=[.!?;:])\s+/).filter(Boolean);
+    const pedacos = [];
+    frases.forEach((frase) => {
+      const ultimo = pedacos[pedacos.length - 1];
+      if (ultimo && (ultimo.length + frase.length + 1) <= TAMANHO_PEDACO) pedacos[pedacos.length - 1] = `${ultimo} ${frase}`;
+      else pedacos.push(frase);
+    });
+    return pedacos;
+  }
+
+  function falarPedaco() {
+    const atual = leitura;
+    if (!atual) return;
+    if (atual.indice >= atual.pedacos.length) {
+      encerrarLeitura('sintetizada');
+      return;
+    }
+    const sintese = window.speechSynthesis;
+    const fala = new SpeechSynthesisUtterance(atual.pedacos[atual.indice]);
+    fala.lang = atual.voz.lang || 'pt-BR';
+    fala.voice = atual.voz;
+    fala.rate = VELOCIDADE;
+    atual.fala = fala; // mantém a fala viva até terminar
+    fala.onstart = () => {
+      atual.comecou = true;
+      clearTimeout(atual.vigia);
+    };
+    fala.onend = () => {
+      if (leitura !== atual) return;
+      atual.indice += 1;
+      falarPedaco();
+    };
+    fala.onerror = (evento) => {
+      if (leitura !== atual) return;
+      if (evento && (evento.error === 'interrupted' || evento.error === 'canceled')) {
+        encerrarLeitura('parada');
+        return;
+      }
+      tentarOutraVoz(atual);
+    };
+    if (sintese.paused) sintese.resume();
+    sintese.speak(fala);
+    // Vigia: se a primeira fala não começar, tenta outra voz.
+    if (atual.indice === 0 && !atual.comecou) {
+      clearTimeout(atual.vigia);
+      atual.vigia = setTimeout(() => {
+        if (leitura === atual && !atual.comecou && !sintese.speaking) tentarOutraVoz(atual);
+      }, ESPERA_PARA_COMECAR_MS);
+    }
+  }
+
+  // Uma segunda chance com outra voz em português (de preferência instalada no aparelho).
+  function tentarOutraVoz(atual) {
+    clearTimeout(atual.vigia);
+    const outras = vozesPortugues().filter((v) => v !== atual.voz);
+    // Sem outra voz em português, tenta de novo com a mesma.
+    const outra = outras.find((v) => v.localService !== false) || outras[0] || atual.voz;
+    if (!atual.trocouVoz && outra) {
+      atual.trocouVoz = true;
+      atual.voz = outra;
+      atual.comecou = false;
+      window.speechSynthesis.cancel();
+      setTimeout(falarPedaco, 60);
+      return;
+    }
+    window.speechSynthesis.cancel();
+    encerrarLeitura('erro');
+  }
+
   // Lê uma pergunta com a voz do navegador. Nunca usa gravação,
   // mesmo que o texto seja igual a uma das frases fixas.
+  // Devolve 'sintetizada', 'parada', 'erro' ou 'indisponivel'.
   function lerPergunta(texto) {
-    const sintese = temSintese ? window.speechSynthesis : null;
-    const estavaFalando = Boolean(sintese && (sintese.speaking || sintese.pending));
     parar(); // cancela a fala anterior
     if (!disponivel()) return Promise.resolve('indisponivel');
+    const pedacos = dividir(texto);
+    if (!pedacos.length) return Promise.resolve('sintetizada');
     return new Promise((resolver) => {
-      const fala = new SpeechSynthesisUtterance(limparTexto(texto));
-      fala.lang = vozPt.lang || 'pt-BR';
-      fala.voice = vozPt;
-      fala.rate = VELOCIDADE;
-      fala.onend = () => resolver('sintetizada');
-      fala.onerror = () => resolver('sintetizada');
-      // Alguns celulares perdem a fala nova se ela vem logo depois do cancelamento.
-      if (estavaFalando) setTimeout(() => sintese.speak(fala), 60);
-      else sintese.speak(fala);
+      leitura = { pedacos, indice: 0, voz: vozPt, resolver, comecou: false, trocouVoz: false, vigia: null };
+      // A primeira fala sai direto do toque (o iPhone exige isso).
+      falarPedaco();
     });
   }
 
+  // Lendo agora? Usa o estado do próprio app, não o do navegador, que às vezes erra.
   function lendo() {
-    return Boolean(audioAtual) || (temSintese && window.speechSynthesis.speaking);
+    return Boolean(leitura) || Boolean(audioAtual);
   }
 
   iniciarSintese();

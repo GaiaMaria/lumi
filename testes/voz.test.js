@@ -144,3 +144,27 @@ test('incentivo: com só uma frase gravada, o texto continua variando', () => {
   assert.ok(new Set(frases.filter((f) => !f.startsWith('seguidas'))).size > 1);
   for (let i = 1; i < frases.length; i += 1) assert.notStrictEqual(frases[i], frases[i - 1]);
 });
+
+test('leitura: texto longo é dividido em falas curtas, lidas em ordem', async () => {
+  const { Voz, falas } = carregar([ptBR]);
+  const texto = 'Como se chama quando a água vira vapor com o calor? A: Condensação. B: Evaporação. C: Congelamento. D: Derretimento. E: Chuva com granizo e muito vento forte lá fora.';
+  assert.strictEqual(await Voz.lerPergunta(texto), 'sintetizada');
+  assert.ok(falas.length >= 2, `falas: ${falas.length}`);
+  falas.forEach((f) => assert.ok(f.text.length <= 160, f.text));
+  assert.strictEqual(falas.map((f) => f.text).join(' '), Voz.limparTexto(texto));
+});
+
+test('leitura: prefere a voz pt-BR instalada no aparelho à voz online', async () => {
+  const online = { name: 'Google português do Brasil', lang: 'pt-BR', localService: false };
+  const local = { name: 'Microsoft Maria', lang: 'pt-BR', localService: true };
+  const { Voz, falas } = carregar([online, local]);
+  await Voz.lerPergunta('Olá');
+  assert.strictEqual(falas[0].voice.name, 'Microsoft Maria');
+});
+
+test('leitura: botão usa o estado do app, não o "speaking" do navegador', async () => {
+  const { Voz } = carregar([ptBR]);
+  assert.strictEqual(Voz.lendo(), false);
+  await Voz.lerPergunta('Olá');
+  assert.strictEqual(Voz.lendo(), false);
+});
