@@ -132,6 +132,7 @@ const Narracao = (() => {
     estadoNosPais: $('pais-voz-digital-estado'),
     regravar: $('narracao-regravar'),
     botaoInicio: $('botao-voz-familia'),
+    criarVoz: $('narracao-criar-voz'),
   };
 
   let gravacao = null; // { gravador, fluxo, inicio, relogio, contador, pedacos, tipo }
@@ -188,11 +189,14 @@ const Narracao = (() => {
       : '';
   }
 
-  // Botão da tela inicial: aparece se houver voz em português no aparelho (para o plano B)
-  // ou se a família já tem voz digital.
+  // Item "Ouvir" da barra de baixo: aparece sempre. É o único caminho para as curiosidades
+  // e para criar a voz digital da família. Antes ele sumia quando o aparelho não tinha voz
+  // em português e a família ainda não tinha voz digital, e aí não havia como criar a voz.
+  // A tela de narração já trata cada caso (sem voz digital: pede a gravação; sem voz no
+  // aparelho: mostra o texto).
   function atualizarBotaoInicio() {
     if (!el.botaoInicio) return;
-    el.botaoInicio.hidden = !(Voz.disponivel() || Familia.vozDigital());
+    el.botaoInicio.hidden = false;
   }
 
   // ---------- barra de progresso com tempo estimado ----------
@@ -328,6 +332,7 @@ const Narracao = (() => {
     montarTeleprompter(texto); // o texto já aparece inteiro
     el.tocarTexto.textContent = 'Ouvir';
     atualizarRestantes();
+    el.criarVoz.hidden = Boolean(Familia.vozDigital());
     mostrarBloco('ouvir');
     el.tocar.focus();
   }
@@ -541,6 +546,7 @@ const Narracao = (() => {
       return;
     }
     atualizarBotaoInicio();
+    abrirNaGravacao = true;
     App.mostrarTela('narracao'); // volta para a gravação
   });
 
@@ -575,6 +581,9 @@ const Narracao = (() => {
 
   // ---------- abrir e sair ----------
 
+  // Quando true, a próxima abertura vai direto para a gravação (ex.: "Gravar a voz de novo").
+  let abrirNaGravacao = false;
+
   async function abrir({ manterMensagem = false } = {}) {
     pararTudo();
     if (!manterMensagem) avisar('');
@@ -587,12 +596,21 @@ const Narracao = (() => {
       return;
     }
 
-    if (Familia.vozDigital()) {
-      await gerarNarracao();
+    if (abrirNaGravacao) {
+      abrirNaGravacao = false;
+      mostrarGravacao();
       return;
     }
 
-    // Sem voz digital: pede a gravação.
+    // Com ou sem voz digital, abre nas curiosidades. Sem voz digital, a leitura usa a voz do
+    // aparelho e aparece o botão "Criar a voz da família", que leva à gravação.
+    await gerarNarracao();
+  }
+
+  // Tela de gravação da voz digital (consentimento, roteiro e cronômetro).
+  function mostrarGravacao() {
+    if (Vitrine.ativa()) return; // criar a voz digital fica no plano Voz da Família
+    pararTudo();
     mostrarBloco('gravar');
     let problema = '';
     if (Voz.navegadorDentroDeApp()) problema = MENSAGENS.dentroDeApp;
@@ -614,6 +632,7 @@ const Narracao = (() => {
     if (el.aceite.checked) avisar('');
   });
   el.gravar.addEventListener('click', comecarGravacao);
+  el.criarVoz.addEventListener('click', mostrarGravacao);
   el.tocar.addEventListener('click', tocar);
 
   // ---------- outra curiosidade: escrita ou lida de uma imagem ----------
