@@ -101,7 +101,7 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 ### Voz da responsável
 
 - A voz é gravada no próprio aparelho, sem serviço externo e sem envio a servidor. Voz nunca é compartilhada entre famílias.
-- Frases gravadas: "Oi! Vamos estudar juntos?", "Muito bem!", "Quase! Tente de novo" e "Vamos lá!".
+- Frases gravadas: "Oi! Vamos estudar juntos?", "Vamos lá!", quatro frases de acerto que se revezam sem repetir ("Muito bem!", "Isso mesmo!", "Que orgulho de você!" e "Você aprendeu direitinho!"), frases para 3, 5 e 10 acertos seguidos ("Três seguidas! Continue assim!", "Cinco seguidas! Você está brilhando!" e "Dez seguidas! Que luz forte!") e "Quase! Tente de novo". Um erro zera a sequência.
 - Antes da primeira gravação, a tela pede consentimento com uma caixa de marcação: "Esta é a minha voz. Ela será usada só para narrar as missões da minha família, e posso apagar quando quiser." A data do consentimento é registrada.
 - Cada frase pode ser ouvida, regravada e apagada. O botão "Apagar dados da família" também apaga os áudios.
 - Os áudios ficam no IndexedDB do navegador, não no localStorage.

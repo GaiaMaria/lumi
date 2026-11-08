@@ -2,16 +2,37 @@
 // Tudo fica neste aparelho: os áudios vão para o IndexedDB, sem serviço externo
 // e sem envio a servidor.
 //
-// - Frases fixas (oi, muito bem, quase, vamos lá): tocam a gravação da família, se existir.
+// - Frases fixas (começo, acertos, sequências e erro): tocam a gravação da família, se existir.
 // - Perguntas (criadas pela IA ou de exemplo): sempre com a voz do navegador em português.
 //   A gravação nunca é tocada para uma pergunta.
 
 const Voz = (() => {
+  // A ordem aqui é a ordem em que aparecem na área "Minha voz".
   const FRASES = {
     oi: 'Oi! Vamos estudar juntos?',
-    muito_bem: 'Muito bem!',
-    quase: 'Quase! Tente de novo',
     vamos_la: 'Vamos lá!',
+    muito_bem: 'Muito bem!',
+    isso_mesmo: 'Isso mesmo!',
+    que_orgulho: 'Que orgulho de você!',
+    voce_aprendeu: 'Você aprendeu direitinho!',
+    seguidas_3: 'Três seguidas! Continue assim!',
+    seguidas_5: 'Cinco seguidas! Você está brilhando!',
+    seguidas_10: 'Dez seguidas! Que luz forte!',
+    quase: 'Quase! Tente de novo',
+  };
+
+  // Quando cada frase toca (texto de ajuda para a família).
+  const QUANDO = {
+    oi: 'No começo da missão',
+    vamos_la: 'No começo da tabuada',
+    muito_bem: 'Num acerto (se reveza com as outras de acerto)',
+    isso_mesmo: 'Num acerto (se reveza com as outras de acerto)',
+    que_orgulho: 'Num acerto (se reveza com as outras de acerto)',
+    voce_aprendeu: 'Num acerto (se reveza com as outras de acerto)',
+    seguidas_3: 'No 3º acerto seguido',
+    seguidas_5: 'No 5º acerto seguido',
+    seguidas_10: 'No 10º acerto seguido (e a cada 5 depois disso)',
+    quase: 'Num erro',
   };
 
   const BANCO = 'lumi-voz';
@@ -276,6 +297,7 @@ const Voz = (() => {
 
   return {
     FRASES,
+    QUANDO,
     navegadorDentroDeApp,
     podeGravar,
     formatoGravacao,
@@ -291,6 +313,59 @@ const Voz = (() => {
     lendo,
     disponivel,
     aoVerificar,
+  };
+})();
+
+// Incentivo: escolhe a frase de cada acerto para não ficar repetitivo.
+// - 3, 5 e 10 acertos seguidos (e depois a cada 5) têm frase própria.
+// - Nos outros acertos, as frases se revezam e nunca repetem a anterior.
+// - Um erro zera a sequência.
+const Incentivo = (() => {
+  const ACERTOS = ['muito_bem', 'isso_mesmo', 'que_orgulho', 'voce_aprendeu'];
+  const SEQUENCIAS = { 3: 'seguidas_3', 5: 'seguidas_5', 10: 'seguidas_10' };
+
+  let seguidas = 0;
+  let ultima = null;
+  let sortear = Math.random; // trocado nos testes
+
+  function fraseDaSequencia(n) {
+    if (SEQUENCIAS[n]) return SEQUENCIAS[n];
+    if (n > 10 && n % 5 === 0) return 'seguidas_10';
+    return null;
+  }
+
+  // Com 2 ou mais frases de acerto gravadas, reveza entre elas (a voz da família toca sempre).
+  // Com menos, reveza entre todas, para o texto não repetir; a gravação toca quando for a vez dela.
+  function escolherAcerto() {
+    const gravadas = ACERTOS.filter((f) => Voz.temGravacao(f));
+    const base = gravadas.length >= 2 ? gravadas : ACERTOS;
+    const opcoes = base.length > 1 ? base.filter((f) => f !== ultima) : base;
+    return opcoes[Math.floor(sortear() * opcoes.length)];
+  }
+
+  // Devolve { frase, texto, seguidas } para mostrar na tela e tocar.
+  function acerto() {
+    seguidas += 1;
+    const frase = fraseDaSequencia(seguidas) || escolherAcerto();
+    ultima = frase;
+    return { frase, texto: Voz.FRASES[frase], seguidas };
+  }
+
+  function erro() {
+    seguidas = 0;
+    return { frase: 'quase', texto: Voz.FRASES.quase, seguidas };
+  }
+
+  function reiniciar() {
+    seguidas = 0;
+    ultima = null;
+  }
+
+  return {
+    acerto,
+    erro,
+    reiniciar,
+    _definirSorteio: (fn) => { sortear = fn; },
   };
 })();
 
@@ -361,6 +436,10 @@ const MinhaVoz = (() => {
       titulo.className = 'frase__texto';
       titulo.textContent = `“${texto}”`;
 
+      const quando = document.createElement('p');
+      quando.className = 'frase__quando';
+      quando.textContent = Voz.QUANDO[frase] || '';
+
       const estado = document.createElement('p');
       estado.className = 'frase__estado';
 
@@ -384,7 +463,7 @@ const MinhaVoz = (() => {
         }
       }
 
-      item.append(titulo, estado, acoes);
+      item.append(titulo, quando, estado, acoes);
       return item;
     }));
   }

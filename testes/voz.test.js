@@ -38,12 +38,12 @@ function carregar(vozes, { eventoDepois = null } = {}) {
   contexto.SpeechSynthesisUtterance = contexto.window.SpeechSynthesisUtterance;
   vm.createContext(contexto);
   const codigo = fs.readFileSync(path.join(__dirname, '..', 'js', 'voz.js'), 'utf8');
-  vm.runInContext(`${codigo}\nthis.Voz = Voz;`, contexto);
+  vm.runInContext(`${codigo}\nthis.Voz = Voz; this.Incentivo = Incentivo;`, contexto);
   if (eventoDepois) {
     listaAtual = eventoDepois;
     ouvinteVozes();
   }
-  return { Voz: contexto.Voz, falas };
+  return { Voz: contexto.Voz, Incentivo: contexto.Incentivo, falas };
 }
 
 const ptBR = { name: 'Maria', lang: 'pt-BR' };
@@ -100,4 +100,47 @@ test('pergunta igual a uma frase fixa é falada pela voz do navegador, nunca pel
   const { Voz, falas } = carregar([ptBR]);
   assert.strictEqual(await Voz.lerPergunta('Muito bem!'), 'sintetizada');
   assert.strictEqual(falas.length, 1);
+});
+
+test('incentivo: frases especiais em 3, 5, 10 e 15 acertos seguidos', () => {
+  const { Incentivo } = carregar([ptBR]);
+  const frases = Array.from({ length: 15 }, () => Incentivo.acerto().frase);
+  assert.strictEqual(frases[2], 'seguidas_3');
+  assert.strictEqual(frases[4], 'seguidas_5');
+  assert.strictEqual(frases[9], 'seguidas_10');
+  assert.strictEqual(frases[14], 'seguidas_10');
+});
+
+test('incentivo: acertos comuns nunca repetem a frase anterior', () => {
+  const { Incentivo } = carregar([ptBR]);
+  for (let rodada = 0; rodada < 20; rodada += 1) {
+    Incentivo.reiniciar();
+    const frases = Array.from({ length: 30 }, () => Incentivo.acerto().frase);
+    for (let i = 1; i < frases.length; i += 1) assert.notStrictEqual(frases[i], frases[i - 1]);
+  }
+});
+
+test('incentivo: um erro zera a sequência', () => {
+  const { Incentivo } = carregar([ptBR]);
+  Incentivo.acerto();
+  Incentivo.acerto();
+  assert.strictEqual(Incentivo.erro().frase, 'quase');
+  assert.notStrictEqual(Incentivo.acerto().frase, 'seguidas_3');
+  Incentivo.acerto();
+  assert.strictEqual(Incentivo.acerto().frase, 'seguidas_3');
+});
+
+test('incentivo: prefere as frases de acerto que a família gravou', () => {
+  const { Voz, Incentivo } = carregar([ptBR]);
+  Voz.temGravacao = (frase) => frase === 'isso_mesmo' || frase === 'que_orgulho';
+  const frases = [Incentivo.acerto().frase, Incentivo.acerto().frase];
+  frases.forEach((f) => assert.ok(['isso_mesmo', 'que_orgulho'].includes(f), f));
+});
+
+test('incentivo: com só uma frase gravada, o texto continua variando', () => {
+  const { Voz, Incentivo } = carregar([ptBR]);
+  Voz.temGravacao = (frase) => frase === 'muito_bem';
+  const frases = Array.from({ length: 8 }, () => Incentivo.acerto().frase);
+  assert.ok(new Set(frases.filter((f) => !f.startsWith('seguidas'))).size > 1);
+  for (let i = 1; i < frases.length; i += 1) assert.notStrictEqual(frases[i], frases[i - 1]);
 });

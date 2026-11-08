@@ -290,12 +290,15 @@ const Tabuada = (() => {
     el.tempo.hidden = modo !== 'desafio';
     if (modo === 'desafio') iniciarRelogio();
     mostrarConta();
+    if (temVoz) Incentivo.reiniciar(); // cada rodada começa uma sequência nova
     tocarFrase('vamos_la');
   }
 
+  const temVoz = typeof Voz !== 'undefined';
+
   // Frases de incentivo na voz da família, quando gravadas.
   function tocarFrase(frase) {
-    if (typeof Voz !== 'undefined') Voz.tocarFrase(frase);
+    if (temVoz && frase) Voz.tocarFrase(frase);
   }
 
   function contaAtual() {
@@ -373,12 +376,15 @@ const Tabuada = (() => {
       Pontos.adicionar(PONTOS_POR_ACERTO);
       if (rodada.modo === 'revisao') tirarErro(c);
       el.resposta.classList.add('tabuada-resposta--certa');
-      mostrarFeedback('sucesso', `Certo! +${PONTOS_POR_ACERTO} pontos`, ContasTabuada.completa(c));
-      tocarFrase('muito_bem');
+      // Frase de incentivo variada (e especial em 3, 5 e 10 acertos seguidos).
+      const incentivo = temVoz ? Incentivo.acerto() : { frase: null, texto: 'Certo!' };
+      mostrarFeedback('sucesso', `${incentivo.texto} +${PONTOS_POR_ACERTO} pontos`, ContasTabuada.completa(c));
+      tocarFrase(incentivo.frase);
     } else {
       rodada.erradas += 1;
       registrarErro(c);
       el.resposta.classList.add('tabuada-resposta--errada');
+      if (temVoz) Incentivo.erro(); // zera a sequência de acertos
       mostrarFeedback('erro', 'Quase!', `A conta completa é ${ContasTabuada.completa(c)}.`);
       tocarFrase('quase');
     }

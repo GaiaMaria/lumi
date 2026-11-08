@@ -1200,6 +1200,11 @@ figure {
   font-weight: 800;
 }
 
+.frase__quando {
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-9);
+}
+
 .frase__estado {
   color: var(--texto-suave);
   font-size: var(--fonte-0-9);

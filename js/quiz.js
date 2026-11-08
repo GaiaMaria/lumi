@@ -323,13 +323,16 @@ const Quiz = (() => {
 
     el.pontos.textContent = textoPontos(estado.pontos);
     atualizarBarra(estado.indice + 1);
-    mostrarFeedback('sucesso', `Isso! +${ganhos} pontos`, pergunta.explicacao);
-    if (temVoz) Voz.tocarFrase('muito_bem'); // gravação da família, se existir
+    // Frase de incentivo variada (e especial em 3, 5 e 10 acertos seguidos).
+    const incentivo = temVoz ? Incentivo.acerto() : { frase: null, texto: 'Isso!' };
+    mostrarFeedback('sucesso', `${incentivo.texto} +${ganhos} pontos`, pergunta.explicacao);
+    if (temVoz) Voz.tocarFrase(incentivo.frase); // gravação da família, se existir
     mostrarProxima();
   }
 
   function errou() {
     estado.tentativas += 1;
+    if (temVoz) Incentivo.erro(); // zera a sequência de acertos
     mostrarFeedback('erro', 'Quase! Tente de novo.');
     if (temVoz) Voz.tocarFrase('quase'); // gravação da família, se existir
   }
@@ -535,7 +538,10 @@ const Quiz = (() => {
     el.aviso.hidden = !aviso;
     el.pontos.textContent = textoPontos(0);
     mostrarPergunta();
-    if (temVoz) Voz.tocarFrase('oi'); // "Oi! Vamos estudar juntos?" na voz da família, se gravada
+    if (temVoz) {
+      Incentivo.reiniciar(); // cada missão começa uma sequência nova
+      Voz.tocarFrase('oi'); // "Oi! Vamos estudar juntos?" na voz da família, se gravada
+    }
   }
 
   function mostrarPergunta() {
