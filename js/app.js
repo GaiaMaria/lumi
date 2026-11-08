@@ -468,5 +468,9 @@ const Inicio = (() => {
   return { atualizar };
 })();
 
+// Abertura na primeira visita da aba. Vem antes da volta do Google,
+// que apaga o ?google= do endereço (com ?google=, a abertura não aparece).
+Abertura.iniciar();
+
 // Volta do login do Google Agenda (?google=...).
 Calendario.aoVoltarDoGoogle();

@@ -18,10 +18,30 @@
   <script src="js/curiosidades.js" defer></script>
   <script src="js/narracao.js" defer></script>
   <script src="js/calendario.js" defer></script>
+  <script src="js/abertura.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
   <main class="app">
+
+    <!-- Abertura: rede de neurônios com a Lumi (só na primeira visita da aba) -->
+    <section class="tela abertura" id="tela-abertura" aria-labelledby="titulo-abertura" hidden>
+      <div class="abertura__ceu">
+        <img class="abertura__rede" src="assets/rede-neuronios.svg" alt="" width="390" height="470">
+        <div class="abertura__lumi halo-lumi">
+          <img class="mascote mascote--lumi flutuar" src="assets/recortes/lumi-comemorando.png" alt="Lumi, o vaga-lume, comemorando" width="695" height="896">
+        </div>
+      </div>
+      <div class="abertura__texto">
+        <h1 class="abertura__titulo" id="titulo-abertura">Lumi</h1>
+        <p class="abertura__frase">Cada acerto acende uma luz.</p>
+        <button type="button" class="botao-principal abertura__comecar" data-ir="inicio">
+          <span>Começar</span>
+          <svg class="icone" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="botao-link" data-ir="pais">Área dos pais</button>
+      </div>
+    </section>
 
     <!-- Tela inicial -->
     <section class="tela" id="tela-inicio">

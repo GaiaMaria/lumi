@@ -46,6 +46,10 @@
   --raio-cartao: 18px;
   --raio-balao-ponta: 4px;
   --altura-chip: 36px;
+  --fonte-abertura: 4.25rem;               /* cerca de 68px */
+  --flutuacao-abertura: 8px;
+  --largura-coluna: 480px;
+  --largura-abertura: 420px;
   --fundo-ceu: radial-gradient(120% 60% at 50% 0%, var(--superficie) 0%, var(--fundo) 55%, var(--fundo-escuro) 100%);
   --brilho-mascote: drop-shadow(0 0 12px color-mix(in srgb, var(--brilho) 25%, transparent));
   --halo-lumi: radial-gradient(circle, color-mix(in srgb, var(--brilho) 35%, transparent) 0%, transparent 65%);
@@ -317,6 +321,85 @@ figure {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+/* Abertura: rede de neurônios, Lumi no centro, título e "Começar" */
+.abertura {
+  align-items: center;
+  overflow: hidden;
+}
+
+.abertura__ceu {
+  position: relative;
+  width: 100%;
+  max-width: var(--largura-abertura);
+  aspect-ratio: 390 / 470; /* mesma proporção do SVG: o centro da rede fica no lugar certo */
+}
+
+.abertura__rede {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* A Lumi fica no ponto onde as linhas se encontram (195, 250 no SVG) */
+.abertura__lumi {
+  position: absolute;
+  left: 50%;
+  top: calc(250 / 470 * 100%);
+  width: 40%;
+  transform: translate(-50%, -50%);
+}
+
+/* Disco do céu atrás da Lumi: nenhuma linha aparece por baixo dela */
+.abertura__lumi::after {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  background: var(--halo-lumi), radial-gradient(closest-side, var(--fundo) 45%, transparent 100%);
+  pointer-events: none;
+}
+
+.abertura__lumi img {
+  --flutuacao-altura: var(--flutuacao-abertura);
+  z-index: 1;
+  width: 100%;
+}
+
+.abertura__texto {
+  width: 100%;
+  max-width: var(--largura-coluna);
+  margin-top: calc(-1 * var(--espaco-6));
+  padding: 0 var(--espaco-4) var(--espaco-8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-2);
+  text-align: center;
+}
+
+.abertura__titulo {
+  font-size: var(--fonte-abertura);
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: var(--brilho-texto-lumi);
+}
+
+.abertura__frase {
+  max-width: 18ch;
+  color: var(--brilho);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-35);
+  font-weight: 600;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+.abertura__comecar {
+  align-self: stretch;
+  margin-top: var(--espaco-6);
+  font-size: var(--fonte-1-25);
 }
 
 /* Cabeçalho da tela inicial */
@@ -596,7 +679,8 @@ figure {
   font-size: var(--fonte-0-95);
 }
 
-.botao-apagar {
+.botao-apagar,
+.botao-link {
   appearance: none;
   align-self: center;
   background: transparent;
@@ -613,11 +697,13 @@ figure {
   cursor: pointer;
 }
 
-.botao-apagar:hover {
+.botao-apagar:hover,
+.botao-link:hover {
   color: var(--texto);
 }
 
-.botao-apagar:focus-visible {
+.botao-apagar:focus-visible,
+.botao-link:focus-visible {
   outline: var(--foco-largura) solid var(--brilho);
   outline-offset: var(--foco-distancia-2);
 }
