@@ -610,3 +610,27 @@ body.landing .pular {
     scroll-behavior: auto;
   }
 }
+
+/* ---------- lista de espera ligada ou desligada ---------- */
+/* Com "sem-lista" no body, some tudo o que depende de guardar e-mails. */
+body.sem-lista [data-lista] {
+  display: none !important;
+}
+
+body:not(.sem-lista) [data-sem-lista] {
+  display: none !important;
+}
+
+.hero__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaco-3);
+}
+
+.hero__acoes a {
+  text-decoration: none;
+}
+
+body.landing .hero__acoes .botao-principal {
+  color: var(--texto);
+}

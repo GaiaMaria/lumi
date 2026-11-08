@@ -32,8 +32,11 @@
   <!-- Vercel Web Analytics (sem biblioteca): visitas, para calcular leads ÷ visitantes -->
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
-<body class="landing">
-  <a class="pular" href="#lista">Pular para a lista de espera</a>
+<!-- Lista de espera desligada por enquanto (sem banco de dados).
+     Para ligar: tirar "sem-lista" do body e configurar a Upstash na Vercel. -->
+<body class="landing sem-lista">
+  <a class="pular" href="#lista" data-lista>Pular para a lista de espera</a>
+  <a class="pular" href="#experimente" data-sem-lista>Pular para o app</a>
   <header class="barra-landing">
     <a class="barra-landing__marca" href="#topo">Lumi</a>
     <a class="barra-landing__link" href="/">Abrir o app</a>
@@ -46,7 +49,12 @@
         <h1 class="hero__titulo" id="hero-titulo">Use a tela a favor do estudo.</h1>
         <p class="hero__sub">O Lumi transforma a foto do caderno em uma missão com perguntas, pontos e a voz da família. Seu filho revisa para a prova jogando, e você acompanha sem virar professora à noite.</p>
 
-        <form class="form-curto" id="form-curto" novalidate>
+        <div class="hero__acoes" data-sem-lista>
+          <a class="botao-principal" href="#experimente">Experimente agora</a>
+          <a class="botao-secundario" href="/">Abrir o app</a>
+        </div>
+
+        <form class="form-curto" id="form-curto" novalidate data-lista>
           <label class="rotulo" for="curto-email">Seu e-mail</label>
           <div class="form-curto__linha">
             <input class="campo" type="email" id="curto-email" name="email" autocomplete="email" inputmode="email" placeholder="voce@email.com" required aria-describedby="curto-erro">
@@ -60,7 +68,7 @@
           <p class="nota">Grátis para começar. Lançamento em breve. Ninguém é cobrado agora.</p>
         </form>
 
-        <a class="link-seta" href="#experimente">Experimente agora ↓</a>
+        <a class="link-seta" href="#experimente" data-lista>Experimente agora ↓</a>
       </div>
 
       <div class="hero__app" id="experimente">
@@ -114,7 +122,7 @@
             <li>Frases de incentivo gravadas com a voz da família</li>
             <li>Calendário de provas e Google Agenda</li>
           </ul>
-          <button type="button" class="botao-secundario plano__botao" data-plano="gratuito">Quero o gratuito</button>
+          <button type="button" class="botao-secundario plano__botao" data-plano="gratuito" data-lista>Quero o gratuito</button>
         </article>
 
         <article class="plano plano--destaque" aria-labelledby="plano-voz">
@@ -126,14 +134,15 @@
             <li>Voz digital da família, criada a partir de 30 segundos de gravação</li>
             <li>Os fatos das missões e as curiosidades narrados com essa voz (até 5 por dia)</li>
           </ul>
-          <button type="button" class="botao-principal plano__botao" data-plano="voz_familia">Quero a Voz da Família</button>
+          <button type="button" class="botao-principal plano__botao" data-plano="voz_familia" data-lista>Quero a Voz da Família</button>
         </article>
       </div>
-      <p class="nota nota--centro planos__nota">Lista de espera: ninguém é cobrado agora. A voz digital só é criada com autorização de quem grava e pode ser apagada a qualquer momento.</p>
+      <p class="nota nota--centro planos__nota" data-sem-lista>Preços de lançamento em teste. Ainda não há assinatura. A voz digital só é criada com autorização de quem grava e pode ser apagada a qualquer momento.</p>
+      <p class="nota nota--centro planos__nota" data-lista>Lista de espera: ninguém é cobrado agora. A voz digital só é criada com autorização de quem grava e pode ser apagada a qualquer momento.</p>
     </section>
 
     <!-- Lista de espera: formulário completo (só dados de quem é responsável) -->
-    <section class="secao lista" id="lista" aria-labelledby="lista-titulo">
+    <section class="secao lista" id="lista" aria-labelledby="lista-titulo" data-lista>
       <div class="lista__conteudo" id="lista-formulario">
         <h2 class="secao__titulo" id="lista-titulo">Seja das primeiras famílias.</h2>
 
@@ -246,7 +255,7 @@
     <p>Lumi · Cada acerto acende uma luz.</p>
     <nav class="rodape-landing__links" aria-label="Links do rodapé">
       <a href="/">Abrir o app</a>
-      <a href="#privacidade">Privacidade</a>
+      <a href="#privacidade" data-lista>Privacidade</a>
     </nav>
     <p class="rodape-landing__copia">© 2026</p>
   </footer>

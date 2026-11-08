@@ -175,26 +175,40 @@ lumi/
 │ ├── abertura.js tela de abertura (só na primeira visita da aba)
 │ ├── trilha.js textos e estado (nova ou feita) das paradas da trilha
 │ ├── resultado.js cartões, barra de nível e regra do "Ouvir o fato da Dóris"
-│ └── navegacao.js regra do voltar de Provas (volta para a tela de origem)
+│ ├── navegacao.js regra do voltar de Provas (volta para a tela de origem)
+│ └── vitrine.js modo vitrine (/?vitrine=1): o app dentro da landing
 ├── api/ funções no servidor (Vercel), as únicas que leem chaves
 │ ├── questoes.js chama o Claude (perguntas e fato curto)
 │ ├── curiosidade.js lê uma curiosidade a partir de imagem (Claude)
 │ ├── voz.js cria e apaga a voz digital na ElevenLabs
 │ ├── narrar.js narra o fato com a voz digital (ElevenLabs)
 │ ├── _elevenlabs.js ajudantes da ElevenLabs (o "_" não vira endereço)
+│ ├── leads.js lista de espera: POST grava, GET ?chave= mostra o resumo e o CSV (desligada)
+│ ├── interesse.js conta os cliques nos planos da landing (desligada)
+│ ├── _leads.js e _redis.js validação dos leads e Redis da Upstash por REST
 │ └── google/ _comum, login, callback, estado, criar-evento,
 │ criar-eventos (todas as provas) e desconectar
+├── conheca/ landing de apresentação (index.html, landing.css e landing.js)
 ├── data/curiosidades.json banco de 150 curiosidades
 ├── assets/ imagens da Lumi e da Dóris; recortes/ (mascotes sem fundo) e rede-neuronios.svg
 ├── testes/ testes automáticos: node --test testes/
 ├── docs/PROXIMA-SESSAO.md prompt para começar uma nova conversa
 ├── docs/PROMPT-LAYOUT.md especificação do layout (seções A a I)
 ├── docs/referencias/ imagens de referência do layout
+├── docs/PROMPT-LANDING.md especificação da landing (seções 1 a 10)
 ├── CONTEXTO.md este arquivo
 └── README.md
 ```
 
 **Telas em `index.html`:** abertura, inicio (trilha), fotoquest, disciplina, quiz, resultado, tabuada, narracao, pais (Área dos pais) e provas.
+
+**Landing (`/conheca/`):** apresentação do Lumi com o app funcionando dentro de um celular desenhado em CSS (`<iframe src="/?vitrine=1">`). Seções: hero, como funciona, voz da família e planos. A lista de espera está **desligada** (classe `sem-lista` no `<body>`): os formulários e os botões dos planos não aparecem. Para ligar: tirar `sem-lista` e configurar a Upstash (veja a seção 12). Preços de teste em `PRECOS`, no topo de `conheca/landing.js`.
+
+**Modo vitrine (`/?vitrine=1`, `js/vitrine.js`):**
+- O FotoQuest usa a missão de exemplo: nenhuma foto é enviada e a API do Claude não é chamada.
+- A voz digital (ElevenLabs), a leitura de curiosidade por imagem e o Google Agenda ficam desligados. A narração lê com a voz do aparelho.
+- Os dados ficam em outra chave (`lumi.vitrine.familia`), separados da família de verdade. O "Apagar dados" da vitrine não toca nos dados reais nem no Google.
+- Uma faixa fina embaixo leva para `/conheca/`. Fora da vitrine, nada muda.
 
 **Navegação:**
 - A barra de baixo (`#nav-principal`: Trilha, Tabuada, Provas, Ouvir e Pais) aparece só no Início, no menu da Tabuada, em Provas, na Narração e na Área dos pais, controlada por `App.mostrarTela`. O item "Ouvir" é o `#botao-voz-familia` e segue a regra de `Narracao.atualizarBotaoInicio()`.
@@ -262,7 +276,7 @@ lumi/
   Claude-Session: https://claude.ai/code/session_01MVYyXg6UiaydGP5yx6gGYm
   ```
 - Antes de qualquer `git push`, mostrar o diff e os comandos e aguardar confirmação.
-- Rodar `node --test testes/` antes de cada commit (142 testes passando em 8/11/2026). Se aparecer 1 falha estranha no Node 22, rodar `node --test testes/*.test.js`.
+- Rodar `node --test testes/` antes de cada commit (163 testes passando em 8/11/2026). Se aparecer 1 falha estranha no Node 22, rodar `node --test testes/*.test.js`.
 - Testar primeiro na prévia da branch e mostrar o resultado antes do merge.
 - Não criar bibliotecas novas sem perguntar antes.
 - Manter tudo em HTML, CSS e JavaScript puros, sem framework, a menos que a usuária autorize.
@@ -290,6 +304,8 @@ lumi/
 | Prévia | https://lumi-git-estrutura-inicial-gaia-3fba.vercel.app | `estrutura-inicial` |
 
 - Variáveis (só os nomes; os valores ficam na Vercel): `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI`.
+- **Limite do plano gratuito da Vercel: no máximo 12 funções em `api/`** (arquivos sem "_" no nome). Hoje são 12. Uma função nova precisa entrar num arquivo existente ou exige plano pago; passar do limite faz o deploy falhar.
+- Lista de espera (desligada): para ligar, criar o banco **Upstash** (Storage → Create Database → Upstash → Redis; não o "Redis Cloud", que não usa REST), que gera `KV_REST_API_URL` e `KV_REST_API_TOKEN`, e criar `LEADS_SAL` e `LEADS_CHAVE`. Atenção: o plano grátis da Upstash pela Vercel não tem persistência.
 - Cada variável precisa estar marcada no ambiente certo (Production e/ou Preview). Depois de mudar uma variável, fazer **Redeploy**.
 - `GOOGLE_REDIRECT_URI`: na produção, `https://lumi-psi-nine.vercel.app/api/google/callback`; na prévia, `https://lumi-git-estrutura-inicial-gaia-3fba.vercel.app/api/google/callback`. Os dois endereços estão cadastrados no cliente OAuth "Lumi Web" do Google Cloud.
 - `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` precisam vir do **mesmo** cliente ("Lumi Web"). Se não vierem, o login falha com `invalid_client`.
@@ -320,5 +336,7 @@ lumi/
 
 - Navegação (PR #8): voltar para a capa pela trilha, Provas na barra de baixo e voltar de Provas para a tela de origem.
 - Testado na prévia pela usuária: Google Agenda, voz digital, "Minha voz", "Leia comigo", desktop e a navegação nova.
+- Correção (PR #10): o "Ouvir" aparece sempre e, sem voz digital, a narração abre nas curiosidades (voz do aparelho) com o botão "Criar a voz da família".
+- Landing de apresentação em `/conheca/` com o app em modo vitrine. A lista de espera e a coleta de e-mails ficaram prontas no código, mas desligadas.
 
 **Fica para depois ("Em breve" no vídeo):** mapa dos Mundos, Chefão, sequência de dias, medalhas de missão, Turminha, login e assinatura, reforço automático. O teclado numérico na tela da Tabuada (opcional) não foi feito.
