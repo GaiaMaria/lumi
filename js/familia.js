@@ -243,9 +243,43 @@ const Familia = (() => {
     return opcoes[0] || null;
   }
 
+  // ---------- datas de prova ----------
+  // Só o que a família digitou: nome da prova, matéria, dia e horário (sem foto, sem nomes).
+
+  function provas() {
+    const dados = ler();
+    if (!Array.isArray(dados.provas)) dados.provas = [];
+    return dados.provas;
+  }
+
+  function salvarProva({ nome, materia, materiaNome, data, hora }) {
+    const prova = { id: gerarId(), nome, materia, materiaNome, data, hora, criadaEm: new Date().toISOString(), noGoogle: false };
+    provas().push(prova);
+    gravar();
+    return prova;
+  }
+
+  function marcarProvaNoGoogle(id) {
+    const prova = provas().find((p) => p.id === id);
+    if (prova) {
+      prova.noGoogle = true;
+      gravar();
+    }
+  }
+
+  function removerProva(id) {
+    const dados = ler();
+    dados.provas = provas().filter((p) => p.id !== id);
+    gravar();
+  }
+
   return {
     id: lerId,
     garantirId,
+    provas,
+    salvarProva,
+    marcarProvaNoGoogle,
+    removerProva,
     vozDigital,
     salvarVozDigital,
     removerVozDigital,

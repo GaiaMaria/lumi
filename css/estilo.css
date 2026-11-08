@@ -1322,6 +1322,256 @@ figure {
   pointer-events: none;
 }
 
+/* Provas: calendário mensal */
+
+/* Cor de cada matéria (só variáveis da paleta) */
+.calendario__luz--portugues, .icone-materia--portugues, .cartao-prova--portugues { --cor-materia: var(--info); }
+.calendario__luz--matematica, .icone-materia--matematica, .cartao-prova--matematica { --cor-materia: var(--atencao); }
+.calendario__luz--ciencias, .icone-materia--ciencias, .cartao-prova--ciencias { --cor-materia: var(--sucesso); }
+.calendario__luz--geografia, .icone-materia--geografia, .cartao-prova--geografia { --cor-materia: var(--doris); }
+.calendario__luz--outra, .icone-materia--outra, .cartao-prova--outra { --cor-materia: var(--brilho); }
+
+.icone-materia {
+  flex-shrink: 0;
+  stroke: var(--cor-materia);
+  fill: none;
+}
+
+.calendario {
+  padding: var(--espaco-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1-5);
+}
+
+.calendario__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+}
+
+.calendario__mes {
+  font-size: var(--fonte-1-15);
+  font-weight: 800;
+  text-align: center;
+}
+
+.calendario__seta {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: var(--altura-44);
+  height: var(--altura-44);
+  border: var(--traco-fino) solid var(--vidro-borda);
+  border-radius: var(--raio-pilula);
+  background: var(--vidro-forte);
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.calendario__seta:focus-visible {
+  outline: var(--foco-largura) solid var(--texto);
+  outline-offset: var(--foco-distancia-2);
+}
+
+.calendario__grade {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1);
+}
+
+.calendario__semana {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--espaco-1);
+}
+
+.calendario__semana--nomes span {
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-8);
+  font-weight: 800;
+  text-align: center;
+}
+
+.calendario__dia {
+  appearance: none;
+  position: relative;
+  aspect-ratio: 1;
+  min-height: var(--altura-44);
+  padding: var(--espaco-0-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--espaco-0-5);
+  border: var(--traco-fino) solid transparent;
+  border-radius: var(--raio-sm);
+  background: var(--vidro);
+  color: var(--texto);
+  font: inherit;
+  cursor: pointer;
+}
+
+.calendario__dia--vazio {
+  background: transparent;
+  cursor: default;
+}
+
+.calendario__dia:focus-visible {
+  outline: var(--foco-largura) solid var(--texto);
+  outline-offset: var(--foco-distancia-1);
+}
+
+.calendario__numero {
+  font-size: var(--fonte-0-95);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+/* Hoje: um anel */
+.calendario__dia--hoje {
+  box-shadow: inset 0 0 0 var(--traco-medio) var(--brilho);
+}
+
+.calendario__dia--prova {
+  background: var(--vidro-forte);
+  border-color: var(--vidro-borda);
+}
+
+.calendario__dia--aberto {
+  border-color: var(--texto);
+}
+
+.calendario__marcas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaco-0-5);
+}
+
+/* Pequena luz com brilho na cor da matéria */
+.calendario__luz {
+  position: absolute;
+  top: var(--espaco-0-5);
+  right: var(--espaco-0-5);
+  width: var(--tamanho-8);
+  height: var(--tamanho-8);
+  border-radius: var(--raio-pilula);
+  background: var(--cor-materia);
+  box-shadow: 0 0 var(--espaco-2) var(--cor-materia);
+}
+
+.calendario__mais {
+  font-size: var(--fonte-0-8);
+  font-weight: 800;
+  color: var(--texto-suave);
+}
+
+/* Cartão do dia */
+.cartao-dia {
+  padding: var(--espaco-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+.cartao-prova__dia {
+  font-size: var(--fonte-1-1);
+  font-weight: 800;
+}
+
+.cartao-prova {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2-5);
+  padding: var(--espaco-3);
+  border-radius: var(--raio-lg);
+  background: var(--vidro-forte);
+  border-left: var(--traco-grosso) solid var(--cor-materia);
+}
+
+.cartao-prova__cabeca {
+  display: flex;
+  align-items: center;
+  gap: var(--espaco-3);
+}
+
+.cartao-prova__icone {
+  display: grid;
+  place-items: center;
+  width: var(--tamanho-56);
+  height: var(--tamanho-56);
+  flex-shrink: 0;
+  border-radius: var(--raio-md);
+  background: var(--fundo-escuro);
+}
+
+.cartao-prova__nome {
+  margin: 0;
+  font-size: var(--fonte-1-1);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.cartao-prova__detalhe {
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-95);
+}
+
+.cartao-prova__aviso {
+  padding: var(--espaco-2) var(--espaco-3);
+  border-radius: var(--raio-sm);
+  background: var(--fundo-escuro);
+  font-size: var(--fonte-0-95);
+  font-weight: 700;
+}
+
+.cartao-prova__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaco-2);
+}
+
+/* Formulário da prova */
+.campo-rotulo {
+  color: var(--texto-suave);
+  font-weight: 700;
+}
+
+.campo-texto {
+  width: 100%;
+  min-height: var(--altura-48);
+  padding: var(--espaco-2-5) var(--espaco-3-5);
+  border: var(--traco-fino) solid var(--vidro-borda);
+  border-radius: var(--raio-sm);
+  background: var(--fundo-escuro);
+  color: var(--texto);
+  font: inherit;
+  font-size: var(--fonte-1);
+  color-scheme: dark;
+}
+
+.campo-texto:focus-visible {
+  outline: var(--foco-largura) solid var(--texto);
+  outline-offset: var(--foco-distancia-2);
+}
+
+.campos-lado-a-lado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--espaco-3);
+}
+
+.campos-lado-a-lado > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-1-5);
+  min-width: 0;
+}
+
 /* Área dos pais: Minha voz */
 .voz-area {
   display: flex;

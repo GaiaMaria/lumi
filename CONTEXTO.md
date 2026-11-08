@@ -96,6 +96,7 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 - **Chave da API do Claude nunca no código.** Fica na variável `ANTHROPIC_API_KEY`, na Vercel, e é lida somente em `api/questoes.js`.
 - **Chave da ElevenLabs nunca no código.** Fica na variável `ELEVENLABS_API_KEY`, na Vercel, e é lida somente em `api/voz.js` e `api/narrar.js`. Nunca no frontend, nunca em log, nunca no repositório.
 - Arquivo `.env` sempre no `.gitignore`.
+- **Google Agenda:** OAuth 2.0 com o escopo `https://www.googleapis.com/auth/calendar.events`, variáveis `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI` na Vercel. O refresh token fica só num cookie httpOnly, Secure, SameSite=Lax e criptografado (AES-256-GCM, chave derivada de `GOOGLE_CLIENT_SECRET`), limitado a `/api/google`. Nunca em localStorage e nunca em log. O título do evento tem só a matéria e o nome da prova. "Apagar dados da família" também revoga o acesso no Google.
 - Foto enviada pela criança é processada na função e não é armazenada no servidor na versão de demonstração.
 - Para o piloto real (Corujinha), será necessário termo de consentimento dos responsáveis, conforme a LGPD (art. 14). Isso fica fora do link de domingo.
 
@@ -131,11 +132,12 @@ lumi/
 │ ├── tabuada.js treinos de multiplicação (contas no código)
 │ ├── pontos.js pontos, níveis e medalhas
 │ ├── voz.js gravação, consentimento e narração
-│ └── calendario.js provas e revisão (se houver tempo)
+│ ├── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
 ├── api/
 │ ├── questoes.js função no servidor que chama o Claude (perguntas e fato)
 │ ├── voz.js função no servidor que cria e apaga a voz digital na ElevenLabs
-│ └── narrar.js função no servidor que narra o fato com a voz digital (ElevenLabs)
+│ ├── narrar.js função no servidor que narra o fato com a voz digital (ElevenLabs)
+│ └── google/ login, callback, criar-evento e desconectar (Google Agenda)
 ├── assets/ imagens da Lumi, da Dóris e da referência
 ├── CONTEXTO.md este arquivo
 └── README.md

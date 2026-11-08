@@ -17,6 +17,7 @@ const App = (() => {
       Narracao.atualizarAreaDosPais();
     }
     else MinhaVoz.sair(); // para uma gravação em andamento ao sair
+    if (nome === 'provas') Calendario.abrir();
     if (nome === 'narracao') Narracao.abrir();
     else Narracao.sair();
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
@@ -437,7 +438,7 @@ const Inicio = (() => {
 
   el.apagar.addEventListener('click', async () => {
     const ok = window.confirm(
-      'Apagar todas as perguntas, o progresso, as gravações de voz e a voz digital da família (também na ElevenLabs)? Isso não pode ser desfeito.',
+      'Apagar todas as perguntas, o progresso, as provas, as gravações de voz e a voz digital da família (também na ElevenLabs), e desconectar o Google Agenda? Isso não pode ser desfeito.',
     );
     if (!ok) return;
     const familia = Familia.id(); // guarda antes de apagar, para achar os áudios
@@ -449,6 +450,7 @@ const Inicio = (() => {
       el.mensagem.textContent = vozDigital.mensagem;
       return;
     }
+    await Calendario.desconectarGoogle({ silencioso: true }); // cancela o acesso ao Google Agenda, se houver
     Familia.apagarTudo();
     let audiosApagados = true;
     try {
@@ -458,10 +460,13 @@ const Inicio = (() => {
     }
     atualizar();
     el.mensagem.textContent = audiosApagados
-      ? 'Pronto. Os dados, as gravações e a voz digital da família foram apagados.'
+      ? 'Pronto. Os dados, as provas, as gravações e a voz digital da família foram apagados, e o Google Agenda foi desconectado.'
       : 'Os dados foram apagados, mas não consegui apagar as gravações. Tente de novo.';
   });
 
   atualizar();
   return { atualizar };
 })();
+
+// Volta do login do Google Agenda (?google=...).
+Calendario.aoVoltarDoGoogle();
