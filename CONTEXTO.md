@@ -96,7 +96,7 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 - **Chave da API do Claude nunca no código.** Fica na variável `ANTHROPIC_API_KEY`, na Vercel, e é lida somente em `api/questoes.js`.
 - **Chave da ElevenLabs nunca no código.** Fica na variável `ELEVENLABS_API_KEY`, na Vercel, e é lida somente em `api/voz.js` e `api/narrar.js`. Nunca no frontend, nunca em log, nunca no repositório.
 - Arquivo `.env` sempre no `.gitignore`.
-- **Google Agenda:** OAuth 2.0 com o escopo `https://www.googleapis.com/auth/calendar.events`, variáveis `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI` na Vercel. O refresh token fica só num cookie httpOnly, Secure, SameSite=Lax e criptografado (AES-256-GCM, chave derivada de `GOOGLE_CLIENT_SECRET`), limitado a `/api/google`. Nunca em localStorage e nunca em log. O título do evento tem só a matéria e o nome da prova. "Apagar dados da família" também revoga o acesso no Google.
+- **Google Agenda:** OAuth 2.0 com o escopo `https://www.googleapis.com/auth/calendar.events`, variáveis `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI` na Vercel. O refresh token fica só num cookie httpOnly, Secure, SameSite=Lax e criptografado (AES-256-GCM, chave derivada de `GOOGLE_CLIENT_SECRET`), limitado a `/api/google`. Nunca em localStorage e nunca em log. O título do evento tem só a matéria e o nome da prova, nunca o nome da criança nem da escola. Se o envio falhar, o app oferece um arquivo `.ics`. "Apagar dados da família" também revoga o acesso no Google.
 - Foto enviada pela criança é processada na função e não é armazenada no servidor na versão de demonstração.
 - Para o piloto real (Corujinha), será necessário termo de consentimento dos responsáveis, conforme a LGPD (art. 14). Isso fica fora do link de domingo.
 
@@ -123,25 +123,43 @@ Briefing do projeto Lumi. Leia este arquivo inteiro antes de criar ou alterar qu
 
 ```
 lumi/
-├── index.html tela inicial e navegação entre telas
+├── index.html todas as telas (uma <section id="tela-..."> por tela)
 ├── css/
-│ └── estilo.css variáveis da paleta e estilos gerais
+│ └── estilo.css variáveis da paleta, tamanhos e estilos gerais
 ├── js/
-│ ├── app.js controle das telas e navegação
+│ ├── app.js controle das telas e navegação (App.mostrarTela)
+│ ├── familia.js dados da família no aparelho (localStorage por família)
+│ ├── fotos.js FotoQuest: fotos do material e envio para api/questoes
 │ ├── quiz.js perguntas, respostas e feedback
-│ ├── tabuada.js treinos de multiplicação (contas no código)
 │ ├── pontos.js pontos, níveis e medalhas
-│ ├── voz.js gravação, consentimento e narração
-│ ├── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
-├── api/
-│ ├── questoes.js função no servidor que chama o Claude (perguntas e fato)
-│ ├── voz.js função no servidor que cria e apaga a voz digital na ElevenLabs
-│ ├── narrar.js função no servidor que narra o fato com a voz digital (ElevenLabs)
-│ └── google/ login, callback, criar-evento e desconectar (Google Agenda)
-├── assets/ imagens da Lumi, da Dóris e da referência
+│ ├── tabuada.js treinos de multiplicação (contas no código)
+│ ├── voz.js Leia comigo, frases gravadas pela família (IndexedDB)
+│ ├── narracao.js voz digital da família (ElevenLabs) e teleprompter
+│ ├── curiosidades.js sorteio e busca de curiosidades sem repetir
+│ └── calendario.js provas: calendário mensal, Google Agenda e arquivo .ics
+├── api/ funções no servidor (Vercel), as únicas que leem chaves
+│ ├── questoes.js chama o Claude (perguntas e fato curto)
+│ ├── curiosidade.js lê uma curiosidade a partir de imagem (Claude)
+│ ├── voz.js cria e apaga a voz digital na ElevenLabs
+│ ├── narrar.js narra o fato com a voz digital (ElevenLabs)
+│ ├── _elevenlabs.js ajudantes da ElevenLabs (o "_" não vira endereço)
+│ └── google/ _comum, login, callback, estado, criar-evento,
+│ criar-eventos (todas as provas) e desconectar
+├── data/curiosidades.json banco de 150 curiosidades
+├── assets/ imagens da Lumi e da Dóris (doris-livro.jpg na tela Provas)
+├── testes/ testes automáticos: node --test testes/
+├── docs/PROXIMA-SESSAO.md prompt para começar uma nova conversa
 ├── CONTEXTO.md este arquivo
 └── README.md
 ```
+
+**Telas em `index.html`:** inicio, fotoquest, disciplina, quiz, resultado, tabuada, narracao, pais (Área dos pais) e provas.
+
+**Onde cada dado fica:**
+- `localStorage`: `lumi.familia` guarda o ID da família, e `lumi.familia.<id>` guarda pontos, missões, tabuada, provas e o ID da voz digital.
+- `IndexedDB` (`lumi-voz`): frases gravadas pela família.
+- `sessionStorage` (`lumi.google.pendente`): lembra de enviar as provas depois do login no Google.
+- Cookies httpOnly em `/api/google`: estado do login (10 min) e refresh token criptografado (180 dias).
 
 ## 8. Contrato da API de questões (`api/questoes.js`)
 
@@ -187,9 +205,17 @@ lumi/
 
 ## 9. Regras de trabalho com o código
 
-- Construir uma tela por vez, e fazer commit a cada tela pronta.
-- Mensagens de commit em português, por exemplo "Adiciona tela de tabuada".
-- Antes de qualquer `git push`, mostrar os comandos e aguardar confirmação.
+- Trabalhar na branch `estrutura-inicial`, nunca na `main`. A `main` publica em produção.
+- Só fazer o merge na `main` depois da confirmação da usuária, por pull request (como os PRs #1 a #6).
+- Construir uma tela por vez, e fazer commits pequenos a cada passo pronto.
+- Mensagens de commit em português, por exemplo "Adiciona tela de tabuada", terminando com as duas linhas de rodapé combinadas:
+  ```
+  Co-Authored-By: Claude Haiku 5.5 <noreply@anthropic.com>
+  Claude-Session: https://claude.ai/code/session_01MVYyXg6UiaydGP5yx6gGYm
+  ```
+- Antes de qualquer `git push`, mostrar o diff e os comandos e aguardar confirmação.
+- Rodar `node --test testes/` antes de cada commit (119 testes passando em 8/11/2026).
+- Testar primeiro na prévia da branch e mostrar o resultado antes do merge.
 - Não criar bibliotecas novas sem perguntar antes.
 - Manter tudo em HTML, CSS e JavaScript puros, sem framework, a menos que a usuária autorize.
 - Ao terminar cada tarefa, listar os arquivos alterados e o que falta.
@@ -207,3 +233,30 @@ lumi/
 - **1:20–2:00, como foi construído:** Claude (leitura da foto, perguntas e fato), voz gravada no aparelho e voz digital da família (ElevenLabs), Claude Design ou Lovable (landing), GitHub e Vercel (publicação).
 - **2:00–2:30, próximos passos:** Turminha, assinatura, calendário, piloto na Escola Corujinha e adequação à LGPD.
 - Marcar "Em breve" nas funções que não estão no link.
+
+## 12. Ambientes e variáveis (Vercel)
+
+| Ambiente | Endereço | Branch |
+|---|---|---|
+| Produção | https://lumi-psi-nine.vercel.app | `main` |
+| Prévia | https://lumi-git-estrutura-inicial-gaia-3fba.vercel.app | `estrutura-inicial` |
+
+- Variáveis (só os nomes; os valores ficam na Vercel): `ANTHROPIC_API_KEY`, `ELEVENLABS_API_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` e `GOOGLE_REDIRECT_URI`.
+- Cada variável precisa estar marcada no ambiente certo (Production e/ou Preview). Depois de mudar uma variável, fazer **Redeploy**.
+- `GOOGLE_REDIRECT_URI`: na produção, `https://lumi-psi-nine.vercel.app/api/google/callback`; na prévia, `https://lumi-git-estrutura-inicial-gaia-3fba.vercel.app/api/google/callback`. Os dois endereços estão cadastrados no cliente OAuth "Lumi Web" do Google Cloud.
+- `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET` precisam vir do **mesmo** cliente ("Lumi Web"). Se não vierem, o login falha com `invalid_client`.
+- O app do Google está em modo de teste: só os e-mails de teste cadastrados conseguem entrar.
+- `/api/google/estado` mostra, sem segredos, se o Google está configurado, se há login e para qual endereço o Google volta.
+
+## 13. Estado atual (8/11/2026)
+
+**Em produção (merge do PR #6) e funcionando:**
+- FotoQuest e quiz com cinco tipos de pergunta, pontos e medalhas.
+- Tabuada com quatro modos, medalhas e níveis.
+- Leia comigo (voz do aparelho), frases gravadas pela família e voz digital da família (ElevenLabs) com teleprompter.
+- Banco de 150 curiosidades e leitura de curiosidade a partir de imagem.
+- Tela Provas: calendário mensal com a Dóris, ícones por matéria e cadastro só com a matéria ("Outra" pede o nome).
+- Google Agenda: um botão "Enviar N provas para o Google Agenda", um login só, sem duplicar provas já enviadas. Se falhar, oferece `.ics` com todas as provas. Mensagens de erro mostram um código curto (ex.: `invalid_client`).
+- Testado na prévia: login, criação dos eventos, login cancelado e token expirado.
+
+**Próxima etapa:** layout (melhorar a aparência das telas), usando só as variáveis de `css/estilo.css`.
