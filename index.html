@@ -12,6 +12,7 @@
   <script src="js/voz.js" defer></script>
   <script src="js/quiz.js" defer></script>
   <script src="js/tabuada.js" defer></script>
+  <script src="js/curiosidades.js" defer></script>
   <script src="js/narracao.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -118,6 +119,7 @@
             <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
             <span id="narracao-tocar-texto">Ouvir</span>
           </button>
+          <button type="button" class="botao-secundario" id="narracao-aleatoria">Curiosidade aleatória</button>
           <p class="campo__ajuda" id="narracao-restantes"></p>
 
           <details class="outro-texto vidro" id="narracao-outro">
@@ -133,8 +135,6 @@
               <button type="button" class="botao-principal" id="narracao-ler-texto">Ler esta curiosidade</button>
             </div>
           </details>
-          <button type="button" class="botao-secundario" id="narracao-regravar" hidden>Gravar a voz de novo</button>
-          <button type="button" class="botao-apagar" id="narracao-apagar-voz" hidden>Apagar a voz digital</button>
         </div>
       </div>
     </section>
@@ -147,6 +147,13 @@
       </div>
 
       <div class="conteudo">
+        <section class="campo vidro" aria-labelledby="titulo-voz-digital">
+          <h2 class="campo__titulo" id="titulo-voz-digital">Voz digital da família</h2>
+          <p class="campo__ajuda" id="pais-voz-digital-estado"></p>
+          <button type="button" class="botao-secundario" id="narracao-regravar" hidden>Gravar a voz de novo</button>
+          <button type="button" class="botao-apagar" id="narracao-apagar-voz" hidden>Apagar a voz digital</button>
+        </section>
+
         <section class="campo vidro" aria-labelledby="titulo-minha-voz">
           <h2 class="campo__titulo" id="titulo-minha-voz">Minha voz</h2>
           <p class="campo__ajuda">Grave as frases com a sua voz. Elas tocam durante as missões. Os áudios ficam só neste aparelho.</p>

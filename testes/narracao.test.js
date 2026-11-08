@@ -42,15 +42,11 @@ test('tempo estimado cresce com o número de caracteres', () => {
   assert.strictEqual(TextoNarrado.estimativaSegundos(300), 19);
 });
 
-test('palavras e linhas curtas, sem perder nenhuma palavra', () => {
+test('palavras com a posição de cada uma, sem perder nenhuma', () => {
   const texto = 'A água que você bebe hoje já pode ter sido nuvem, chuva e até gelo muitas vezes.';
   const palavras = TextoNarrado.palavras(texto);
-  const linhas = TextoNarrado.linhas(palavras);
-  assert.strictEqual(linhas.flat().length, palavras.length);
-  linhas.forEach((linha) => {
-    const tamanho = linha.map((i) => palavras[i].palavra).join(' ').length;
-    assert.ok(tamanho <= 22 || linha.length === 1, `linha longa: ${tamanho}`);
-  });
+  assert.strictEqual(palavras.map((p) => p.palavra).join(' '), texto);
+  palavras.forEach((p) => assert.strictEqual(texto.slice(p.inicio, p.fim), p.palavra));
 });
 
 test('tempo de cada palavra vem do alinhamento por caractere', () => {

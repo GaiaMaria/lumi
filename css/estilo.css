@@ -1232,27 +1232,12 @@ figure {
   gap: var(--espaco-2);
 }
 
-.teleprompter__dica {
-  margin: auto 0;
-  color: var(--texto-suave);
-  font-size: var(--fonte-1-05);
-  text-align: center;
-}
-
-.teleprompter__linha {
+.teleprompter__texto {
+  margin: 0;
+  width: 100%;
   font-size: var(--fonte-1-3);
   font-weight: 800;
-  line-height: 1.35;
-  color: var(--texto-suave);
-  transition: opacity var(--duracao-media) ease, transform var(--duracao-media) ease;
-}
-
-.teleprompter__linha--oculta {
-  opacity: 0;
-  transform: translateY(var(--espaco-2));
-}
-
-.teleprompter__linha--atual {
+  line-height: 1.45;
   color: var(--texto);
 }
 
@@ -1263,7 +1248,7 @@ figure {
 }
 
 .teleprompter__palavra--falada {
-  color: var(--texto);
+  color: var(--texto-suave);
 }
 
 .teleprompter__palavra--agora {
@@ -1272,14 +1257,9 @@ figure {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .teleprompter__linha,
   .teleprompter__palavra,
   .progresso-estimado__barra {
     transition: none;
-  }
-
-  .teleprompter__linha--oculta {
-    transform: none;
   }
 }
 

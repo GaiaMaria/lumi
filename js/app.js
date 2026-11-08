@@ -12,7 +12,10 @@ const App = (() => {
     Voz.parar(); // não deixa a leitura continuar em outra tela
     if (nome === 'tabuada') Tabuada.abrir();
     else Tabuada.parar(); // para o relógio do desafio ao sair
-    if (nome === 'pais') MinhaVoz.abrir();
+    if (nome === 'pais') {
+      MinhaVoz.abrir();
+      Narracao.atualizarAreaDosPais();
+    }
     else MinhaVoz.sair(); // para uma gravação em andamento ao sair
     if (nome === 'narracao') Narracao.abrir();
     else Narracao.sair();

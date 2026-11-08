@@ -220,7 +220,27 @@ const Familia = (() => {
   // Fato da missão mais recente que tem fato.
   function ultimoFato() {
     const missao = ler().missoes.find((m) => typeof m.fato === 'string' && m.fato.trim());
-    return missao ? { texto: missao.fato, disciplinaNome: missao.disciplinaNome } : null;
+    return missao ? { texto: missao.fato, disciplinaNome: missao.disciplinaNome, criadaEm: missao.criadaEm } : null;
+  }
+
+  // Curiosidade que a família enviou por uma imagem na tela de leitura (só o texto).
+  function salvarCuriosidadeEnviada(texto) {
+    const dados = ler();
+    dados.curiosidadeEnviada = { texto, criadaEm: new Date().toISOString() };
+    gravar();
+  }
+
+  // A curiosidade mais recente que veio das fotos da família: da missão ou de uma imagem enviada.
+  function curiosidadeDasFotos() {
+    const daMissao = ultimoFato();
+    const enviada = ler().curiosidadeEnviada;
+    const opcoes = [];
+    if (daMissao) opcoes.push({ texto: daMissao.texto, criadaEm: daMissao.criadaEm, origem: `Um fato da sua missão de ${daMissao.disciplinaNome}:` });
+    if (enviada && typeof enviada.texto === 'string' && enviada.texto.trim()) {
+      opcoes.push({ texto: enviada.texto, criadaEm: enviada.criadaEm, origem: 'A curiosidade que vocês enviaram:' });
+    }
+    opcoes.sort((a, b) => String(b.criadaEm).localeCompare(String(a.criadaEm)));
+    return opcoes[0] || null;
   }
 
   return {
@@ -232,6 +252,8 @@ const Familia = (() => {
     narracoesHoje,
     registrarNarracao,
     ultimoFato,
+    salvarCuriosidadeEnviada,
+    curiosidadeDasFotos,
     consentimentoVoz,
     registrarConsentimentoVoz,
     salvarMissao,

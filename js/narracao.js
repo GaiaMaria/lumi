@@ -9,8 +9,6 @@ const LIMITE_NARRACOES_POR_DIA = 5;
 // ---------- partes sem tela (testadas no Node) ----------
 
 const TextoNarrado = (() => {
-  const LETRAS_POR_LINHA = 22; // cabe numa linha do celular (375 px)
-
   // Palavras com a posição de cada uma no texto: [{ palavra, inicio, fim }].
   function palavras(texto) {
     const lista = [];
@@ -21,25 +19,6 @@ const TextoNarrado = (() => {
       m = busca.exec(texto);
     }
     return lista;
-  }
-
-  // Junta as palavras em linhas curtas: [[índices das palavras], ...].
-  function linhas(listaDePalavras, letras = LETRAS_POR_LINHA) {
-    const resultado = [];
-    let atual = [];
-    let tamanho = 0;
-    listaDePalavras.forEach((p, i) => {
-      const extra = atual.length ? 1 : 0;
-      if (atual.length && tamanho + extra + p.palavra.length > letras) {
-        resultado.push(atual);
-        atual = [];
-        tamanho = 0;
-      }
-      tamanho += (atual.length ? 1 : 0) + p.palavra.length;
-      atual.push(i);
-    });
-    if (atual.length) resultado.push(atual);
-    return resultado;
   }
 
   // Liga cada letra do texto à letra do alinhamento (pulando espaços).
@@ -99,7 +78,7 @@ const TextoNarrado = (() => {
     return Math.round(4 + caracteres * 0.05);
   }
 
-  return { palavras, linhas, tempos, palavraNoTempo, palavraNaPosicao, estimativaSegundos };
+  return { palavras, tempos, palavraNoTempo, palavraNaPosicao, estimativaSegundos };
 })();
 
 // ---------- tela ----------
@@ -148,7 +127,9 @@ const Narracao = (() => {
     imagem: $('narracao-imagem'),
     imagemRotulo: $('narracao-imagem-rotulo'),
     lerTexto: $('narracao-ler-texto'),
+    aleatoria: $('narracao-aleatoria'),
     apagarVoz: $('narracao-apagar-voz'),
+    estadoNosPais: $('pais-voz-digital-estado'),
     regravar: $('narracao-regravar'),
     botaoInicio: $('botao-voz-familia'),
   };
@@ -160,7 +141,6 @@ const Narracao = (() => {
   let quadro = null;
   let tocando = false;
   let palavrasNaTela = [];
-  let linhasNaTela = [];
 
   // ---------- utilidades ----------
 
@@ -185,10 +165,19 @@ const Narracao = (() => {
     return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   }
 
-  function fatoAtual() {
-    const fato = Familia.ultimoFato();
-    if (fato) return { texto: fato.texto, origem: `Um fato da sua missão de ${fato.disciplinaNome}:` };
-    return { texto: Quiz.FATO_DEMO, origem: 'Um fato de exemplo. Faça uma missão para ouvir um fato do seu caderno:' };
+  // Curiosidade sorteada do banco, com a origem para mostrar na tela.
+  async function curiosidadeSorteada() {
+    const item = await sortearCuriosidade();
+    if (!item) return { texto: Quiz.FATO_DEMO, origem: 'Uma curiosidade:' };
+    return { texto: item.texto, origem: `Uma curiosidade sobre ${Curiosidades.nomeDoTema(item.tema)}:` };
+  }
+
+  // Prioridade: a curiosidade que a família enviou pelas fotos (a mais recente,
+  // da missão ou da imagem enviada aqui). Só sorteia quando não houver nenhuma.
+  async function fatoAtual() {
+    const enviada = Familia.curiosidadeDasFotos();
+    if (enviada) return { texto: enviada.texto, origem: enviada.origem };
+    return curiosidadeSorteada();
   }
 
   function atualizarRestantes() {
@@ -197,8 +186,6 @@ const Narracao = (() => {
     el.restantes.textContent = Familia.vozDigital()
       ? `Narrações com a voz da família hoje: ${usadas} de ${LIMITE_NARRACOES_POR_DIA}${restam ? '' : ' (amanhã tem mais)'}.`
       : '';
-    el.apagarVoz.hidden = !Familia.vozDigital();
-    el.regravar.hidden = !Familia.vozDigital();
   }
 
   // Botão da tela inicial: aparece se houver voz em português no aparelho (para o plano B)
@@ -236,51 +223,34 @@ const Narracao = (() => {
 
   // ---------- teleprompter ----------
 
-  // Antes de tocar: uma dica no lugar do texto (as linhas aparecem durante a leitura).
-  function mostrarDica() {
-    const dica = document.createElement('p');
-    dica.className = 'teleprompter__dica';
-    dica.textContent = 'Toque em Ouvir. As palavras aparecem aqui enquanto o fato é lido.';
-    el.teleprompter.replaceChildren(dica);
-  }
-
+  // O texto aparece inteiro, em um parágrafo na largura do cartão (sem quebra de linha forçada).
+  // Durante a leitura, a palavra falada fica destacada e as já lidas ficam mais claras.
   function montarTeleprompter(texto) {
     const lista = TextoNarrado.palavras(texto);
-    const grupos = TextoNarrado.linhas(lista);
-    palavrasNaTela = [];
-    linhasNaTela = grupos.map((indices) => {
-      const linha = document.createElement('p');
-      linha.className = 'teleprompter__linha teleprompter__linha--oculta';
-      indices.forEach((i, posicao) => {
-        const span = document.createElement('span');
-        span.className = 'teleprompter__palavra';
-        span.textContent = lista[i].palavra;
-        palavrasNaTela[i] = { span, linha };
-        linha.append(span);
-        if (posicao < indices.length - 1) linha.append(' ');
-      });
-      return linha;
+    const paragrafo = document.createElement('p');
+    paragrafo.className = 'teleprompter__texto';
+    palavrasNaTela = lista.map((p, i) => {
+      const span = document.createElement('span');
+      span.className = 'teleprompter__palavra';
+      span.textContent = p.palavra;
+      paragrafo.append(span);
+      if (i < lista.length - 1) paragrafo.append(' ');
+      return span;
     });
-    el.teleprompter.replaceChildren(...linhasNaTela);
+    el.teleprompter.replaceChildren(paragrafo);
   }
 
   function destacar(indice) {
-    palavrasNaTela.forEach((p, i) => {
-      if (!p) return;
-      p.span.classList.toggle('teleprompter__palavra--falada', i < indice);
-      p.span.classList.toggle('teleprompter__palavra--agora', i === indice);
-      if (i <= indice) p.linha.classList.remove('teleprompter__linha--oculta');
+    palavrasNaTela.forEach((span, i) => {
+      span.classList.toggle('teleprompter__palavra--falada', i < indice);
+      span.classList.toggle('teleprompter__palavra--agora', i === indice);
     });
     const atual = palavrasNaTela[indice];
-    if (atual) {
-      linhasNaTela.forEach((linha) => linha.classList.toggle('teleprompter__linha--atual', linha === atual.linha));
-      atual.linha.scrollIntoView({ block: 'nearest' });
-    }
+    if (atual) atual.scrollIntoView({ block: 'nearest' });
   }
 
   function mostrarTudo() {
-    linhasNaTela.forEach((linha) => linha.classList.remove('teleprompter__linha--oculta', 'teleprompter__linha--atual'));
-    palavrasNaTela.forEach((p) => p && p.span.classList.remove('teleprompter__palavra--agora'));
+    palavrasNaTela.forEach((span) => span.classList.remove('teleprompter__palavra--agora', 'teleprompter__palavra--falada'));
   }
 
   // ---------- tocar ----------
@@ -355,7 +325,7 @@ const Narracao = (() => {
     if (narracao && narracao.url && narracao.url !== url) URL.revokeObjectURL(narracao.url);
     narracao = { texto, origem, url, tempos: TextoNarrado.tempos(texto, alinhamento) };
     el.origem.textContent = origem;
-    mostrarDica();
+    montarTeleprompter(texto); // o texto já aparece inteiro
     el.tocarTexto.textContent = 'Ouvir';
     atualizarRestantes();
     mostrarBloco('ouvir');
@@ -388,8 +358,9 @@ const Narracao = (() => {
   }
 
   // Gera a narração com a voz digital. Sem voz, no limite ou com falha, usa a voz do aparelho.
-  // fato: { texto, origem }. Sem nada, usa o fato da última missão.
-  async function gerarNarracao(fato = fatoAtual()) {
+  // fato: { texto, origem }. Sem nada, usa a curiosidade das fotos ou uma sorteada.
+  async function gerarNarracao(fatoEscolhido) {
+    const fato = fatoEscolhido || await fatoAtual();
     const voz = Familia.vozDigital();
 
     if (!voz) {
@@ -568,18 +539,31 @@ const Narracao = (() => {
       return;
     }
     atualizarBotaoInicio();
-    abrir();
+    App.mostrarTela('narracao'); // volta para a gravação
   });
 
   el.apagarVoz.addEventListener('click', async () => {
     if (!window.confirm('Apagar a voz digital da família? Ela também será apagada na ElevenLabs.')) return;
     pararTudo();
     const resultado = await apagarVozDigital();
-    avisar(resultado.ok ? 'A voz digital foi apagada.' : resultado.mensagem);
-    atualizarRestantes();
     atualizarBotaoInicio();
-    if (resultado.ok) abrir({ manterMensagem: true });
+    atualizarAreaDosPais(resultado.ok ? 'A voz digital foi apagada, também na ElevenLabs.' : resultado.mensagem);
   });
+
+  // Área dos pais: situação da voz digital e os botões de gravar de novo e apagar.
+  const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  function atualizarAreaDosPais(mensagem) {
+    const voz = Familia.vozDigital();
+    el.regravar.hidden = !voz;
+    el.apagarVoz.hidden = !voz;
+    if (mensagem) {
+      el.estadoNosPais.textContent = mensagem;
+    } else if (voz) {
+      el.estadoNosPais.textContent = `A família tem uma voz digital, criada em ${formatoData.format(new Date(voz.criadaEm))}.`;
+    } else {
+      el.estadoNosPais.textContent = 'Ainda não há voz digital. Para criar, toque em "Ouvir a voz da sua família" na tela inicial.';
+    }
+  }
 
   // ---------- abrir e sair ----------
 
@@ -625,7 +609,17 @@ const Narracao = (() => {
     el.contador.textContent = String(el.textoLivre.value.length);
   }
 
-  el.textoLivre.addEventListener('input', atualizarContador);
+  el.textoLivre.addEventListener('input', () => {
+    atualizarContador();
+    if (!el.textoLivre.value.trim()) delete el.textoLivre.dataset.daImagem;
+  });
+
+  // Curiosidade aleatória: sorteia outra do banco (sem repetir a última) e narra.
+  el.aleatoria.addEventListener('click', async () => {
+    pararTudo();
+    avisar('');
+    gerarNarracao(await curiosidadeSorteada());
+  });
 
   el.lerTexto.addEventListener('click', () => {
     const texto = el.textoLivre.value.replace(/\s+/g, ' ').trim().slice(0, MAX_CARACTERES_TEXTO);
@@ -637,6 +631,8 @@ const Narracao = (() => {
     pararTudo();
     avisar('');
     el.outro.open = false;
+    // Se veio de uma imagem enviada, guarda para ter prioridade nas próximas vezes.
+    if (el.textoLivre.dataset.daImagem === 'sim') Familia.salvarCuriosidadeEnviada(texto);
     gerarNarracao({ texto, origem: 'A curiosidade que vocês escolheram:' });
   });
 
@@ -654,6 +650,7 @@ const Narracao = (() => {
       const resposta = await enviarJSON('/api/curiosidade', 'POST', { imagem });
       if (resposta.ok && resposta.dados && typeof resposta.dados.texto === 'string') {
         el.textoLivre.value = resposta.dados.texto.slice(0, MAX_CARACTERES_TEXTO);
+        el.textoLivre.dataset.daImagem = 'sim';
         atualizarContador();
         avisar('Confira o texto e toque em "Ler esta curiosidade".');
       } else {
@@ -671,5 +668,5 @@ const Narracao = (() => {
 
   Voz.aoVerificar(atualizarBotaoInicio);
 
-  return { abrir, sair, apagarVozDigital, atualizarBotaoInicio };
+  return { abrir, sair, apagarVozDigital, atualizarBotaoInicio, atualizarAreaDosPais };
 })();
