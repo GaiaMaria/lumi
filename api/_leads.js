@@ -67,7 +67,60 @@ function chaveDeLimite(ip, sal, agora = new Date()) {
   return `limite:${sha256(`${ip}|${sal}|${dia(agora)}`)}:${hora}`;
 }
 
+// ---------- resumo e CSV (api/leads-resumo.js) ----------
+
+// Compara a chave sem vazar o tempo da comparação.
+function chaveConfere(enviada, certa) {
+  if (typeof enviada !== 'string' || typeof certa !== 'string' || !certa) return false;
+  const a = crypto.createHash('sha256').update(enviada).digest();
+  const b = crypto.createHash('sha256').update(certa).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+
+// Os últimos N dias (AAAA-MM-DD, horário de Brasília), do mais antigo para hoje.
+function ultimosDias(n, agora = new Date()) {
+  const dias = [];
+  for (let i = n - 1; i >= 0; i -= 1) dias.push(dia(new Date(agora.getTime() - i * 86400000)));
+  return dias;
+}
+
+function somar(mapa, chave) {
+  mapa[chave] = (mapa[chave] || 0) + 1;
+}
+
+// Totais a partir dos leads guardados. leadsPorDia: { 'AAAA-MM-DD': n }.
+function resumir(leads, cliques, leadsPorDia) {
+  const porPlano = {};
+  const porUf = {};
+  const porAno = {};
+  const porOrigem = {};
+  leads.forEach((lead) => {
+    somar(porPlano, lead.plano || 'indefinido');
+    if (lead.uf) somar(porUf, lead.uf);
+    String(lead.anos || '').split(',').filter(Boolean).forEach((ano) => somar(porAno, ano));
+    somar(porOrigem, lead.utm_source || lead.ref || 'direto');
+  });
+  return { total: leads.length, porPlano, porUf, porAno, porOrigem, cliques, leadsPorDia };
+}
+
+const COLUNAS_CSV = ['criadoEm', 'email', 'plano', 'uf', 'anos', 'whatsapp', 'utm_source', 'utm_medium', 'utm_campaign', 'ref', 'consentimentoEm'];
+
+// Célula do CSV: aspas quando preciso e proteção contra fórmula no Excel (=, +, -, @).
+function celula(valor) {
+  let texto = String(valor === undefined || valor === null ? '' : valor);
+  if (/^[=+\-@\t\r]/.test(texto)) texto = `'${texto}`;
+  return /[;"\n\r]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
+}
+
+// CSV para planilha: separador ";" e BOM, para o Excel em português abrir certo.
+function paraCsv(leads) {
+  const ordenados = [...leads].sort((a, b) => String(a.criadoEm).localeCompare(String(b.criadoEm)));
+  const linhas = [COLUNAS_CSV.join(';'), ...ordenados.map((lead) => COLUNAS_CSV.map((c) => celula(lead[c])).join(';'))];
+  return `﻿${linhas.join('\r\n')}\r\n`;
+}
+
 module.exports = {
   UFS, ANOS, PLANOS, PLANOS_DE_CLIQUE, CAMPOS_DE_ORIGEM, LIMITE_POR_HORA,
   sha256, dia, validar, ehRobo, ipDoPedido, chaveDeLimite,
+  chaveConfere, ultimosDias, resumir, paraCsv,
 };

@@ -6,6 +6,7 @@ const path = require('node:path');
 
 const leads = require(path.join(__dirname, '..', 'api', 'leads.js'));
 const interesse = require(path.join(__dirname, '..', 'api', 'interesse.js'));
+const resumo = require(path.join(__dirname, '..', 'api', 'leads-resumo.js'));
 const L = require(path.join(__dirname, '..', 'api', '_leads.js'));
 
 // ---------- Redis simulado (só os comandos que usamos) ----------
@@ -47,6 +48,7 @@ function resFalsa() {
     headers: {},
     status(codigo) { this.statusCode = codigo; return this; },
     json(corpo) { this.corpo = corpo; return this; },
+    send(corpo) { this.corpo = corpo; return this; },
     setHeader(nome, valor) { this.headers[nome] = valor; },
   };
 }
@@ -54,17 +56,17 @@ function resFalsa() {
 const VARIAVEIS = { KV_REST_API_URL: 'https://redis-falso.exemplo', KV_REST_API_TOKEN: 'token-falso', LEADS_SAL: 'sal-falso' };
 
 // Chama o handler com variáveis, fetch e console simulados. Guarda tudo o que foi logado.
-async function chamar(handler, corpo, { redis = criarRedis(), variaveis = VARIAVEIS, ip = '200.1.2.3', metodo = 'POST' } = {}) {
+async function chamar(handler, corpo, { redis = criarRedis(), variaveis = VARIAVEIS, ip = '200.1.2.3', metodo = 'POST', query = {} } = {}) {
   const originais = { fetch: global.fetch, log: console.log, error: console.error, env: { ...process.env } };
   const logs = [];
-  ['KV_REST_API_URL', 'KV_REST_API_TOKEN', 'LEADS_SAL'].forEach((k) => { delete process.env[k]; });
+  ['KV_REST_API_URL', 'KV_REST_API_TOKEN', 'LEADS_SAL', 'LEADS_CHAVE'].forEach((k) => { delete process.env[k]; });
   Object.assign(process.env, variaveis);
   global.fetch = redis.fetchFalso;
   console.log = (...a) => logs.push(a.join(' '));
   console.error = (...a) => logs.push(a.join(' '));
   const res = resFalsa();
   try {
-    await handler({ method: metodo, body: corpo, headers: { 'x-forwarded-for': ip } }, res);
+    await handler({ method: metodo, body: corpo, query, headers: { 'x-forwarded-for': ip } }, res);
   } finally {
     global.fetch = originais.fetch;
     console.log = originais.log;
@@ -189,4 +191,61 @@ test('interesse: soma o clique do plano e recusa plano desconhecido', async () =
 test('só aceita POST', async () => {
   const { res } = await chamar(leads, BASE, { metodo: 'GET' });
   assert.strictEqual(res.statusCode, 405);
+});
+
+// ---------- resumo e CSV ----------
+const COM_CHAVE = { ...VARIAVEIS, LEADS_CHAVE: 'chave-ficticia-de-teste' };
+
+async function redisComLeads() {
+  const redis = criarRedis();
+  await chamar(leads, { ...BASE, origem: { utm_source: 'whatsapp' } }, { redis });
+  await chamar(leads, { email: 'outra@exemplo.com', plano: 'voz_familia', uf: 'RJ', anos: ['7'], consentimento: true }, { redis, ip: '200.5.5.5' });
+  await chamar(interesse, { plano: 'voz_familia' }, { redis });
+  return redis;
+}
+
+test('resumo: sem a chave certa responde 401 e não mostra nada', async () => {
+  const redis = await redisComLeads();
+  const semChave = await chamar(resumo, null, { redis, metodo: 'GET', variaveis: COM_CHAVE });
+  assert.strictEqual(semChave.res.statusCode, 401);
+  const errada = await chamar(resumo, null, { redis, metodo: 'GET', variaveis: COM_CHAVE, query: { chave: 'errada' } });
+  assert.strictEqual(errada.res.statusCode, 401);
+  assert.ok(!JSON.stringify(errada.res.corpo).includes('exemplo.com'));
+});
+
+test('resumo: sem LEADS_CHAVE na Vercel responde 503', async () => {
+  const { res } = await chamar(resumo, null, { metodo: 'GET', query: { chave: 'qualquer' } });
+  assert.strictEqual(res.statusCode, 503);
+});
+
+test('resumo: totais por plano, UF, ano, origem, cliques e dias', async () => {
+  const redis = await redisComLeads();
+  const { res } = await chamar(resumo, null, { redis, metodo: 'GET', variaveis: COM_CHAVE, query: { chave: 'chave-ficticia-de-teste' } });
+  assert.strictEqual(res.statusCode, 200);
+  const r = res.corpo;
+  assert.strictEqual(r.total, 2);
+  assert.deepStrictEqual(r.porPlano, { gratuito: 1, voz_familia: 1 });
+  assert.deepStrictEqual(r.porUf, { SP: 1, RJ: 1 });
+  assert.deepStrictEqual(r.porAno, { 5: 1, 6: 1, 7: 1 });
+  assert.deepStrictEqual(r.porOrigem, { whatsapp: 1, direto: 1 });
+  assert.deepStrictEqual(r.cliques, { gratuito: 0, voz_familia: 1 });
+  assert.strictEqual(Object.keys(r.leadsPorDia).length, 14);
+  assert.strictEqual(r.leadsPorDia[L.dia()], 2);
+});
+
+test('resumo em CSV: BOM, separador ";" e uma linha por lead', async () => {
+  const redis = await redisComLeads();
+  const { res } = await chamar(resumo, null, { redis, metodo: 'GET', variaveis: COM_CHAVE, query: { chave: 'chave-ficticia-de-teste', formato: 'csv' } });
+  assert.strictEqual(res.statusCode, 200);
+  assert.match(res.headers['Content-Type'], /text\/csv/);
+  assert.ok(res.corpo.startsWith('﻿criadoEm;email;plano'));
+  const linhas = res.corpo.trim().split('\r\n');
+  assert.strictEqual(linhas.length, 3);
+  assert.ok(linhas.some((l) => l.includes(';mae.teste@exemplo.com;gratuito;SP;5,6;11912345678;whatsapp')));
+});
+
+test('CSV: protege contra fórmulas e escapa ";" e aspas', () => {
+  const csv = L.paraCsv([{ criadoEm: '2026-11-08', email: '=HYPERLINK("x")', ref: 'a;b' }]);
+  assert.ok(csv.includes(`"'=HYPERLINK(""x"")"`));
+  assert.ok(csv.includes('"a;b"'));
 });
