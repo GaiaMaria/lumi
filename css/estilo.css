@@ -58,6 +58,7 @@
   --raio-segmento: 6px;
   --tamanho-mascote-resultado: 260px;
   --largura-cartao-numero: 120px;
+  --largura-resposta-tabuada: 200px;
   --fundo-acerto: color-mix(in srgb, var(--sucesso) 22%, var(--fundo-escuro));
   --fundo-ceu: radial-gradient(120% 60% at 50% 0%, var(--superficie) 0%, var(--fundo) 55%, var(--fundo-escuro) 100%);
   --brilho-mascote: drop-shadow(0 0 12px color-mix(in srgb, var(--brilho) 25%, transparent));
@@ -2282,7 +2283,10 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   --cor-modo: var(--info);
 }
 
-.modo--revisao,
+.modo--revisao {
+  --cor-modo: var(--sucesso);
+}
+
 .distintivo--revisao {
   --cor-modo: var(--brilho);
 }
@@ -2293,20 +2297,14 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 /* Nível */
 .nivel {
-  padding: var(--espaco-4);
   display: flex;
   align-items: center;
-  gap: var(--espaco-4);
+  gap: var(--espaco-3);
 }
 
 .nivel__lumi {
-  width: var(--tamanho-88);
-  height: var(--tamanho-88);
+  width: var(--tamanho-96);
   flex-shrink: 0;
-  object-fit: cover;
-  border-radius: 50%;
-  border: var(--traco-medio) solid var(--vidro-borda);
-  box-shadow: var(--sombra-lumi-media);
 }
 
 .nivel__info {
@@ -2332,8 +2330,8 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 .nivel__numero {
   color: var(--brilho);
-  font-size: clamp(var(--fonte-2-4), 11vw, var(--fonte-3));
-  font-weight: 900;
+  font-size: clamp(var(--fonte-2), 9vw, var(--fonte-2-4));
+  font-weight: 700;
   text-shadow: var(--brilho-texto-lumi-pequeno);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
@@ -2365,10 +2363,13 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 .medalhas {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: var(--espaco-3) var(--espaco-2);
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(var(--tamanho-96), 1fr));
-  gap: var(--espaco-2-5);
+  grid-template-columns: repeat(auto-fill, minmax(var(--tamanho-64), 1fr));
+  gap: var(--espaco-3) var(--espaco-1);
+  background: var(--superficie);
+  border: var(--traco-cartao) solid var(--borda);
+  border-radius: var(--raio-cartao);
 }
 
 .medalha {
@@ -2376,13 +2377,14 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   flex-direction: column;
   align-items: center;
   gap: var(--espaco-1);
-  padding: var(--espaco-3) var(--espaco-2);
-  border-radius: var(--raio-lg);
-  background: var(--vidro);
-  border: var(--traco-medio) solid var(--borda);
   text-align: center;
-  font-size: var(--fonte-0-9);
-  line-height: 1.25;
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-0-8);
+  line-height: 1.2;
+}
+
+.medalha strong {
+  font-weight: 600;
 }
 
 .medalha__detalhe {
@@ -2392,6 +2394,7 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 .medalha--bloqueada strong {
   color: var(--texto-suave);
+  font-weight: 500;
 }
 
 /* Distintivo em SVG */
@@ -2460,10 +2463,13 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   align-items: center;
   gap: var(--espaco-3-5);
   width: 100%;
-  min-height: var(--altura-80);
-  padding: var(--espaco-3-5) var(--espaco-4) var(--espaco-3-5) var(--espaco-3-5);
-  border-left: var(--traco-grosso) solid var(--cor-modo);
-  color: var(--texto);
+  min-height: var(--altura-72);
+  padding: var(--espaco-3) var(--espaco-4) var(--espaco-3) var(--espaco-3);
+  background: var(--cor-modo);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-botao);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
   font: inherit;
   text-align: left;
   cursor: pointer;
@@ -2477,9 +2483,10 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   width: var(--tamanho-56);
   height: var(--tamanho-56);
   flex-shrink: 0;
-  border-radius: var(--raio-lg);
-  background: var(--cor-modo);
-  color: var(--fundo);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-sm);
+  background: var(--creme);
+  color: var(--texto-escuro);
 }
 
 .modo__icone svg {
@@ -2495,28 +2502,29 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .modo__texto strong {
-  font-size: var(--fonte-1-1);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-15);
+  font-weight: 600;
   line-height: 1.25;
 }
 
 .modo__texto span {
-  color: var(--texto-suave);
-  font-size: var(--fonte-0-95);
+  color: var(--texto-escuro);
+  font-size: var(--fonte-0-9);
+  font-weight: 700;
 }
 
 /* Sombra ao passar o mouse (computador) */
 @media (hover: hover) {
   .modo:hover:not(:disabled) {
-    transform: translateY(calc(-1 * var(--subida-hover)));
-    border-color: var(--cor-modo);
-    box-shadow: var(--sombra-hover-modo);
+    background: color-mix(in srgb, var(--cor-modo) 88%, var(--contorno));
   }
 }
 
-/* Toque (celular) */
+/* Toque (celular): o adesivo afunda */
 .modo:active:not(:disabled) {
-  transform: scale(0.98);
-  box-shadow: 0 0 0 var(--traco-medio) var(--cor-modo);
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
 }
 
 .modo:focus-visible {
@@ -2526,6 +2534,7 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 .modo:disabled {
   opacity: 0.55;
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -2580,11 +2589,19 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   appearance: none;
   aspect-ratio: 1;
   min-height: var(--altura-52);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
+  box-shadow: var(--sombra-dura);
   color: var(--texto);
-  font: inherit;
+  font-family: var(--fonte-titulo);
   font-size: var(--fonte-1-4);
-  font-weight: 900;
+  font-weight: 700;
   cursor: pointer;
+}
+
+.numero:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
 }
 
 .numero:focus-visible {
@@ -2593,8 +2610,8 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .numero--feito {
-  border-color: var(--sucesso);
-  box-shadow: inset 0 0 0 var(--traco-medio) var(--sucesso);
+  background: var(--sucesso);
+  color: var(--texto-escuro);
 }
 
 .tabuada-topo {
@@ -2607,18 +2624,22 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 .tabuada-tempo {
   min-width: var(--tamanho-64);
-  padding: var(--espaco-1-5) var(--espaco-3);
-  border-radius: var(--raio-pilula);
-  background: var(--fundo-escuro);
-  color: var(--texto);
-  font-weight: 900;
+  padding: var(--espaco-1) var(--espaco-3);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-xs);
+  background: var(--info);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
+  font-weight: 600;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
 .tabuada-conta {
-  font-size: clamp(var(--fonte-2-2), 11vw, var(--fonte-3-2));
-  font-weight: 900;
+  font-size: clamp(var(--fonte-3), 15vw, var(--fonte-3-5));
+  font-weight: 700;
+  line-height: 1.1;
+  text-shadow: var(--brilho-texto-lumi);
   text-align: center;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
@@ -2626,15 +2647,17 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 
 .tabuada-resposta {
   width: 100%;
-  min-height: var(--altura-64);
+  max-width: var(--largura-resposta-tabuada);
+  align-self: center;
+  min-height: var(--altura-72);
   padding: var(--espaco-2-5) var(--espaco-4);
-  border: var(--traco-medio) solid var(--borda);
-  border-radius: var(--raio-lg);
+  border: var(--traco-cartao) solid var(--sucesso);
+  border-radius: var(--raio-botao);
   background: var(--fundo-escuro);
-  color: var(--texto);
-  font: inherit;
-  font-size: var(--fonte-2);
-  font-weight: 900;
+  color: var(--brilho);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-2-2);
+  font-weight: 700;
   text-align: center;
 }
 
@@ -2644,24 +2667,25 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .tabuada-resposta--certa {
-  background: var(--sucesso);
-  border-color: var(--sucesso);
-  color: var(--fundo);
+  background: var(--brilho);
+  border-color: var(--contorno);
+  color: var(--texto-escuro);
 }
 
 .tabuada-resposta--errada {
-  background: var(--erro);
   border-color: var(--erro);
-  color: var(--fundo);
 }
 
 .conquista {
   width: 100%;
   padding: var(--espaco-3) var(--espaco-4);
-  border-radius: var(--raio-lg);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
   background: var(--atencao);
-  color: var(--fundo);
-  font-weight: 800;
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
 }
 
 .conquista--nivel {
@@ -2836,6 +2860,39 @@ body.com-nav .rodape {
   }
 
   .botao-leia:active {
+    transform: none;
+  }
+}
+
+/* Barra do tempo do desafio da Tabuada */
+.barra-tempo {
+  height: var(--tamanho-14);
+  padding: var(--espaco-0-5);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-pilula);
+  background: var(--fundo-escuro);
+  overflow: hidden;
+}
+
+.barra-tempo__preenchido {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--raio-pilula);
+  background: var(--info);
+  transition: width var(--duracao-rapida) linear;
+}
+
+/* Fim do treino: as duas mascotes um pouco menores */
+.resultado__mascote--pequena {
+  width: min(55%, var(--tamanho-200));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra-tempo__preenchido {
+    transition: none;
+  }
+
+  .numero:active {
     transform: none;
   }
 }

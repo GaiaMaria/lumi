@@ -310,8 +310,8 @@
       <div class="conteudo">
         <!-- Menu dos modos -->
         <div class="tabuada-bloco" id="tabuada-menu">
-          <div class="nivel vidro">
-            <img class="nivel__lumi" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="88" height="88">
+          <div class="nivel">
+            <img class="mascote mascote--lumi nivel__lumi" src="assets/recortes/lumi-abraco-lapis.png" alt="Lumi abraçando um lápis" width="644" height="790">
             <div class="nivel__info">
               <p class="nivel__titulo"><span class="nivel__rotulo">Nível</span> <span class="nivel__numero" id="tabuada-nivel">1</span></p>
               <div class="nivel__barra" id="tabuada-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
@@ -321,7 +321,7 @@
             </div>
           </div>
 
-          <h2 class="tabuada-subtitulo">Medalhas</h2>
+          <h2 class="tabuada-subtitulo">Suas medalhas</h2>
           <ul class="medalhas" id="tabuada-medalhas"></ul>
 
           <h2 class="tabuada-subtitulo">Escolha o modo</h2>
@@ -381,6 +381,10 @@
             <span id="tabuada-progresso"></span>
             <span class="tabuada-tempo" id="tabuada-tempo" role="timer" aria-live="off" hidden></span>
           </div>
+          <!-- Barra do tempo do desafio (só aparece com o relógio) -->
+          <div class="barra-tempo" id="tabuada-tempo-barra" aria-hidden="true" hidden>
+            <div class="barra-tempo__preenchido" id="tabuada-tempo-preenchido"></div>
+          </div>
           <p class="tabuada-conta" id="tabuada-conta"></p>
           <label class="visualmente-oculto" for="tabuada-resposta">Sua resposta</label>
           <input class="tabuada-resposta" id="tabuada-resposta" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off">
@@ -391,6 +395,7 @@
 
         <!-- Fim da rodada -->
         <div class="tabuada-bloco resultado" id="tabuada-fim" hidden>
+          <img class="mascote resultado__mascote resultado__mascote--pequena" src="assets/recortes/duas-comemorando.png" alt="" width="900" height="890">
           <h2 class="resultado__titulo" id="tabuada-fim-titulo"></h2>
           <div class="conquista-distintivo" id="tabuada-fim-distintivo" aria-hidden="true" hidden></div>
           <p class="pontos pontos--grande"><span id="tabuada-fim-pontos">0</span> pontos</p>
