@@ -937,32 +937,47 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .barra-topo__titulo {
-  font-size: var(--fonte-1-3);
-  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fonte-1-4);
+  font-weight: 600;
 }
 
+/* Botão voltar: quadradinho com ícone (o texto fica para o leitor de tela) */
 .botao-voltar {
   appearance: none;
-  background: transparent;
-  border: 0;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--altura-44);
+  height: var(--altura-44);
+  padding: 0;
+  border: var(--borda-adesivo);
   border-radius: var(--raio-sm);
-  color: var(--texto-suave);
-  font: inherit;
-  font-size: var(--fonte-1);
-  font-weight: 700;
-  padding: var(--espaco-2-5) var(--espaco-3);
-  margin-left: calc(-1 * var(--espaco-3));
-  min-height: var(--altura-44);
+  background: var(--superficie);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto);
   cursor: pointer;
 }
 
 .botao-voltar:hover {
-  color: var(--texto);
+  background: var(--borda);
+}
+
+.botao-voltar:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
 }
 
 .botao-voltar:focus-visible {
   outline: var(--foco-largura) solid var(--brilho);
   outline-offset: var(--foco-distancia-2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .botao-voltar:active {
+    transform: none;
+  }
 }
 
 /* Barra de progresso da missão */
@@ -996,24 +1011,6 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 /* FotoQuest */
-.guia-doris {
-  display: flex;
-  align-items: center;
-  gap: var(--espaco-4);
-  padding: var(--espaco-3-5) var(--espaco-4);
-  color: var(--texto-suave);
-  font-size: var(--fonte-1-05);
-}
-
-.guia-doris__imagem {
-  width: var(--tamanho-72);
-  height: var(--tamanho-72);
-  flex-shrink: 0;
-  object-fit: cover;
-  border-radius: 50%;
-  border: var(--traco-medio) solid var(--vidro-borda);
-}
-
 .botao-foto {
   display: flex;
   align-items: center;
@@ -1188,10 +1185,17 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 .miniatura {
   position: relative;
   aspect-ratio: 3 / 4;
+  border: var(--borda-adesivo);
   border-radius: var(--raio-sm);
   overflow: hidden;
   background: var(--creme);
+  box-shadow: var(--sombra-dura);
+  transform: rotate(var(--giro-miniatura));
 }
+
+/* Leve rotação, alternando o lado, como fotos soltas na mesa */
+.miniatura:nth-child(odd) { --giro-miniatura: -3deg; }
+.miniatura:nth-child(even) { --giro-miniatura: 2deg; }
 
 .miniatura img {
   width: 100%;
@@ -1205,7 +1209,7 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   right: var(--espaco-1);
   width: var(--tamanho-32);
   height: var(--tamanho-32);
-  border: 0;
+  border: var(--traco-medio) solid var(--contorno);
   border-radius: 50%;
   background: var(--fundo-escuro);
   color: var(--texto);
@@ -1221,16 +1225,48 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .aviso-privacidade {
-  padding: var(--espaco-3-5) var(--espaco-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--espaco-2);
   color: var(--texto-suave);
   font-size: var(--fonte-0-95);
 }
 
-.aviso-privacidade__titulo {
-  color: var(--texto);
-  font-size: var(--fonte-1);
+/* "Saiba mais" abre o texto completo de privacidade */
+.saiba-mais[open] {
+  flex-basis: 100%;
+}
+
+.saiba-mais__titulo {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--altura-44);
+  color: var(--info);
+  font-family: var(--fonte-texto);
   font-weight: 800;
-  margin-bottom: var(--espaco-1);
+  text-decoration: underline;
+  text-underline-offset: var(--sublinhado-distancia);
+  cursor: pointer;
+  list-style: none;
+}
+
+.saiba-mais__titulo::-webkit-details-marker {
+  display: none;
+}
+
+.saiba-mais[open] .saiba-mais__titulo {
+  color: var(--texto);
+}
+
+.saiba-mais__texto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  padding: var(--espaco-3) var(--espaco-4);
+  background: var(--superficie);
+  border: var(--traco-cartao) solid var(--borda);
+  border-radius: var(--raio-cartao);
 }
 
 .declaracao {
@@ -1246,7 +1282,7 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   width: var(--tamanho-24);
   height: var(--tamanho-24);
   margin: var(--espaco-0-5) 0 0;
-  accent-color: var(--primaria);
+  accent-color: var(--sucesso);
   cursor: pointer;
 }
 
@@ -1268,14 +1304,14 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   width: 100%;
 }
 
-.guia-doris__imagem--grande {
-  width: var(--tamanho-120);
-  height: var(--tamanho-120);
+/* Dóris solta na tela "Hmm, será a matéria certa?" */
+.mascote--aviso {
+  width: var(--tamanho-160);
 }
 
 .titulo-aviso {
   font-size: clamp(var(--fonte-1-5), 6vw, var(--fonte-1-9));
-  font-weight: 900;
+  font-weight: 600;
   line-height: 1.2;
 }
 

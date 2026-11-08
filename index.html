@@ -101,7 +101,7 @@
     <!-- Voz da família: gravar, gerar e ouvir a narração -->
     <section class="tela" id="tela-narracao" aria-labelledby="titulo-narracao" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-narracao">Voz da família</h1>
       </div>
 
@@ -183,7 +183,7 @@
     <!-- Provas: calendário mensal -->
     <section class="tela" id="tela-provas" aria-labelledby="titulo-provas" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="pais">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="pais"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-provas">Provas</h1>
       </div>
 
@@ -258,7 +258,7 @@
     <!-- Área dos pais -->
     <section class="tela" id="tela-pais" aria-labelledby="titulo-pais" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-pais">Área dos pais</h1>
       </div>
 
@@ -302,7 +302,7 @@
     <!-- Tabuada -->
     <section class="tela" id="tela-tabuada" aria-labelledby="titulo-tabuada" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" id="tabuada-voltar">← Voltar</button>
+        <button type="button" class="botao-voltar" id="tabuada-voltar"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-tabuada">Tabuada</h1>
       </div>
 
@@ -405,14 +405,14 @@
     <!-- FotoQuest: escolher a foto -->
     <section class="tela" id="tela-fotoquest" aria-labelledby="titulo-fotoquest" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-fotoquest">FotoQuest</h1>
       </div>
 
       <form class="conteudo" id="form-fotos" novalidate>
-        <div class="guia-doris vidro">
-          <img class="guia-doris__imagem" src="assets/doris.jpg" alt="" width="72" height="72">
-          <p>Tire fotos do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
+        <div class="guia guia--doris">
+          <img class="mascote guia__mascote" src="assets/recortes/doris-acenando.png" alt="Dóris, a coruja, acenando" width="812" height="900">
+          <p class="balao guia__balao">Mostra o que você estudou que eu viro missão!</p>
         </div>
 
         <fieldset class="campo vidro">
@@ -441,16 +441,22 @@
 
             <!-- Galeria: o mesmo campo, sem o atributo capture -->
             <input type="file" id="entrada-galeria" class="visualmente-oculto" accept="image/*" multiple>
-            <label class="botao-foto botao-foto--galeria" for="entrada-galeria" id="rotulo-galeria">Escolher da galeria</label>
+            <label class="botao-foto botao-foto--galeria" for="entrada-galeria" id="rotulo-galeria">Galeria</label>
           </div>
           <p class="contador" id="contador-fotos" aria-live="polite"></p>
           <ul class="miniaturas" id="miniaturas" aria-label="Fotos escolhidas"></ul>
         </fieldset>
 
-        <section class="aviso-privacidade vidro" aria-labelledby="titulo-privacidade">
-          <h2 class="aviso-privacidade__titulo" id="titulo-privacidade">Sua privacidade</h2>
+        <section class="aviso-privacidade" aria-labelledby="titulo-privacidade">
+          <h2 class="visualmente-oculto" id="titulo-privacidade">Sua privacidade</h2>
+          <p class="aviso-privacidade__resumo">Fotos viram missão e são apagadas.</p>
+          <details class="saiba-mais">
+            <summary class="saiba-mais__titulo">Saiba mais</summary>
+            <div class="saiba-mais__texto">
           <p>Suas fotos são usadas só para criar as perguntas da missão e são descartadas logo depois. As perguntas ficam guardadas somente para a sua família, para você estudar quando quiser. Nenhuma outra família tem acesso a elas, e elas não são usadas para treinar sistemas. Você pode apagar tudo a qualquer momento no botão 'Apagar dados da família'.</p>
           <p>Se você criar a voz digital da família, a gravação da sua voz é enviada à ElevenLabs, que cria e guarda essa voz até a família apagar. O botão 'Apagar dados da família' também apaga a voz digital no serviço.</p>
+            </div>
+          </details>
         </section>
 
         <label class="declaracao" for="declaracao">
@@ -458,9 +464,7 @@
           <span>Declaro que as fotos enviadas são de cadernos ou materiais de estudo meus ou do meu filho, e que serão usadas apenas para estudo da nossa família.</span>
         </label>
 
-        <button type="submit" class="botao-principal" id="botao-enviar" disabled>
-          Enviar fotos
-        </button>
+        <button type="submit" class="botao-principal" id="botao-enviar" disabled>Criar minha missão</button>
 
         <p class="mensagem" id="mensagem-foto" role="status" aria-live="polite"></p>
       </form>
@@ -469,7 +473,7 @@
     <!-- Aviso de disciplina diferente -->
     <section class="tela" id="tela-disciplina" aria-labelledby="titulo-disciplina" hidden>
       <div class="conteudo conteudo--centro">
-        <img class="guia-doris__imagem guia-doris__imagem--grande" src="assets/doris.jpg" alt="" width="120" height="120">
+        <img class="mascote mascote--aviso" src="assets/recortes/doris-livro.png" alt="" width="634" height="741">
         <h1 class="titulo-aviso" id="titulo-disciplina">Hmm, será a matéria certa?</h1>
         <p class="texto-aviso" id="texto-disciplina"></p>
         <button type="button" class="botao-principal" id="botao-continuar">Continuar</button>
@@ -480,7 +484,7 @@
     <!-- Quiz -->
     <section class="tela" id="tela-quiz" aria-labelledby="quiz-enunciado" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Sair</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span class="visualmente-oculto">Sair</span></button>
         <span class="pontos" id="quiz-pontos">0 pontos</span>
       </div>
 

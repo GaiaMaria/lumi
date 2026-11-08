@@ -142,7 +142,7 @@ const FotoQuest = (() => {
     el.entradas.forEach((entrada) => { entrada.value = ''; });
     preparando = false;
     enviando = false;
-    el.enviar.textContent = 'Enviar fotos';
+    el.enviar.textContent = 'Criar minha missão';
     avisar('');
     desenharMiniaturas();
     atualizarBotao();
@@ -259,7 +259,7 @@ const FotoQuest = (() => {
     const resultado = await buscarPerguntas(disciplina);
 
     enviando = false;
-    el.enviar.textContent = 'Enviar fotos';
+    el.enviar.textContent = 'Criar minha missão';
     atualizarBotao();
 
     if (resultado.erro) return avisar(resultado.mensagem);
