@@ -55,6 +55,8 @@
   --tamanho-ponto: 6px;
   --espaco-trilha: 28px;
   --altura-nav: 60px;
+  --raio-segmento: 6px;
+  --fundo-acerto: color-mix(in srgb, var(--sucesso) 22%, var(--fundo-escuro));
   --fundo-ceu: radial-gradient(120% 60% at 50% 0%, var(--superficie) 0%, var(--fundo) 55%, var(--fundo-escuro) 100%);
   --brilho-mascote: drop-shadow(0 0 12px color-mix(in srgb, var(--brilho) 25%, transparent));
   --halo-lumi: radial-gradient(circle, color-mix(in srgb, var(--brilho) 35%, transparent) 0%, transparent 65%);
@@ -980,22 +982,30 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   }
 }
 
-/* Barra de progresso da missão */
+/* Barra de progresso da missão: um segmento por pergunta, no topo do quiz */
 .progresso {
-  position: sticky;
-  top: var(--altura-barra);
-  z-index: 2;
-  height: var(--tamanho-14);
-  background: var(--fundo-escuro);
-  border-bottom: var(--traco-medio) solid var(--contorno);
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: var(--espaco-1-5);
 }
 
+/* O preenchimento antigo continua no HTML (o JS usa o id), mas quem aparece são os segmentos */
 .progresso__preenchido {
-  width: 0;
-  height: 100%;
+  display: none;
+}
+
+.progresso__segmento {
+  flex: 1;
+  height: var(--tamanho-14);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-segmento);
+  background: var(--fundo-escuro);
+  transition: background-color var(--duracao-media) ease;
+}
+
+.progresso__segmento--feito {
   background: var(--sucesso);
-  border-radius: 0 var(--raio-pilula) var(--raio-pilula) 0;
-  transition: width var(--duracao-media) ease;
 }
 
 /* Conteúdo das telas internas */
@@ -1349,14 +1359,49 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   font-size: var(--fonte-1);
 }
 
+.quiz-linha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaco-2);
+  min-height: var(--altura-chip);
+}
+
 .quiz-progresso {
   color: var(--texto-suave);
-  font-weight: 700;
+  font-size: var(--fonte-0-8);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Selo "N seguidas" */
+.selo-seguidas {
+  flex-shrink: 0;
+  padding: var(--espaco-1) var(--espaco-3);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-xs);
+  background: var(--doris);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-0-9);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Pergunta com o alto-falante ao lado */
+.quiz-pergunta {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaco-3);
 }
 
 .quiz-enunciado {
-  font-size: clamp(var(--fonte-1-3), 5vw, var(--fonte-1-6));
-  font-weight: 800;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fonte-1-25);
+  font-weight: 600;
   line-height: 1.3;
 }
 
@@ -1364,30 +1409,30 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   outline: none;
 }
 
-/* Leia comigo */
-.leia-comigo {
-  margin-top: calc(-1 * var(--espaco-2));
-}
-
+/* Leia comigo: quadradinho azul com alto-falante */
 .botao-leia {
   appearance: none;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--espaco-2);
-  min-height: var(--altura-44);
-  padding: var(--espaco-2) var(--espaco-4);
-  background: var(--vidro-forte);
-  border: var(--traco-medio) solid var(--borda);
-  border-radius: var(--raio-pilula);
-  color: var(--texto);
-  font: inherit;
-  font-size: var(--fonte-1);
-  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: var(--altura-44);
+  height: var(--altura-44);
+  padding: 0;
+  background: var(--info);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-sm);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto-escuro);
   cursor: pointer;
 }
 
 .botao-leia:hover {
-  border-color: var(--texto-suave);
+  background: color-mix(in srgb, var(--info) 88%, var(--contorno));
+}
+
+.botao-leia:active {
+  transform: var(--pressionar);
+  box-shadow: var(--sombra-dura-pressionada);
 }
 
 .botao-leia:focus-visible {
@@ -1396,7 +1441,7 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .botao-leia[aria-pressed="true"] {
-  border-color: var(--texto);
+  background: var(--brilho);
 }
 
 .aviso-voz {
@@ -1471,30 +1516,83 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .feedback {
-  border-radius: var(--raio-lg);
+  border: var(--borda-adesivo);
+  border-radius: var(--raio-cartao);
   padding: var(--espaco-3-5) var(--espaco-4);
-  color: var(--fundo);
   font-weight: 700;
-  box-shadow: var(--sombra-suave);
 }
 
 .feedback strong {
   display: block;
-  font-size: var(--fonte-1-15);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-25);
+  font-weight: 600;
 }
 
+/* Acerto: verde-escuro com texto menta claro */
 .feedback--sucesso {
-  background: var(--sucesso);
+  background: var(--fundo-acerto);
+  color: var(--brilho);
 }
 
+/* Erro: sol com texto índigo, sempre com incentivo */
 .feedback--erro {
-  background: var(--erro);
+  background: var(--atencao);
+  color: var(--texto-escuro);
 }
 
 .feedback--neutro {
-  background: var(--vidro-forte);
-  border: var(--traco-medio) solid var(--borda);
+  background: var(--superficie);
   color: var(--texto);
+}
+
+/* Lumi pequena comemorando no acerto */
+.feedback:has(.feedback__lumi) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  column-gap: var(--espaco-3);
+}
+
+.feedback__lumi {
+  grid-row: span 3;
+  width: var(--tamanho-56);
+}
+
+/* Painel de resposta preso embaixo da tela do quiz */
+.painel-resposta {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-4) max(var(--espaco-4), (100% - var(--largura-conteudo)) / 2 + var(--espaco-4)) calc(var(--espaco-4) + env(safe-area-inset-bottom));
+  background: var(--fundo-escuro);
+  border-top: var(--traco-cartao) solid var(--borda);
+}
+
+.painel-resposta:not(:has(> :not([hidden]))) {
+  display: none;
+}
+
+.painel-resposta:has(.feedback--sucesso) {
+  background: var(--fundo-acerto);
+  border-top-color: var(--sucesso);
+}
+
+.painel-resposta:has(.feedback--erro) {
+  background: var(--atencao);
+  border-top-color: var(--contorno);
+}
+
+/* Dentro do painel, a cor vem do painel inteiro */
+.painel-resposta .feedback {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .aviso-leitura {
@@ -1515,13 +1613,14 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   flex-direction: column;
   gap: var(--espaco-2);
   padding: var(--espaco-3) var(--espaco-3-5);
-  background: var(--vidro);
-  border: var(--traco-medio) solid var(--borda);
-  border-radius: var(--raio-lg);
+  background: var(--superficie);
+  border: var(--traco-cartao) solid var(--borda);
+  border-radius: var(--raio-botao);
 }
 
 .relacionar__item {
-  font-weight: 800;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
 }
 
 .relacionar__campo {
@@ -1541,15 +1640,13 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .relacionar__linha--certa {
-  background: var(--sucesso);
-  border-color: var(--sucesso);
-  color: var(--fundo);
+  background: var(--brilho);
+  border-color: var(--contorno);
+  color: var(--texto-escuro);
 }
 
 .relacionar__linha--errada {
-  background: var(--erro);
   border-color: var(--erro);
-  color: var(--fundo);
 }
 
 /* Dissertativa */
@@ -1600,9 +1697,9 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
 }
 
 .lacuna__campo--certa {
-  background: var(--sucesso);
-  border-color: var(--sucesso);
-  color: var(--fundo);
+  background: var(--brilho);
+  border-color: var(--contorno);
+  color: var(--texto-escuro);
 }
 
 .resposta-modelo {
@@ -2656,6 +2753,16 @@ body.com-nav .rodape {
 
   .missao__parada:active,
   .chip-prova:active {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progresso__segmento {
+    transition: none;
+  }
+
+  .botao-leia:active {
     transform: none;
   }
 }

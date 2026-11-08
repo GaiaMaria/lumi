@@ -168,7 +168,22 @@ const Quiz = (() => {
     leia: document.getElementById('botao-leia'),
     leiaTexto: document.getElementById('botao-leia-texto'),
     avisoVoz: document.getElementById('aviso-voz'),
+    seguidas: document.getElementById('quiz-seguidas'),
   };
+
+  // Nome curto de cada tipo, mostrado ao lado do número da pergunta.
+  const NOMES_DOS_TIPOS = {
+    verdadeiro_falso: 'verdadeiro ou falso',
+    multipla_escolha: 'múltipla escolha',
+    relacionar: 'relacionar',
+    completar_lacunas: 'completar',
+    dissertativa: 'resposta livre',
+  };
+
+  // Selo de acertos seguidos: aparece a partir de 2 (o erro zera a contagem).
+  function textoSeguidas(n) {
+    return n >= 2 ? `${n} seguidas` : '';
+  }
 
   let estado = null;
 
@@ -304,16 +319,40 @@ const Quiz = (() => {
     return elemento;
   }
 
+  // Um segmento por pergunta, criado a partir do total (nada fixo em 5).
+  function criarSegmentos() {
+    const segmentos = estado.perguntas.map(() => criar('span', 'progresso__segmento'));
+    el.barra.replaceChildren(el.barraPreenchida, ...segmentos);
+  }
+
   function atualizarBarra(respondidas) {
     const total = estado.perguntas.length;
     el.barraPreenchida.style.width = `${(respondidas / total) * 100}%`;
     el.barra.setAttribute('aria-valuemax', String(total));
     el.barra.setAttribute('aria-valuenow', String(respondidas));
+    el.barra.querySelectorAll('.progresso__segmento').forEach((segmento, i) => {
+      segmento.classList.toggle('progresso__segmento--feito', i < respondidas);
+    });
+  }
+
+  function atualizarSelo() {
+    const texto = textoSeguidas(estado.seguidas);
+    el.seguidas.textContent = texto;
+    el.seguidas.hidden = !texto;
   }
 
   function mostrarFeedback(tipo, titulo, detalhe) {
     const partes = [criar('strong', '', titulo)];
     if (detalhe) partes.push(criar('span', '', detalhe));
+    if (tipo === 'sucesso') {
+      // A Lumi comemora no painel de acerto.
+      const lumi = criar('img', 'feedback__lumi mascote mascote--lumi');
+      lumi.src = 'assets/recortes/lumi-comemorando.png';
+      lumi.alt = '';
+      lumi.width = 56;
+      lumi.height = 72;
+      partes.unshift(lumi);
+    }
     el.feedback.replaceChildren(...partes);
     el.feedback.className = `feedback feedback--${tipo}`;
     el.feedback.hidden = false;
@@ -332,7 +371,9 @@ const Quiz = (() => {
     if (estado.tentativas === 0) estado.acertosDePrimeira += 1;
     estado.pontos += ganhos;
     estado.respondida = true;
+    estado.seguidas += 1;
     Pontos.adicionar(ganhos);
+    atualizarSelo();
 
     el.pontos.textContent = textoPontos(estado.pontos);
     atualizarBarra(estado.indice + 1);
@@ -345,6 +386,8 @@ const Quiz = (() => {
 
   function errou() {
     estado.tentativas += 1;
+    estado.seguidas = 0; // o selo some no erro
+    atualizarSelo();
     if (temVoz) Incentivo.erro(); // zera a sequência de acertos
     mostrarFeedback('erro', 'Quase! Tente de novo.');
     if (temVoz) Voz.tocarFrase('quase'); // gravação da família, se existir
@@ -544,8 +587,11 @@ const Quiz = (() => {
       indice: 0,
       pontos: 0,
       acertosDePrimeira: 0,
+      seguidas: 0,
       aoTerminar,
     };
+    criarSegmentos();
+    atualizarSelo();
     el.avisoDemo.hidden = !demo;
     el.aviso.textContent = aviso || '';
     el.aviso.hidden = !aviso;
@@ -567,7 +613,8 @@ const Quiz = (() => {
     }
     mostrarBotaoLeitura(false);
 
-    el.progresso.textContent = `Pergunta ${estado.indice + 1} de ${estado.perguntas.length}`;
+    const tipo = NOMES_DOS_TIPOS[p.tipo];
+    el.progresso.textContent = `Pergunta ${estado.indice + 1} de ${estado.perguntas.length}${tipo ? ` · ${tipo}` : ''}`;
     el.enunciado.textContent = p.enunciado;
     el.feedback.hidden = true;
     el.feedback.className = 'feedback';
@@ -607,5 +654,6 @@ const Quiz = (() => {
     iniciar,
     suportadas,
     textoPontos,
+    textoSeguidas,
   };
 })();
