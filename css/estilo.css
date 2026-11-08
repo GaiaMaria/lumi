@@ -1645,6 +1645,14 @@ body:has(#tela-tabuada:not([hidden]) #tabuada-menu[hidden]) {
   color: var(--texto-escuro);
 }
 
+/* Campo da linha certa: fica travado, mas com texto escuro bem legível */
+.relacionar__linha--certa .relacionar__campo {
+  background: var(--creme);
+  border-color: var(--contorno);
+  color: var(--texto-escuro);
+  opacity: 1;
+}
+
 .relacionar__linha--errada {
   border-color: var(--erro);
 }
