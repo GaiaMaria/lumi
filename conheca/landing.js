@@ -206,5 +206,27 @@ const Landing = (() => {
   window.addEventListener('hashchange', abrirPrivacidade);
   abrirPrivacidade();
 
+  // ---------- planos ----------
+  // Preços vindos das constantes do topo (fáceis de trocar no teste).
+  document.querySelectorAll('[data-preco]').forEach((elemento) => {
+    const preco = PRECOS[elemento.dataset.preco];
+    if (preco) elemento.textContent = preco;
+  });
+
+  // Os botões dos planos não vendem nada: registram o interesse e levam ao formulário.
+  document.querySelectorAll('[data-plano]').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      const plano = botao.dataset.plano;
+      fetch('/api/interesse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plano }),
+        keepalive: true,
+      }).catch(() => {});
+      escolherPlano(plano);
+      irParaLista();
+    });
+  });
+
   return { enviarLead, mensagemDeErro, EMAIL_VALIDO, origem, escolherPlano, irParaLista, mascaraWhatsapp };
 })();

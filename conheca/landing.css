@@ -25,6 +25,12 @@ body.landing a {
   color: var(--texto);
 }
 
+/* Títulos menores sem a margem padrão do navegador (o espaço vem do layout) */
+:where(body.landing) :where(h3, ol, ul) {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 /* ---------- barra do topo ---------- */
 .barra-landing {
   max-width: var(--landing-largura);
@@ -240,6 +246,152 @@ body.landing a {
   color: var(--texto-suave);
   font-size: var(--landing-sub);
   line-height: 1.55;
+}
+
+/* ---------- como funciona ---------- */
+.secao__titulo--centro {
+  text-align: center;
+  max-width: 18ch;
+  margin-inline: auto;
+}
+
+.passos {
+  list-style: none;
+  margin: var(--espaco-10) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--espaco-10);
+}
+
+.passo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaco-2);
+  text-align: center;
+}
+
+.passo__img {
+  width: auto;
+  height: var(--tamanho-120);
+  margin-bottom: var(--espaco-2);
+  object-fit: contain;
+}
+
+.passo__titulo {
+  font-size: var(--fonte-1-4);
+  font-weight: 600;
+}
+
+.passo__texto {
+  max-width: 28ch;
+  color: var(--texto-suave);
+}
+
+.passos__extra {
+  margin-top: var(--espaco-10);
+}
+
+/* ---------- voz da família e planos ---------- */
+.voz {
+  max-width: var(--landing-coluna);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-4);
+  text-align: center;
+}
+
+.voz__ciencia {
+  color: var(--brilho);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-1-25);
+  font-weight: 600;
+}
+
+.planos {
+  margin-top: var(--espaco-10);
+  display: grid;
+  gap: var(--espaco-6);
+}
+
+.plano {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+  padding: var(--espaco-6);
+  background: var(--superficie);
+  border: var(--traco-cartao) solid var(--borda);
+  border-radius: var(--raio-cartao);
+}
+
+.plano--destaque {
+  border-color: var(--primaria);
+}
+
+.plano__selo {
+  position: absolute;
+  top: calc(-1 * var(--espaco-3-5));
+  right: var(--espaco-5);
+  padding: var(--espaco-1) var(--espaco-3);
+  border: var(--traco-medio) solid var(--contorno);
+  border-radius: var(--raio-xs);
+  background: var(--primaria);
+  color: var(--texto);
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-0-9);
+  font-weight: 600;
+}
+
+.plano__nome {
+  font-size: var(--fonte-1-5);
+  font-weight: 600;
+}
+
+.plano__preco {
+  font-family: var(--fonte-titulo);
+  font-size: var(--fonte-2);
+  font-weight: 700;
+}
+
+.plano__lancamento {
+  display: block;
+  color: var(--texto-suave);
+  font-family: var(--fonte-texto);
+  font-size: var(--fonte-0-9);
+  font-weight: 700;
+}
+
+.plano__lista {
+  flex: 1;
+  margin: 0;
+  padding-left: var(--espaco-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-2);
+  color: var(--texto-suave);
+}
+
+.plano__botao {
+  width: 100%;
+}
+
+.planos__nota {
+  max-width: var(--landing-coluna);
+  margin: var(--espaco-6) auto 0;
+}
+
+@media (min-width: 900px) {
+  .passos {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--espaco-8);
+  }
+
+  .planos {
+    grid-template-columns: repeat(2, minmax(0, 420px));
+    justify-content: center;
+  }
 }
 
 /* ---------- lista de espera ---------- */
