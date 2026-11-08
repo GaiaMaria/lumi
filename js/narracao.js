@@ -561,7 +561,7 @@ const Narracao = (() => {
     } else if (voz) {
       el.estadoNosPais.textContent = `A família tem uma voz digital, criada em ${formatoData.format(new Date(voz.criadaEm))}.`;
     } else {
-      el.estadoNosPais.textContent = 'Ainda não há voz digital. Para criar, toque em "Ouvir a voz da sua família" na tela inicial.';
+      el.estadoNosPais.textContent = 'Ainda não há voz digital. Para criar, toque em "Ouvir", na barra de baixo.';
     }
   }
 

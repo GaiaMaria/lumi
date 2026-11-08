@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Lumi</title>
   <meta name="description" content="Lumi: cada acerto acende uma luz.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilo.css">
   <script src="js/familia.js" defer></script>
   <script src="js/pontos.js" defer></script>
@@ -15,53 +18,91 @@
   <script src="js/curiosidades.js" defer></script>
   <script src="js/narracao.js" defer></script>
   <script src="js/calendario.js" defer></script>
+  <script src="js/trilha.js" defer></script>
+  <script src="js/resultado.js" defer></script>
+  <script src="js/abertura.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
   <main class="app">
 
+    <!-- Abertura: rede de neurônios com a Lumi (só na primeira visita da aba) -->
+    <section class="tela abertura" id="tela-abertura" aria-labelledby="titulo-abertura" hidden>
+      <div class="abertura__ceu">
+        <img class="abertura__rede" src="assets/rede-neuronios.svg" alt="" width="390" height="470">
+        <div class="abertura__lumi halo-lumi">
+          <img class="mascote mascote--lumi flutuar" src="assets/recortes/lumi-comemorando.png" alt="Lumi, o vaga-lume, comemorando" width="695" height="896">
+        </div>
+      </div>
+      <div class="abertura__texto">
+        <h1 class="abertura__titulo" id="titulo-abertura">Lumi</h1>
+        <p class="abertura__frase">Cada acerto acende uma luz.</p>
+        <button type="button" class="botao-principal abertura__comecar" data-ir="inicio">
+          <span>Começar</span>
+          <svg class="icone" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="botao-link" data-ir="pais">Área dos pais</button>
+      </div>
+    </section>
+
     <!-- Tela inicial -->
     <section class="tela" id="tela-inicio">
-      <header class="cabecalho">
-        <div class="cabecalho__luz">
-          <img class="cabecalho__lumi flutuar" src="assets/lumi.jpg" alt="Lumi, o vaga-lume verde-menta com asas violeta" width="180" height="180">
-        </div>
+      <header class="cabecalho visualmente-oculto">
         <h1 class="cabecalho__nome">Lumi</h1>
         <p class="cabecalho__frase">Cada acerto acende uma luz</p>
       </header>
 
       <div class="inicio">
+        <!-- Topo: nível, barra do nível e total de pontos -->
+        <div class="inicio-topo">
+          <span class="pilula pilula--nivel">Nível <span id="inicio-nivel">1</span></span>
+          <div class="barra-nivel" id="inicio-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+            <div class="barra-nivel__preenchido" id="inicio-nivel-preenchido"></div>
+          </div>
+          <span class="inicio-topo__conta" id="inicio-nivel-conta">0/50</span>
+          <span class="pilula pilula--pontos">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            <span id="inicio-pontos">0</span><span class="visualmente-oculto"> pontos</span>
+          </span>
+        </div>
+
+        <!-- Lumi com balão de fala -->
+        <div class="guia guia--lumi">
+          <img class="mascote mascote--lumi guia__mascote" src="assets/recortes/lumi-lapis.png" alt="Lumi segurando um lápis" width="666" height="900">
+          <p class="balao guia__balao">Oi! Bora transformar o caderno em missão?</p>
+        </div>
+
         <button type="button" class="botao-principal botao-principal--grande" data-ir="fotoquest">
           <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false">
             <path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.2-1.8A1.5 1.5 0 0 1 10.5 3.5h3a1.5 1.5 0 0 1 1.2.7L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
             <circle cx="12" cy="12.5" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
           </svg>
-          <span>Tirar foto e começar a missão</span>
+          <span>Nova missão</span>
         </button>
 
-        <button type="button" class="botao-secundario" data-ir="tabuada">Treinar tabuada</button>
-        <button type="button" class="botao-secundario" id="botao-voz-familia" data-ir="narracao" hidden>Ouvir a voz da sua família</button>
-
-        <section class="area-doris vidro" aria-labelledby="titulo-doris">
-          <img class="area-doris__imagem" src="assets/doris.jpg" alt="Dóris, a coruja laranja, segurando um livro" width="140" height="140">
+        <!-- O card grande saiu. A narração fica no item "Ouvir" da barra de baixo. -->
+        <section class="area-doris" aria-labelledby="titulo-doris" hidden>
           <h2 class="area-doris__titulo" id="titulo-doris">Leia comigo</h2>
         </section>
 
-        <section class="missoes vidro" id="missoes" aria-labelledby="titulo-missoes" hidden>
-          <h2 class="missoes__titulo" id="titulo-missoes">Suas missões</h2>
-          <ul class="missoes__lista" id="lista-missoes"></ul>
+        <!-- Trilha: cada missão salva é uma parada -->
+        <section class="missoes" id="missoes" aria-labelledby="titulo-missoes">
+          <h2 class="missoes__titulo visualmente-oculto" id="titulo-missoes">Suas missões</h2>
+          <ul class="missoes__lista trilha" id="lista-missoes"></ul>
         </section>
 
-        <button type="button" class="botao-apagar" data-ir="pais">Área dos pais</button>
-        <button type="button" class="botao-apagar" id="botao-apagar">Apagar dados da família</button>
-        <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
+        <!-- Próxima prova (some quando não há prova marcada) -->
+        <button type="button" class="chip-prova" id="inicio-prova" data-ir="provas" hidden>
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span id="inicio-prova-texto"></span>
+        </button>
       </div>
     </section>
 
     <!-- Voz da família: gravar, gerar e ouvir a narração -->
     <section class="tela" id="tela-narracao" aria-labelledby="titulo-narracao" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-narracao">Voz da família</h1>
       </div>
 
@@ -70,9 +111,7 @@
 
         <!-- 1. Gravar a voz para criar a voz digital -->
         <div class="narracao-bloco" id="narracao-gravar" hidden>
-          <figure class="quadro-ilustracao">
-            <img src="assets/doris-lumi-lapis.png" alt="Dóris segurando um lápis, com a Lumi na ponta" width="440" height="412">
-          </figure>
+          <img class="mascote narracao__mascote" src="assets/recortes/duas-lapis.png" alt="Dóris segurando um lápis, com a Lumi na ponta" width="879" height="698">
           <h2 class="tabuada-subtitulo">Crie a voz digital da família</h2>
           <p class="campo__ajuda">Grave de 30 a 45 segundos lendo o texto abaixo, num lugar silencioso, com o celular a um palmo da boca. Fale com a sua voz de sempre, sem pressa. Com essa gravação, o app cria uma voz parecida com a sua para narrar um fato das missões.</p>
 
@@ -99,9 +138,7 @@
 
         <!-- 2. Esperando: criando a voz ou gerando a narração -->
         <div class="narracao-bloco narracao-bloco--centro" id="narracao-esperando" hidden>
-          <figure class="quadro-ilustracao quadro-ilustracao--pequeno">
-            <img src="assets/doris-livro-olhos-fechados.jpg" alt="" width="300" height="364">
-          </figure>
+          <img class="mascote narracao__mascote narracao__mascote--pequena" src="assets/recortes/doris-olhos-fechados.png" alt="" width="715" height="900">
           <p class="narracao-titulo" id="narracao-esperando-titulo"></p>
           <div class="progresso-estimado" id="narracao-progresso" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
             <div class="progresso-estimado__barra" id="narracao-progresso-barra"></div>
@@ -111,12 +148,10 @@
 
         <!-- 3. Ouvir o fato, estilo teleprompter -->
         <div class="narracao-bloco" id="narracao-ouvir" hidden>
-          <figure class="quadro-ilustracao">
-            <img src="assets/doris-lumi-livro.png" alt="Dóris lendo um livro com a Lumi" width="430" height="452">
-          </figure>
-          <p class="campo__ajuda" id="narracao-origem"></p>
+          <img class="mascote narracao__mascote narracao__mascote--pequena" src="assets/recortes/doris-olhos-fechados.png" alt="Dóris de olhos fechados, ouvindo" width="715" height="900">
+          <p class="narracao-origem" id="narracao-origem"></p>
           <div class="teleprompter vidro" id="narracao-teleprompter"></div>
-          <button type="button" class="botao-principal botao-principal--grande" id="narracao-tocar">
+          <button type="button" class="botao-principal botao-principal--grande botao--laranja" id="narracao-tocar">
             <svg class="icone" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
             <span id="narracao-tocar-texto">Ouvir</span>
           </button>
@@ -143,14 +178,12 @@
     <!-- Provas: calendário mensal -->
     <section class="tela" id="tela-provas" aria-labelledby="titulo-provas" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="pais">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="pais"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-provas">Provas</h1>
       </div>
 
       <div class="conteudo">
-        <figure class="quadro-ilustracao quadro-ilustracao--pequeno">
-          <img src="assets/doris-livro.jpg" alt="Dóris lendo um livro" width="300" height="384">
-        </figure>
+        <img class="mascote provas__mascote" src="assets/recortes/doris-joinha.png" alt="Dóris fazendo joinha" width="700" height="761">
 
         <p class="aviso-gravacao" id="provas-mensagem" role="status" aria-live="polite" hidden></p>
 
@@ -170,7 +203,7 @@
 
         <section class="cartao-dia vidro" id="provas-cartao" aria-live="polite" hidden></section>
 
-        <button type="button" class="botao-principal" id="provas-nova">Adicionar prova</button>
+        <button type="button" class="botao-principal botao--sol" id="provas-nova">Adicionar prova</button>
 
         <form class="campo vidro" id="provas-formulario" novalidate hidden>
           <h2 class="campo__titulo">Nova prova</h2>
@@ -204,6 +237,10 @@
         </form>
 
         <div class="provas-google vidro">
+          <p class="selo-google" id="provas-google-conectado" hidden>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Google Agenda conectado
+          </p>
           <button type="button" class="botao-principal" id="provas-enviar-todas">Enviar todas as provas para o Google Agenda</button>
           <p class="provas-google__situacao" id="provas-google-situacao" role="status" aria-live="polite" hidden></p>
           <div class="provas-google__acoes">
@@ -218,12 +255,16 @@
     <!-- Área dos pais -->
     <section class="tela" id="tela-pais" aria-labelledby="titulo-pais" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-pais">Área dos pais</h1>
+        <img class="mascote barra-topo__mascote" src="assets/recortes/doris-joinha.png" alt="" width="700" height="761">
       </div>
 
       <div class="conteudo">
-        <button type="button" class="botao-secundario" data-ir="provas">Provas: datas e Google Agenda</button>
+        <button type="button" class="botao-cartao botao--sol" data-ir="provas">
+          <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true" focusable="false"><rect x="4" y="5.5" width="16" height="14.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>Provas: datas e Google Agenda</span>
+        </button>
 
         <section class="campo vidro" aria-labelledby="titulo-voz-digital">
           <h2 class="campo__titulo" id="titulo-voz-digital">Voz digital da família</h2>
@@ -252,21 +293,25 @@
             <p class="mensagem" id="voz-mensagem" role="status" aria-live="polite"></p>
           </div>
         </section>
+
+        <!-- Apagar tudo: fica aqui, longe da criança (mesmo id e mesmo comportamento de antes) -->
+        <button type="button" class="botao-apagar botao-apagar--perigo" id="botao-apagar">Apagar dados da família</button>
+        <p class="mensagem" id="mensagem-inicio" role="status" aria-live="polite"></p>
       </div>
     </section>
 
     <!-- Tabuada -->
     <section class="tela" id="tela-tabuada" aria-labelledby="titulo-tabuada" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" id="tabuada-voltar">← Voltar</button>
+        <button type="button" class="botao-voltar" id="tabuada-voltar"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-tabuada">Tabuada</h1>
       </div>
 
       <div class="conteudo">
         <!-- Menu dos modos -->
         <div class="tabuada-bloco" id="tabuada-menu">
-          <div class="nivel vidro">
-            <img class="nivel__lumi" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="88" height="88">
+          <div class="nivel">
+            <img class="mascote mascote--lumi nivel__lumi" src="assets/recortes/lumi-abraco-lapis.png" alt="Lumi abraçando um lápis" width="644" height="790">
             <div class="nivel__info">
               <p class="nivel__titulo"><span class="nivel__rotulo">Nível</span> <span class="nivel__numero" id="tabuada-nivel">1</span></p>
               <div class="nivel__barra" id="tabuada-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
@@ -276,7 +321,7 @@
             </div>
           </div>
 
-          <h2 class="tabuada-subtitulo">Medalhas</h2>
+          <h2 class="tabuada-subtitulo">Suas medalhas</h2>
           <ul class="medalhas" id="tabuada-medalhas"></ul>
 
           <h2 class="tabuada-subtitulo">Escolha o modo</h2>
@@ -336,6 +381,10 @@
             <span id="tabuada-progresso"></span>
             <span class="tabuada-tempo" id="tabuada-tempo" role="timer" aria-live="off" hidden></span>
           </div>
+          <!-- Barra do tempo do desafio (só aparece com o relógio) -->
+          <div class="barra-tempo" id="tabuada-tempo-barra" aria-hidden="true" hidden>
+            <div class="barra-tempo__preenchido" id="tabuada-tempo-preenchido"></div>
+          </div>
           <p class="tabuada-conta" id="tabuada-conta"></p>
           <label class="visualmente-oculto" for="tabuada-resposta">Sua resposta</label>
           <input class="tabuada-resposta" id="tabuada-resposta" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="3" autocomplete="off">
@@ -346,6 +395,7 @@
 
         <!-- Fim da rodada -->
         <div class="tabuada-bloco resultado" id="tabuada-fim" hidden>
+          <img class="mascote resultado__mascote resultado__mascote--pequena" src="assets/recortes/duas-comemorando.png" alt="" width="900" height="890">
           <h2 class="resultado__titulo" id="tabuada-fim-titulo"></h2>
           <div class="conquista-distintivo" id="tabuada-fim-distintivo" aria-hidden="true" hidden></div>
           <p class="pontos pontos--grande"><span id="tabuada-fim-pontos">0</span> pontos</p>
@@ -361,14 +411,14 @@
     <!-- FotoQuest: escolher a foto -->
     <section class="tela" id="tela-fotoquest" aria-labelledby="titulo-fotoquest" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Voltar</button>
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-fotoquest">FotoQuest</h1>
       </div>
 
       <form class="conteudo" id="form-fotos" novalidate>
-        <div class="guia-doris vidro">
-          <img class="guia-doris__imagem" src="assets/doris.jpg" alt="" width="72" height="72">
-          <p>Tire fotos do caderno, do livro ou da atividade. A Dóris transforma em missão!</p>
+        <div class="guia guia--doris">
+          <img class="mascote guia__mascote" src="assets/recortes/doris-acenando.png" alt="Dóris, a coruja, acenando" width="812" height="900">
+          <p class="balao guia__balao">Mostra o que você estudou que eu viro missão!</p>
         </div>
 
         <fieldset class="campo vidro">
@@ -397,16 +447,22 @@
 
             <!-- Galeria: o mesmo campo, sem o atributo capture -->
             <input type="file" id="entrada-galeria" class="visualmente-oculto" accept="image/*" multiple>
-            <label class="botao-foto botao-foto--galeria" for="entrada-galeria" id="rotulo-galeria">Escolher da galeria</label>
+            <label class="botao-foto botao-foto--galeria" for="entrada-galeria" id="rotulo-galeria">Galeria</label>
           </div>
           <p class="contador" id="contador-fotos" aria-live="polite"></p>
           <ul class="miniaturas" id="miniaturas" aria-label="Fotos escolhidas"></ul>
         </fieldset>
 
-        <section class="aviso-privacidade vidro" aria-labelledby="titulo-privacidade">
-          <h2 class="aviso-privacidade__titulo" id="titulo-privacidade">Sua privacidade</h2>
+        <section class="aviso-privacidade" aria-labelledby="titulo-privacidade">
+          <h2 class="visualmente-oculto" id="titulo-privacidade">Sua privacidade</h2>
+          <p class="aviso-privacidade__resumo">Fotos viram missão e são apagadas.</p>
+          <details class="saiba-mais">
+            <summary class="saiba-mais__titulo">Saiba mais</summary>
+            <div class="saiba-mais__texto">
           <p>Suas fotos são usadas só para criar as perguntas da missão e são descartadas logo depois. As perguntas ficam guardadas somente para a sua família, para você estudar quando quiser. Nenhuma outra família tem acesso a elas, e elas não são usadas para treinar sistemas. Você pode apagar tudo a qualquer momento no botão 'Apagar dados da família'.</p>
           <p>Se você criar a voz digital da família, a gravação da sua voz é enviada à ElevenLabs, que cria e guarda essa voz até a família apagar. O botão 'Apagar dados da família' também apaga a voz digital no serviço.</p>
+            </div>
+          </details>
         </section>
 
         <label class="declaracao" for="declaracao">
@@ -414,9 +470,7 @@
           <span>Declaro que as fotos enviadas são de cadernos ou materiais de estudo meus ou do meu filho, e que serão usadas apenas para estudo da nossa família.</span>
         </label>
 
-        <button type="submit" class="botao-principal" id="botao-enviar" disabled>
-          Enviar fotos
-        </button>
+        <button type="submit" class="botao-principal" id="botao-enviar" disabled>Criar minha missão</button>
 
         <p class="mensagem" id="mensagem-foto" role="status" aria-live="polite"></p>
       </form>
@@ -425,7 +479,7 @@
     <!-- Aviso de disciplina diferente -->
     <section class="tela" id="tela-disciplina" aria-labelledby="titulo-disciplina" hidden>
       <div class="conteudo conteudo--centro">
-        <img class="guia-doris__imagem guia-doris__imagem--grande" src="assets/doris.jpg" alt="" width="120" height="120">
+        <img class="mascote mascote--aviso" src="assets/recortes/doris-livro.png" alt="" width="634" height="741">
         <h1 class="titulo-aviso" id="titulo-disciplina">Hmm, será a matéria certa?</h1>
         <p class="texto-aviso" id="texto-disciplina"></p>
         <button type="button" class="botao-principal" id="botao-continuar">Continuar</button>
@@ -434,14 +488,14 @@
     </section>
 
     <!-- Quiz -->
-    <section class="tela" id="tela-quiz" aria-labelledby="quiz-enunciado" hidden>
-      <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="inicio">← Sair</button>
+    <section class="tela tela-quiz" id="tela-quiz" aria-labelledby="quiz-enunciado" hidden>
+      <div class="barra-topo barra-topo--quiz">
+        <button type="button" class="botao-voltar" data-ir="inicio"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg><span class="visualmente-oculto">Sair</span></button>
+        <!-- Um segmento por pergunta (o JS cria os segmentos a partir do total) -->
+        <div class="progresso" id="quiz-progresso-barra" role="progressbar" aria-label="Progresso da missão" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
+          <div class="progresso__preenchido" id="quiz-progresso-preenchido"></div>
+        </div>
         <span class="pontos" id="quiz-pontos">0 pontos</span>
-      </div>
-
-      <div class="progresso" id="quiz-progresso-barra" role="progressbar" aria-label="Progresso da missão" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0">
-        <div class="progresso__preenchido" id="quiz-progresso-preenchido"></div>
       </div>
 
       <div class="conteudo">
@@ -452,46 +506,99 @@
 
         <p class="aviso-leitura vidro" id="quiz-aviso" hidden></p>
 
-        <p class="quiz-progresso" id="quiz-progresso"></p>
-        <h2 class="quiz-enunciado" id="quiz-enunciado"></h2>
-
-        <div class="leia-comigo">
-          <button type="button" class="botao-leia" id="botao-leia" hidden>
-            <svg class="icone" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-              <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-              <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            </svg>
-            <span id="botao-leia-texto">Leia comigo</span>
-          </button>
-          <p class="aviso-voz" id="aviso-voz" hidden>Este navegador não tem voz em português para ler em voz alta.</p>
+        <div class="quiz-linha">
+          <p class="quiz-progresso" id="quiz-progresso"></p>
+          <span class="selo-seguidas" id="quiz-seguidas" hidden></span>
         </div>
 
+        <div class="quiz-pergunta">
+          <button type="button" class="botao-leia" id="botao-leia" hidden>
+            <svg class="icone" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+              <path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span class="visualmente-oculto" id="botao-leia-texto">Leia comigo</span>
+          </button>
+          <h2 class="quiz-enunciado" id="quiz-enunciado"></h2>
+        </div>
+        <p class="aviso-voz" id="aviso-voz" hidden>Este navegador não tem voz em português para ler em voz alta.</p>
+
         <div class="quiz-opcoes" id="quiz-opcoes"></div>
+      </div>
 
+      <!-- Painel de resposta: fica preso embaixo, estilo trilha -->
+      <div class="painel-resposta">
         <div class="feedback" id="quiz-feedback" role="status" aria-live="polite" hidden></div>
-
-        <button type="button" class="botao-principal" id="quiz-proxima" hidden>
-          Próxima pergunta
-        </button>
+        <button type="button" class="botao-principal botao--menta" id="quiz-proxima" hidden>Próxima pergunta</button>
       </div>
     </section>
 
     <!-- Resultado da missão -->
     <section class="tela" id="tela-resultado" aria-labelledby="titulo-resultado" hidden>
       <div class="conteudo resultado">
-        <div class="resultado__luz">
-          <img class="resultado__lumi flutuar" src="assets/lumi-comemorando.jpg" alt="Lumi comemorando" width="200" height="200">
-        </div>
+        <img class="mascote resultado__mascote" src="assets/recortes/duas-comemorando.png" alt="Dóris e Lumi comemorando" width="900" height="890">
         <h1 class="resultado__titulo" id="titulo-resultado">Missão completa!</h1>
-        <p class="pontos pontos--grande"><span id="resultado-pontos">0</span> pontos</p>
         <p class="resultado__detalhe" id="resultado-detalhe"></p>
 
-        <button type="button" class="botao-principal" data-ir="fotoquest">Nova missão</button>
-        <button type="button" class="botao-secundario" data-ir="inicio">Voltar ao início</button>
+        <!-- Cartões: pontos, acertos de primeira e "sua melhor" (missão repetida) -->
+        <div class="resultado-cartoes">
+          <p class="cartao-numero cartao-numero--menta">
+            <strong>+<span id="resultado-pontos">0</span></strong>
+            <span>pontos</span>
+          </p>
+          <p class="cartao-numero" id="resultado-acertos-cartao" hidden>
+            <strong id="resultado-acertos"></strong>
+            <span>de primeira</span>
+          </p>
+          <p class="cartao-numero cartao-numero--sol" id="resultado-melhor-cartao" hidden>
+            <strong id="resultado-melhor"></strong>
+            <span>sua melhor</span>
+          </p>
+        </div>
+
+        <!-- Barra de nível -->
+        <div class="resultado-nivel">
+          <div class="resultado-nivel__textos">
+            <span id="resultado-nivel-titulo">Nível 1 → 2</span>
+            <span id="resultado-nivel-faltam"></span>
+          </div>
+          <div class="barra-nivel" id="resultado-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+            <div class="barra-nivel__preenchido" id="resultado-nivel-preenchido"></div>
+          </div>
+        </div>
+
+        <!-- Só aparece se a narração vai ler o fato desta missão -->
+        <button type="button" class="botao-principal botao--laranja" id="resultado-ouvir" data-ir="narracao" hidden>
+          <svg class="icone" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <span>Ouvir o fato da Dóris</span>
+        </button>
+        <button type="button" class="botao-principal" data-ir="inicio">Voltar à trilha</button>
+        <button type="button" class="botao-secundario" data-ir="fotoquest">Nova missão</button>
       </div>
     </section>
 
   </main>
+
+  <!-- Barra de navegação de baixo (só no Início, menu da Tabuada, Narração e Área dos pais) -->
+  <nav class="nav-principal" id="nav-principal" aria-label="Navegação principal" hidden>
+    <button type="button" class="nav-principal__item" data-ir="inicio" data-nav="inicio">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6 20c0-4 12-3 12-7.5S6 9 6 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 3.2"/><circle cx="6" cy="20" r="2" fill="currentColor"/><path d="M6 3.2l1.1 2.2 2.4.3-1.8 1.6.5 2.4L6 8.5 3.8 9.7l.5-2.4-1.8-1.6 2.4-.3z" fill="currentColor"/></svg>
+      <span>Trilha</span>
+    </button>
+    <button type="button" class="nav-principal__item" data-ir="tabuada" data-nav="tabuada">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <span>Tabuada</span>
+    </button>
+    <!-- Mesmo id de antes: Narracao.atualizarBotaoInicio() esconde quando não há voz -->
+    <button type="button" class="nav-principal__item" id="botao-voz-familia" data-ir="narracao" data-nav="narracao" hidden>
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Ouvir</span>
+    </button>
+    <button type="button" class="nav-principal__item" data-ir="pais" data-nav="pais">
+      <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false"><circle cx="9" cy="8" r="3.2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="9.5" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 19.5a5.5 5.5 0 0 1 11 0M14.5 15.2a4.5 4.5 0 0 1 6 4.3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>Pais</span>
+    </button>
+  </nav>
 
   <footer class="rodape">
     <p>Lumi</p>

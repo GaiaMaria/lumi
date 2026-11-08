@@ -91,3 +91,17 @@ test('ics: várias provas viram um arquivo só, com um evento por prova em ordem
   assert.strictEqual(uids.join(','), 'a,b,c');
   assert.ok(ics.endsWith('END:VCALENDAR\r\n'));
 });
+
+test('dias até a prova: conta pelo calendário, sem depender da hora', () => {
+  assert.strictEqual(D.diasAte('2026-11-08', new Date(2026, 10, 8, 23, 50)), 0);
+  assert.strictEqual(D.diasAte('2026-11-09', new Date(2026, 10, 8, 23, 50)), 1);
+  assert.strictEqual(D.diasAte('2026-12-01', new Date(2026, 10, 30, 8, 0)), 1); // virada de mês
+  assert.strictEqual(D.diasAte('2027-01-02', new Date(2026, 11, 31, 8, 0)), 2); // virada de ano
+});
+
+test('texto da próxima prova no Início: hoje, amanhã ou em N dias', () => {
+  const prova = { nome: 'Prova de Ciências', data: '2026-11-12', hora: '08:00' };
+  assert.strictEqual(D.textoProxima(prova, new Date(2026, 10, 12, 7, 0)), 'Prova de Ciências hoje');
+  assert.strictEqual(D.textoProxima(prova, new Date(2026, 10, 11, 18, 0)), 'Prova de Ciências amanhã');
+  assert.strictEqual(D.textoProxima(prova, new Date(2026, 10, 8, 9, 0)), 'Prova de Ciências em 4 dias');
+});

@@ -143,6 +143,8 @@ const Tabuada = (() => {
     gradeNumeros: $('grade-numeros'),
     progresso: $('tabuada-progresso'),
     tempo: $('tabuada-tempo'),
+    tempoBarra: $('tabuada-tempo-barra'),
+    tempoPreenchido: $('tabuada-tempo-preenchido'),
     conta: $('tabuada-conta'),
     resposta: $('tabuada-resposta'),
     conferir: $('tabuada-conferir'),
@@ -288,6 +290,7 @@ const Tabuada = (() => {
 
     mostrar('jogo');
     el.tempo.hidden = modo !== 'desafio';
+    el.tempoBarra.hidden = modo !== 'desafio';
     if (modo === 'desafio') iniciarRelogio();
     mostrarConta();
     if (temVoz) Incentivo.reiniciar(); // cada rodada começa uma sequência nova
@@ -329,6 +332,16 @@ const Tabuada = (() => {
       const span = document.createElement('span');
       span.textContent = detalhe;
       partes.push(span);
+    }
+    if (tipo === 'sucesso') {
+      // A Lumi comemora no acerto, como no quiz.
+      const lumi = document.createElement('img');
+      lumi.className = 'feedback__lumi mascote mascote--lumi';
+      lumi.src = 'assets/recortes/lumi-comemorando.png';
+      lumi.alt = '';
+      lumi.width = 56;
+      lumi.height = 72;
+      partes.unshift(lumi);
     }
     el.feedback.replaceChildren(...partes);
     el.feedback.className = `feedback feedback--${tipo}`;
@@ -427,6 +440,7 @@ const Tabuada = (() => {
     const atualizar = () => {
       const restam = Math.max(0, Math.ceil((fim - Date.now()) / 1000));
       el.tempo.textContent = `${restam} s`;
+      el.tempoPreenchido.style.width = `${(restam / TEMPO_DESAFIO_SEGUNDOS) * 100}%`;
       if (restam <= 0) terminar(false);
     };
     atualizar();

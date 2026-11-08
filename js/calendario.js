@@ -71,6 +71,23 @@ const DatasDeProva = (() => {
     return nome.toLowerCase().includes(materia.toLowerCase()) ? nome : `${materia} – ${nome}`;
   }
 
+  // Quantos dias faltam até a data (AAAA-MM-DD), contando pelo calendário (0 = hoje).
+  function diasAte(data, agora = new Date()) {
+    const [a, m, d] = data.split('-').map(Number);
+    const alvo = Date.UTC(a, m - 1, d);
+    const hoje = Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate());
+    return Math.round((alvo - hoje) / 86400000);
+  }
+
+  // Texto do chip da próxima prova no Início: "Prova de Ciências em 4 dias".
+  function textoProxima(prova, agora = new Date()) {
+    const dias = diasAte(prova.data, agora);
+    let quando = `em ${dias} dias`;
+    if (dias <= 0) quando = 'hoje';
+    else if (dias === 1) quando = 'amanhã';
+    return `${prova.nome} ${quando}`;
+  }
+
   function dataPorExtenso(data) {
     const [a, m, d] = data.split('-').map(Number);
     return `${d} de ${MESES[m - 1]} de ${a}`;
@@ -140,7 +157,7 @@ const DatasDeProva = (() => {
     ].join('\r\n');
   }
 
-  return { MATERIAS, chaveDoDia, hojeTexto, grade, nomeDoMes, porDia, proxima, titulo, dataPorExtenso, gerarIcs };
+  return { MATERIAS, chaveDoDia, hojeTexto, grade, nomeDoMes, porDia, proxima, diasAte, textoProxima, titulo, dataPorExtenso, gerarIcs };
 })();
 
 // ---------- tela ----------
@@ -182,6 +199,7 @@ const Calendario = (() => {
     hora: $('prova-hora'),
     cancelar: $('prova-cancelar'),
     desconectar: $('provas-desconectar'),
+    seloGoogle: $('provas-google-conectado'),
     enviarTodas: $('provas-enviar-todas'),
     googleSituacao: $('provas-google-situacao'),
     googleEntrar: $('provas-google-entrar'),
@@ -372,6 +390,12 @@ const Calendario = (() => {
     }
   }
 
+  // Selo "Google Agenda conectado": só aparece quando o servidor confirma a conexão.
+  async function atualizarSeloGoogle() {
+    const estado = await estadoDoGoogle();
+    el.seloGoogle.hidden = !(estado && estado.conectado);
+  }
+
   // O Google sempre volta para um endereço fixo. Se o app estiver aberto por outro
   // (por exemplo, o endereço de um deploy), o login não "pega": avisa em vez de entrar em loop.
   function avisoDeEndereco(endereco) {
@@ -515,6 +539,7 @@ const Calendario = (() => {
   async function desconectarGoogle({ silencioso = false } = {}) {
     try {
       await fetch('/api/google/desconectar', { method: 'POST' });
+      el.seloGoogle.hidden = true;
       if (!silencioso) avisar('Google Agenda desconectado. O acesso foi cancelado no Google.');
     } catch (erro) {
       if (!silencioso) avisar('Não consegui desconectar agora. Tente de novo.');
@@ -598,6 +623,7 @@ const Calendario = (() => {
     fecharCartao();
     const hoje = new Date();
     irPara(hoje.getFullYear(), hoje.getMonth());
+    atualizarSeloGoogle();
   }
 
   return { abrir, aoVoltarDoGoogle, desconectarGoogle };

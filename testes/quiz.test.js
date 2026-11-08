@@ -131,3 +131,10 @@ test('formato inválido é descartado no navegador também', () => {
   ]);
   assert.strictEqual(lista.length, 0);
 });
+
+test('selo de seguidas: aparece a partir de 2 acertos seguidos', () => {
+  assert.strictEqual(Quiz.textoSeguidas(0), '');
+  assert.strictEqual(Quiz.textoSeguidas(1), '');
+  assert.strictEqual(Quiz.textoSeguidas(2), '2 seguidas');
+  assert.strictEqual(Quiz.textoSeguidas(5), '5 seguidas');
+});

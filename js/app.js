@@ -2,6 +2,22 @@
 
 const App = (() => {
   const telas = document.querySelectorAll('.tela');
+  const nav = document.getElementById('nav-principal');
+  // Telas com a barra de navegação de baixo. Na Tabuada, ela some durante o jogo (regra no CSS).
+  const TELAS_COM_NAV = ['inicio', 'tabuada', 'narracao', 'pais'];
+
+  // Mostra a barra só nas telas certas e marca o item da tela atual.
+  function atualizarNav() {
+    const visivel = [...telas].find((tela) => !tela.hidden);
+    const nome = visivel ? visivel.id.replace('tela-', '') : '';
+    const comNav = TELAS_COM_NAV.includes(nome);
+    nav.hidden = !comNav;
+    document.body.classList.toggle('com-nav', comNav);
+    nav.querySelectorAll('[data-nav]').forEach((item) => {
+      if (item.dataset.nav === nome) item.setAttribute('aria-current', 'page');
+      else item.removeAttribute('aria-current');
+    });
+  }
 
   // { manter: true } volta para a tela sem limpar o que já foi preenchido.
   function mostrarTela(nome, { manter = false } = {}) {
@@ -22,6 +38,7 @@ const App = (() => {
     else Narracao.sair();
     if (nome === 'fotoquest' && !manter) FotoQuest.preparar();
     if (nome === 'inicio') Inicio.atualizar();
+    atualizarNav();
   }
 
   // Botões com data-ir="nome-da-tela" levam para aquela tela.
@@ -30,7 +47,7 @@ const App = (() => {
     if (alvo) mostrarTela(alvo.dataset.ir);
   });
 
-  return { mostrarTela };
+  return { mostrarTela, atualizarNav };
 })();
 
 // FotoQuest: escolher disciplina e fotos, e transformar em missão.
@@ -74,6 +91,15 @@ const FotoQuest = (() => {
     mensagem: document.getElementById('mensagem-foto'),
     resultadoPontos: document.getElementById('resultado-pontos'),
     resultadoDetalhe: document.getElementById('resultado-detalhe'),
+    resultadoAcertosCartao: document.getElementById('resultado-acertos-cartao'),
+    resultadoAcertos: document.getElementById('resultado-acertos'),
+    resultadoMelhorCartao: document.getElementById('resultado-melhor-cartao'),
+    resultadoMelhor: document.getElementById('resultado-melhor'),
+    resultadoNivelTitulo: document.getElementById('resultado-nivel-titulo'),
+    resultadoNivelFaltam: document.getElementById('resultado-nivel-faltam'),
+    resultadoNivelBarra: document.getElementById('resultado-nivel-barra'),
+    resultadoNivelPreenchido: document.getElementById('resultado-nivel-preenchido'),
+    resultadoOuvir: document.getElementById('resultado-ouvir'),
     textoDisciplina: document.getElementById('texto-disciplina'),
     continuar: document.getElementById('botao-continuar'),
     trocar: document.getElementById('botao-trocar'),
@@ -125,7 +151,7 @@ const FotoQuest = (() => {
     el.entradas.forEach((entrada) => { entrada.value = ''; });
     preparando = false;
     enviando = false;
-    el.enviar.textContent = 'Enviar fotos';
+    el.enviar.textContent = 'Criar minha missão';
     avisar('');
     desenharMiniaturas();
     atualizarBotao();
@@ -242,7 +268,7 @@ const FotoQuest = (() => {
     const resultado = await buscarPerguntas(disciplina);
 
     enviando = false;
-    el.enviar.textContent = 'Enviar fotos';
+    el.enviar.textContent = 'Criar minha missão';
     atualizarBotao();
 
     if (resultado.erro) return avisar(resultado.mensagem);
@@ -303,7 +329,7 @@ const FotoQuest = (() => {
       aviso,
       aoTerminar: (resultado) => {
         if (id) Familia.concluirMissao(id, resultado);
-        mostrarResultado(resultado);
+        mostrarResultado(resultado, id);
       },
     });
     App.mostrarTela('quiz');
@@ -382,58 +408,154 @@ const FotoQuest = (() => {
     return resultado;
   }
 
-  function mostrarResultado({ pontos, acertosDePrimeira, corrigiveis }) {
+  function mostrarResultado({ pontos, acertosDePrimeira, corrigiveis }, id = null) {
+    const missao = id ? Familia.missao(id) : null;
     el.resultadoPontos.textContent = pontos;
     el.resultadoDetalhe.textContent =
       `Você acertou ${acertosDePrimeira} de ${corrigiveis} de primeira. ` +
       `Seu total: ${Quiz.textoPontos(Pontos.total())}.`;
+
+    const cartoes = Resultado.cartoes({
+      acertosDePrimeira,
+      corrigiveis,
+      vezes: missao ? missao.vezes : 0,
+      melhorPontuacao: missao ? missao.melhorPontuacao : 0,
+    });
+    el.resultadoAcertosCartao.hidden = !cartoes.acertos;
+    el.resultadoAcertos.textContent = cartoes.acertos || '';
+    el.resultadoMelhorCartao.hidden = !cartoes.melhor;
+    el.resultadoMelhor.textContent = cartoes.melhor || '';
+
+    const nivel = Pontos.nivel();
+    const textos = Resultado.textoNivel(nivel);
+    el.resultadoNivelTitulo.textContent = textos.titulo;
+    el.resultadoNivelFaltam.textContent = textos.faltam;
+    el.resultadoNivelPreenchido.style.width = `${(nivel.noNivel / Pontos.PONTOS_POR_NIVEL) * 100}%`;
+    el.resultadoNivelBarra.setAttribute('aria-valuemax', Pontos.PONTOS_POR_NIVEL);
+    el.resultadoNivelBarra.setAttribute('aria-valuenow', nivel.noNivel);
+
+    // Só com a voz digital da família: sem ela, a tela de narração pede a gravação
+    // em vez de ler o fato. E só quando o fato lido vai ser o desta missão.
+    const maisRecente = Familia.curiosidadeDasFotos();
+    el.resultadoOuvir.hidden = !Resultado.mostrarFato({
+      fatoDaMissao: missao ? missao.fato : '',
+      fatoMaisRecente: maisRecente ? maisRecente.texto : null,
+      narracaoDisponivel: Boolean(Familia.vozDigital()),
+    });
+
     App.mostrarTela('resultado');
   }
 
   return { preparar, jogar };
 })();
 
-// Tela inicial: missões guardadas e botão de apagar os dados da família.
+// Tela inicial: topo com nível e pontos, trilha das missões guardadas e próxima prova.
+// O botão de apagar os dados da família agora fica na Área dos pais (mesmo id).
 const Inicio = (() => {
+  const $ = (id) => document.getElementById(id);
   const el = {
-    caixa: document.getElementById('missoes'),
-    lista: document.getElementById('lista-missoes'),
-    apagar: document.getElementById('botao-apagar'),
-    mensagem: document.getElementById('mensagem-inicio'),
+    caixa: $('missoes'),
+    lista: $('lista-missoes'),
+    apagar: $('botao-apagar'),
+    mensagem: $('mensagem-inicio'),
+    nivel: $('inicio-nivel'),
+    nivelBarra: $('inicio-nivel-barra'),
+    nivelPreenchido: $('inicio-nivel-preenchido'),
+    nivelConta: $('inicio-nivel-conta'),
+    pontos: $('inicio-pontos'),
+    prova: $('inicio-prova'),
+    provaTexto: $('inicio-prova-texto'),
   };
 
-  const formatoData = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
+  const SVG = 'http://www.w3.org/2000/svg';
+
+  // Ícone da parada: estrela (nova) ou ✓ (feita).
+  function iconeParada(estado) {
+    const svg = document.createElementNS(SVG, 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
+    const caminho = document.createElementNS(SVG, 'path');
+    caminho.setAttribute('d', estado === 'feita'
+      ? 'M5 12.5l4.5 4.5L19 7.5'
+      : 'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z');
+    caminho.setAttribute('fill', 'none');
+    caminho.setAttribute('stroke', 'currentColor');
+    caminho.setAttribute('stroke-width', estado === 'feita' ? '3' : '2.2');
+    caminho.setAttribute('stroke-linecap', 'round');
+    caminho.setAttribute('stroke-linejoin', 'round');
+    svg.append(caminho);
+    return svg;
+  }
+
+  function texto(tag, classe, conteudo) {
+    const elemento = document.createElement(tag);
+    elemento.className = classe;
+    elemento.textContent = conteudo;
+    return elemento;
+  }
+
+  function atualizarTopo() {
+    const { total, nivel, noNivel } = Pontos.nivel();
+    el.nivel.textContent = nivel;
+    el.nivelPreenchido.style.width = `${(noNivel / Pontos.PONTOS_POR_NIVEL) * 100}%`;
+    el.nivelBarra.setAttribute('aria-valuemax', Pontos.PONTOS_POR_NIVEL);
+    el.nivelBarra.setAttribute('aria-valuenow', noNivel);
+    el.nivelConta.textContent = `${noNivel}/${Pontos.PONTOS_POR_NIVEL}`;
+    el.pontos.textContent = total;
+  }
+
+  function atualizarProva() {
+    const prova = DatasDeProva.proxima(Familia.provas());
+    el.prova.hidden = !prova;
+    el.provaTexto.textContent = prova ? DatasDeProva.textoProxima(prova) : '';
+  }
+
+  // Cada missão vira uma parada. O círculo é o botão que começa a missão.
+  function parada(missao) {
+    const info = Trilha.parada(missao);
+    const item = document.createElement('li');
+    item.className = `missao missao--${info.estado}`;
+
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'missao__parada';
+    botao.setAttribute('aria-label', `${info.acao}: ${info.nome}`);
+    botao.append(iconeParada(info.estado));
+    botao.addEventListener('click', () => {
+      FotoQuest.jogar(missao.perguntas, { aviso: missao.aviso, id: missao.id });
+    });
+
+    const textos = document.createElement('div');
+    textos.className = 'missao__textos';
+    textos.append(texto('p', 'missao__nome', info.nome), texto('p', 'missao__detalhe', info.detalhe));
+
+    item.append(botao, textos);
+    return item;
+  }
+
+  // Sem missões: uma parada apagada que convida a tirar a primeira foto.
+  function paradaVazia() {
+    const item = document.createElement('li');
+    item.className = 'missao missao--vazia';
+    const circulo = document.createElement('span');
+    circulo.className = 'missao__parada';
+    circulo.setAttribute('aria-hidden', 'true');
+    circulo.append(iconeParada('nova'));
+    const textos = document.createElement('div');
+    textos.className = 'missao__textos';
+    textos.append(texto('p', 'missao__nome', 'Sua primeira missão começa com uma foto'));
+    item.append(circulo, textos);
+    return item;
+  }
 
   function atualizar() {
     Narracao.atualizarBotaoInicio();
+    atualizarTopo();
+    atualizarProva();
     const missoes = Familia.missoes();
-    el.caixa.hidden = missoes.length === 0;
-    el.lista.replaceChildren(...missoes.map((missao) => {
-      const item = document.createElement('li');
-      item.className = 'missao';
-
-      const info = document.createElement('div');
-      const nome = document.createElement('p');
-      nome.className = 'missao__nome';
-      nome.textContent = missao.disciplinaNome;
-      const detalhe = document.createElement('p');
-      detalhe.className = 'missao__detalhe';
-      const data = formatoData.format(new Date(missao.criadaEm));
-      const situacao = missao.vezes ? `melhor: ${Quiz.textoPontos(missao.melhorPontuacao)}` : 'nova';
-      detalhe.textContent = `${missao.perguntas.length} perguntas · ${data} · ${situacao}`;
-      info.append(nome, detalhe);
-
-      const botao = document.createElement('button');
-      botao.type = 'button';
-      botao.className = 'botao-secundario';
-      botao.textContent = missao.vezes ? 'Estudar de novo' : 'Começar';
-      botao.addEventListener('click', () => {
-        FotoQuest.jogar(missao.perguntas, { aviso: missao.aviso, id: missao.id });
-      });
-
-      item.append(info, botao);
-      return item;
-    }));
+    el.caixa.hidden = false;
+    el.lista.replaceChildren(...(missoes.length ? missoes.map(parada) : [paradaVazia()]));
   }
 
   el.apagar.addEventListener('click', async () => {
@@ -468,5 +590,12 @@ const Inicio = (() => {
   return { atualizar };
 })();
 
+// Abertura na primeira visita da aba. Vem antes da volta do Google,
+// que apaga o ?google= do endereço (com ?google=, a abertura não aparece).
+Abertura.iniciar();
+
 // Volta do login do Google Agenda (?google=...).
 Calendario.aoVoltarDoGoogle();
+
+// A tela inicial já vem visível no HTML: acerta a barra de baixo na primeira carga.
+App.atualizarNav();
