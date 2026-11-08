@@ -81,8 +81,15 @@
         <fieldset class="campo vidro">
           <legend class="campo__titulo">2. Fotos do material</legend>
           <p class="campo__ajuda">De 1 a 10 fotos, em JPG, PNG ou HEIC.</p>
-          <input type="file" id="entrada-foto" class="visualmente-oculto" accept="image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif" multiple>
-          <label class="botao-foto" for="entrada-foto" id="rotulo-foto">Tirar ou escolher fotos</label>
+          <div class="botoes-foto">
+            <!-- Câmera traseira direto no celular -->
+            <input type="file" id="entrada-camera" class="visualmente-oculto" accept="image/*" capture="environment">
+            <label class="botao-foto" for="entrada-camera" id="rotulo-camera">Tirar foto</label>
+
+            <!-- Galeria: o mesmo campo, sem o atributo capture -->
+            <input type="file" id="entrada-galeria" class="visualmente-oculto" accept="image/*" multiple>
+            <label class="botao-foto botao-foto--galeria" for="entrada-galeria" id="rotulo-galeria">Escolher da galeria</label>
+          </div>
           <p class="contador" id="contador-fotos" aria-live="polite"></p>
           <ul class="miniaturas" id="miniaturas" aria-label="Fotos escolhidas"></ul>
         </fieldset>

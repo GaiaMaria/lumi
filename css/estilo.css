@@ -487,6 +487,30 @@ figure {
   outline-offset: 3px;
 }
 
+.botoes-foto {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.botao-foto--galeria {
+  background: transparent;
+  border: 2px solid var(--doris);
+  color: var(--texto);
+  box-shadow: none;
+}
+
+.visualmente-oculto:focus-visible + .botao-foto--galeria {
+  outline: 3px solid var(--texto);
+  outline-offset: 3px;
+}
+
+@media (max-width: 340px) {
+  .botoes-foto {
+    grid-template-columns: 1fr;
+  }
+}
+
 .botao-foto--cheio {
   opacity: 0.5;
   pointer-events: none;
