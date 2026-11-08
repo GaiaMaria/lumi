@@ -51,6 +51,115 @@
         <p class="nota nota--centro">Toque e jogue uma missão de exemplo.</p>
       </div>
     </section>
+
+    <!-- Lista de espera: formulário completo (só dados de quem é responsável) -->
+    <section class="secao lista" id="lista" aria-labelledby="lista-titulo">
+      <div class="lista__conteudo" id="lista-formulario">
+        <h2 class="secao__titulo" id="lista-titulo">Seja das primeiras famílias.</h2>
+
+        <form class="form-completo" id="form-completo" novalidate>
+          <div class="campo-grupo">
+            <label class="rotulo" for="lista-email">E-mail</label>
+            <input class="campo" type="email" id="lista-email" name="email" autocomplete="email" inputmode="email" required aria-describedby="lista-email-erro">
+            <p class="campo-erro" id="lista-email-erro" aria-live="polite"></p>
+          </div>
+
+          <div class="campo-grupo">
+            <label class="rotulo" for="lista-uf">Estado</label>
+            <select class="campo" id="lista-uf" name="uf" required aria-describedby="lista-uf-erro">
+              <option value="">Escolha...</option>
+              <option value="AC">AC</option>
+              <option value="AL">AL</option>
+              <option value="AP">AP</option>
+              <option value="AM">AM</option>
+              <option value="BA">BA</option>
+              <option value="CE">CE</option>
+              <option value="DF">DF</option>
+              <option value="ES">ES</option>
+              <option value="GO">GO</option>
+              <option value="MA">MA</option>
+              <option value="MT">MT</option>
+              <option value="MS">MS</option>
+              <option value="MG">MG</option>
+              <option value="PA">PA</option>
+              <option value="PB">PB</option>
+              <option value="PR">PR</option>
+              <option value="PE">PE</option>
+              <option value="PI">PI</option>
+              <option value="RJ">RJ</option>
+              <option value="RN">RN</option>
+              <option value="RS">RS</option>
+              <option value="RO">RO</option>
+              <option value="RR">RR</option>
+              <option value="SC">SC</option>
+              <option value="SP">SP</option>
+              <option value="SE">SE</option>
+              <option value="TO">TO</option>
+            </select>
+            <p class="campo-erro" id="lista-uf-erro" aria-live="polite"></p>
+          </div>
+
+          <fieldset class="campo-grupo grupo-opcoes">
+            <legend class="rotulo">Ano escolar dos filhos <span class="opcional">(opcional)</span></legend>
+            <div class="opcoes">
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="4"><span>4º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="5"><span>5º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="6"><span>6º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="7"><span>7º ano</span></label>
+              <label class="opcao-chip"><input type="checkbox" name="anos" value="outro"><span>Outro</span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="campo-grupo grupo-opcoes">
+            <legend class="rotulo">Plano de interesse</legend>
+            <div class="opcoes">
+              <label class="opcao-chip"><input type="radio" name="plano" value="gratuito"><span>Gratuito</span></label>
+              <label class="opcao-chip"><input type="radio" name="plano" value="voz_familia"><span>Voz da Família</span></label>
+            </div>
+          </fieldset>
+
+          <div class="campo-grupo">
+            <label class="rotulo" for="lista-whatsapp">WhatsApp <span class="opcional">(opcional)</span></label>
+            <input class="campo" type="tel" id="lista-whatsapp" name="whatsapp" autocomplete="tel-national" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" aria-describedby="lista-whatsapp-erro">
+            <p class="campo-erro" id="lista-whatsapp-erro" aria-live="polite"></p>
+          </div>
+
+          <!-- Campo escondido contra robôs: pessoas não veem nem preenchem -->
+          <div class="pote-de-mel" aria-hidden="true">
+            <label for="lista-site">Site</label>
+            <input type="text" id="lista-site" name="site" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="campo-grupo">
+            <label class="aceite" for="lista-aceite">
+              <input type="checkbox" id="lista-aceite" name="consentimento" required aria-describedby="lista-aceite-erro">
+              <span>Aceito receber novidades do Lumi por e-mail ou WhatsApp. Posso sair quando quiser.</span>
+            </label>
+            <p class="campo-erro" id="lista-aceite-erro" aria-live="polite"></p>
+            <details class="politica" id="privacidade">
+              <summary>Como usamos seus dados</summary>
+              <ul>
+                <li>Guardamos só o que você digitou aqui, para avisar do lançamento e entender o interesse.</li>
+                <li>Não vendemos nem compartilhamos seus dados.</li>
+                <li>Não pedimos dados de crianças.</li>
+                <li>Para sair da lista ou apagar seus dados, responda qualquer e-mail nosso. (LGPD)</li>
+              </ul>
+            </details>
+          </div>
+
+          <button type="submit" class="botao-principal botao-principal--grande" id="lista-enviar">Entrar na lista de espera</button>
+          <p class="campo-erro campo-erro--geral" id="lista-erro" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <!-- Sucesso -->
+      <div class="lista__sucesso" id="lista-sucesso" tabindex="-1" hidden>
+        <img class="lista__lumi" src="../assets/recortes/lumi-comemorando.png" alt="" width="695" height="896" loading="lazy">
+        <h2 class="secao__titulo">Pronto! Você está na lista.</h2>
+        <p class="secao__texto">Avisamos você assim que o Lumi abrir. Enquanto isso, que tal chamar outra mãe?</p>
+        <a class="botao-principal botao--menta" id="lista-compartilhar" href="#" target="_blank" rel="noopener">Compartilhar com outra mãe</a>
+      </div>
+    </section>
   </main>
 
   <footer class="rodape-landing">
