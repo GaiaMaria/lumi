@@ -206,6 +206,24 @@ const Landing = (() => {
   window.addEventListener('hashchange', abrirPrivacidade);
   abrirPrivacidade();
 
+  // ---------- vídeos ----------
+  // A capa vira o vídeo do YouTube só quando a pessoa toca (página leve e sem cookies antes do play).
+  document.querySelectorAll('.video__capa').forEach((capa) => {
+    capa.addEventListener('click', () => {
+      const id = capa.dataset.video;
+      const quadro = document.createElement('div');
+      quadro.className = 'video__quadro';
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0&playsinline=1`;
+      iframe.title = capa.getAttribute('aria-label');
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      quadro.append(iframe);
+      capa.replaceWith(quadro);
+      iframe.focus();
+    });
+  });
+
   // ---------- planos ----------
   // Preços vindos das constantes do topo (fáceis de trocar no teste).
   document.querySelectorAll('[data-preco]').forEach((elemento) => {

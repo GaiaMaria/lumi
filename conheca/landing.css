@@ -11,6 +11,8 @@
   --celular-largura: 360px;
   --celular-altura: 740px;
   --celular-raio: 44px;
+  --video-vertical: 260px;
+  --video-horizontal: 480px;
   --celular-borda: 3px;
   --sombra-longa: 0 40px 80px color-mix(in srgb, var(--contorno) 70%, transparent);
 }
@@ -315,6 +317,105 @@ body.landing .pular {
 
 .passos__extra {
   margin-top: var(--espaco-10);
+}
+
+/* ---------- vídeos de apresentação ---------- */
+.videos {
+  margin-top: var(--espaco-10);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--espaco-8);
+}
+
+.video {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaco-3);
+}
+
+/* Shorts em pé (9:16) e vídeos deitados (16:9), cada um no seu formato */
+.video--vertical {
+  width: min(100%, var(--video-vertical));
+}
+
+.video--horizontal {
+  width: min(100%, var(--video-horizontal));
+}
+
+.video__capa,
+.video__quadro {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: var(--traco-cartao) solid var(--borda);
+  border-radius: var(--raio-cartao);
+  background: var(--fundo-escuro);
+  box-shadow: var(--sombra-longa);
+  overflow: hidden;
+}
+
+.video--vertical .video__capa,
+.video--vertical .video__quadro {
+  aspect-ratio: 9 / 16;
+}
+
+.video--horizontal .video__capa,
+.video--horizontal .video__quadro {
+  aspect-ratio: 16 / 9;
+}
+
+.video__capa {
+  cursor: pointer;
+}
+
+.video__miniatura {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Botão de play no estilo adesivo do app */
+.video__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: var(--tamanho-72);
+  height: var(--tamanho-72);
+  transform: translate(-50%, -50%);
+  border: var(--borda-adesivo);
+  border-radius: 50%;
+  background: var(--primaria);
+  box-shadow: var(--sombra-dura);
+  color: var(--texto);
+}
+
+.video__capa:hover .video__play {
+  background: var(--primaria-hover);
+}
+
+.video__capa:focus-visible {
+  outline: var(--foco-largura) solid var(--brilho);
+  outline-offset: var(--foco-distancia-3);
+}
+
+.video__quadro iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.video__legenda {
+  color: var(--texto-suave);
+  font-size: var(--fonte-0-95);
+  font-weight: 700;
+  text-align: center;
 }
 
 /* ---------- voz da família e planos ---------- */
