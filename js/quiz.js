@@ -324,12 +324,14 @@ const Quiz = (() => {
     el.pontos.textContent = textoPontos(estado.pontos);
     atualizarBarra(estado.indice + 1);
     mostrarFeedback('sucesso', `Isso! +${ganhos} pontos`, pergunta.explicacao);
+    if (temVoz) Voz.tocarFrase('muito_bem'); // gravação da família, se existir
     mostrarProxima();
   }
 
   function errou() {
     estado.tentativas += 1;
     mostrarFeedback('erro', 'Quase! Tente de novo.');
+    if (temVoz) Voz.tocarFrase('quase'); // gravação da família, se existir
   }
 
   // ---------- tipos ----------
@@ -533,6 +535,7 @@ const Quiz = (() => {
     el.aviso.hidden = !aviso;
     el.pontos.textContent = textoPontos(0);
     mostrarPergunta();
+    if (temVoz) Voz.tocarFrase('oi'); // "Oi! Vamos estudar juntos?" na voz da família, se gravada
   }
 
   function mostrarPergunta() {

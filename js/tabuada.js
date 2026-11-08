@@ -290,6 +290,12 @@ const Tabuada = (() => {
     el.tempo.hidden = modo !== 'desafio';
     if (modo === 'desafio') iniciarRelogio();
     mostrarConta();
+    tocarFrase('vamos_la');
+  }
+
+  // Frases de incentivo na voz da família, quando gravadas.
+  function tocarFrase(frase) {
+    if (typeof Voz !== 'undefined') Voz.tocarFrase(frase);
   }
 
   function contaAtual() {
@@ -368,11 +374,13 @@ const Tabuada = (() => {
       if (rodada.modo === 'revisao') tirarErro(c);
       el.resposta.classList.add('tabuada-resposta--certa');
       mostrarFeedback('sucesso', `Certo! +${PONTOS_POR_ACERTO} pontos`, ContasTabuada.completa(c));
+      tocarFrase('muito_bem');
     } else {
       rodada.erradas += 1;
       registrarErro(c);
       el.resposta.classList.add('tabuada-resposta--errada');
       mostrarFeedback('erro', 'Quase!', `A conta completa é ${ContasTabuada.completa(c)}.`);
+      tocarFrase('quase');
     }
     Familia.salvar();
 
