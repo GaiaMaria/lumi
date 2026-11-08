@@ -24,6 +24,14 @@ test('voltar de Provas: quem veio da Área dos pais volta para a Área dos pais'
   assert.strictEqual(Navegacao.voltarDeProvas('pais'), 'pais');
 });
 
+test('voltar de Provas: quem veio da Tabuada volta para a Tabuada', () => {
+  assert.strictEqual(Navegacao.voltarDeProvas('tabuada'), 'tabuada');
+});
+
+test('voltar de Provas: quem veio da Narração volta para a trilha (não gasta narração)', () => {
+  assert.strictEqual(Navegacao.voltarDeProvas('narracao'), 'inicio');
+});
+
 test('voltar de Provas: sem origem conhecida (volta do Google), vai para a Área dos pais', () => {
   assert.strictEqual(Navegacao.voltarDeProvas(null), 'pais');
   assert.strictEqual(Navegacao.voltarDeProvas('provas'), 'pais');

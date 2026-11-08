@@ -1,13 +1,17 @@
 // Regras do botão voltar que dependem de onde a pessoa veio.
 
 const Navegacao = (() => {
-  // Telas que abrem Provas: a trilha (chip da próxima prova) e a Área dos pais.
-  const ORIGENS_DE_PROVAS = ['inicio', 'pais'];
+  // Telas para onde o voltar de Provas pode levar de novo.
+  const ORIGENS_DE_PROVAS = ['inicio', 'tabuada', 'pais'];
 
   // O voltar de Provas leva para a tela de onde a pessoa veio.
-  // Sem origem conhecida (por exemplo, na volta do login do Google), vai para a Área dos pais.
+  // - Da Narração, volta para a trilha: reabrir a Narração gera uma narração nova
+  //   e gastaria uma das 5 do dia.
+  // - Sem origem conhecida (por exemplo, na volta do login do Google), vai para a Área dos pais.
   function voltarDeProvas(origem) {
-    return ORIGENS_DE_PROVAS.includes(origem) ? origem : 'pais';
+    if (ORIGENS_DE_PROVAS.includes(origem)) return origem;
+    if (origem === 'narracao') return 'inicio';
+    return 'pais';
   }
 
   return { voltarDeProvas };

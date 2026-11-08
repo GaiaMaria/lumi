@@ -4,7 +4,7 @@ const App = (() => {
   const telas = document.querySelectorAll('.tela');
   const nav = document.getElementById('nav-principal');
   // Telas com a barra de navegação de baixo. Na Tabuada, ela some durante o jogo (regra no CSS).
-  const TELAS_COM_NAV = ['inicio', 'tabuada', 'narracao', 'pais'];
+  const TELAS_COM_NAV = ['inicio', 'tabuada', 'provas', 'narracao', 'pais'];
   const voltarDeProvas = document.getElementById('provas-voltar');
   let telaAtual = null; // null até a primeira troca de tela (ex.: na volta do Google)
 
