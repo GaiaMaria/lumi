@@ -85,11 +85,14 @@ const Voz = (() => {
     vozPt = escolherVoz();
     if (vozPt) verificada = true;
     const sintese = window.speechSynthesis;
+    // As vozes podem chegar depois (Chrome do Android): espera o evento antes de decidir.
+    // Se chegarem mais tarde ainda, o botão aparece nessa hora.
     if (typeof sintese.addEventListener === 'function') sintese.addEventListener('voiceschanged', atualizarVoz);
     else sintese.onvoiceschanged = atualizarVoz;
+    // Alguns navegadores nunca disparam o evento: decide com o que houver depois de 3 s.
     setTimeout(() => {
       if (!verificada) atualizarVoz();
-    }, 1500);
+    }, 3000);
   }
 
   function disponivel() {
@@ -232,18 +235,35 @@ const Voz = (() => {
     });
   }
 
-  // Lê uma pergunta com a voz do navegador. Nunca usa gravação.
+  // Deixa o texto bom de ouvir: "7 × ___ = 56" vira "7 vezes ... é igual a 56".
+  function limparTexto(texto) {
+    return String(texto)
+      .replace(/×/g, ' vezes ')
+      .replace(/_+/g, ' ... ')
+      .replace(/=/g, ' é igual a ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  const VELOCIDADE = 0.9;
+
+  // Lê uma pergunta com a voz do navegador. Nunca usa gravação,
+  // mesmo que o texto seja igual a uma das frases fixas.
   function lerPergunta(texto) {
-    parar();
+    const sintese = temSintese ? window.speechSynthesis : null;
+    const estavaFalando = Boolean(sintese && (sintese.speaking || sintese.pending));
+    parar(); // cancela a fala anterior
     if (!disponivel()) return Promise.resolve('indisponivel');
     return new Promise((resolver) => {
-      const fala = new SpeechSynthesisUtterance(texto);
-      fala.lang = 'pt-BR';
+      const fala = new SpeechSynthesisUtterance(limparTexto(texto));
+      fala.lang = vozPt.lang || 'pt-BR';
       fala.voice = vozPt;
-      fala.rate = 0.95;
+      fala.rate = VELOCIDADE;
       fala.onend = () => resolver('sintetizada');
       fala.onerror = () => resolver('sintetizada');
-      window.speechSynthesis.speak(fala);
+      // Alguns celulares perdem a fala nova se ela vem logo depois do cancelamento.
+      if (estavaFalando) setTimeout(() => sintese.speak(fala), 60);
+      else sintese.speak(fala);
     });
   }
 
@@ -266,6 +286,7 @@ const Voz = (() => {
     temGravacao,
     tocarFrase,
     lerPergunta,
+    limparTexto,
     parar,
     lendo,
     disponivel,
