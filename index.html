@@ -20,6 +20,7 @@
   <script src="js/calendario.js" defer></script>
   <script src="js/trilha.js" defer></script>
   <script src="js/resultado.js" defer></script>
+  <script src="js/navegacao.js" defer></script>
   <script src="js/abertura.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
@@ -55,6 +56,7 @@
       <div class="inicio">
         <!-- Topo: nível, barra do nível e total de pontos -->
         <div class="inicio-topo">
+          <button type="button" class="botao-voltar" data-ir="abertura"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar para a abertura</span></button>
           <span class="pilula pilula--nivel">Nível <span id="inicio-nivel">1</span></span>
           <div class="barra-nivel" id="inicio-nivel-barra" role="progressbar" aria-label="Pontos no nível atual" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
             <div class="barra-nivel__preenchido" id="inicio-nivel-preenchido"></div>
@@ -178,7 +180,7 @@
     <!-- Provas: calendário mensal -->
     <section class="tela" id="tela-provas" aria-labelledby="titulo-provas" hidden>
       <div class="barra-topo">
-        <button type="button" class="botao-voltar" data-ir="pais"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
+        <button type="button" class="botao-voltar" id="provas-voltar" data-ir="pais"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="visualmente-oculto">Voltar</span></button>
         <h1 class="barra-topo__titulo" id="titulo-provas">Provas</h1>
       </div>
 

@@ -5,11 +5,14 @@ const App = (() => {
   const nav = document.getElementById('nav-principal');
   // Telas com a barra de navegação de baixo. Na Tabuada, ela some durante o jogo (regra no CSS).
   const TELAS_COM_NAV = ['inicio', 'tabuada', 'narracao', 'pais'];
+  const voltarDeProvas = document.getElementById('provas-voltar');
+  let telaAtual = null; // null até a primeira troca de tela (ex.: na volta do Google)
 
   // Mostra a barra só nas telas certas e marca o item da tela atual.
   function atualizarNav() {
     const visivel = [...telas].find((tela) => !tela.hidden);
     const nome = visivel ? visivel.id.replace('tela-', '') : '';
+    if (!telaAtual) telaAtual = nome; // primeira carga: a tela que já veio visível no HTML
     const comNav = TELAS_COM_NAV.includes(nome);
     nav.hidden = !comNav;
     document.body.classList.toggle('com-nav', comNav);
@@ -21,6 +24,11 @@ const App = (() => {
 
   // { manter: true } volta para a tela sem limpar o que já foi preenchido.
   function mostrarTela(nome, { manter = false } = {}) {
+    // Provas lembra de onde veio: o voltar leva de novo para a trilha ou para a Área dos pais.
+    if (nome === 'provas' && telaAtual !== 'provas') {
+      voltarDeProvas.dataset.ir = Navegacao.voltarDeProvas(telaAtual);
+    }
+    telaAtual = nome;
     telas.forEach((tela) => {
       tela.hidden = tela.id !== `tela-${nome}`;
     });

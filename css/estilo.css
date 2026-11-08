@@ -3044,3 +3044,10 @@ body.com-nav .rodape {
     scroll-behavior: auto !important;
   }
 }
+
+/* Telas bem estreitas: o "30/50" sai para a barra do nível ter espaço (a barra já informa o valor ao leitor de tela) */
+@media (max-width: 359px) {
+  .inicio-topo__conta {
+    display: none;
+  }
+}
