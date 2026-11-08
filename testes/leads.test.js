@@ -6,7 +6,8 @@ const path = require('node:path');
 
 const leads = require(path.join(__dirname, '..', 'api', 'leads.js'));
 const interesse = require(path.join(__dirname, '..', 'api', 'interesse.js'));
-const resumo = require(path.join(__dirname, '..', 'api', 'leads-resumo.js'));
+// O resumo é o GET de api/leads.js (o plano gratuito da Vercel aceita no máximo 12 funções).
+const resumo = leads;
 const L = require(path.join(__dirname, '..', 'api', '_leads.js'));
 
 // ---------- Redis simulado (só os comandos que usamos) ----------
@@ -188,8 +189,8 @@ test('interesse: soma o clique do plano e recusa plano desconhecido', async () =
   assert.strictEqual(ruim.res.statusCode, 400);
 });
 
-test('só aceita POST', async () => {
-  const { res } = await chamar(leads, BASE, { metodo: 'GET' });
+test('só aceita POST para gravar e GET para o resumo', async () => {
+  const { res } = await chamar(leads, BASE, { metodo: 'PUT' });
   assert.strictEqual(res.statusCode, 405);
 });
 
