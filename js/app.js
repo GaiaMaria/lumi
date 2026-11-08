@@ -427,14 +427,24 @@ const Inicio = (() => {
     }));
   }
 
-  el.apagar.addEventListener('click', () => {
+  el.apagar.addEventListener('click', async () => {
     const ok = window.confirm(
-      'Apagar todas as perguntas e o progresso da família neste aparelho? Isso não pode ser desfeito.',
+      'Apagar todas as perguntas, o progresso e as gravações de voz da família neste aparelho? Isso não pode ser desfeito.',
     );
     if (!ok) return;
+    const familia = Familia.id(); // guarda antes de apagar, para achar os áudios
+    Voz.parar();
     Familia.apagarTudo();
+    let audiosApagados = true;
+    try {
+      await Voz.apagarDaFamilia(familia); // áudios no IndexedDB
+    } catch (erro) {
+      audiosApagados = false;
+    }
     atualizar();
-    el.mensagem.textContent = 'Pronto. Os dados da família foram apagados deste aparelho.';
+    el.mensagem.textContent = audiosApagados
+      ? 'Pronto. Os dados e as gravações da família foram apagados deste aparelho.'
+      : 'Os dados foram apagados, mas não consegui apagar as gravações. Tente de novo.';
   });
 
   atualizar();
