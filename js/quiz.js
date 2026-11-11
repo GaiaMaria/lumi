@@ -380,7 +380,8 @@ const Quiz = (() => {
     // Frase de incentivo variada (e especial em 3, 5 e 10 acertos seguidos).
     const incentivo = temVoz ? Incentivo.acerto() : { frase: null, texto: 'Isso!' };
     mostrarFeedback('sucesso', `${incentivo.texto} +${ganhos} pontos`, pergunta.explicacao);
-    if (temVoz) Voz.tocarFrase(incentivo.frase); // gravação da família, se existir
+    // Som de acerto e, depois dele, a gravação da família (se existir).
+    Sons.tocar(Sons.deAcerto(estado.seguidas), () => { if (temVoz) Voz.tocarFrase(incentivo.frase); });
     mostrarProxima();
   }
 
@@ -390,7 +391,7 @@ const Quiz = (() => {
     atualizarSelo();
     if (temVoz) Incentivo.erro(); // zera a sequência de acertos
     mostrarFeedback('erro', 'Quase! Tente de novo.');
-    if (temVoz) Voz.tocarFrase('quase'); // gravação da família, se existir
+    Sons.tocar('erro', () => { if (temVoz) Voz.tocarFrase('quase'); }); // gravação da família depois do som
   }
 
   // ---------- tipos ----------

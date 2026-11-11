@@ -34,9 +34,11 @@ const App = (() => {
     });
     window.scrollTo(0, 0);
     Voz.parar(); // não deixa a leitura continuar em outra tela
+    if (nome !== 'resultado') Sons.tocar('tela'); // o resultado tem a própria comemoração
     if (nome === 'tabuada') Tabuada.abrir();
     else Tabuada.parar(); // para o relógio do desafio ao sair
     if (nome === 'pais') {
+      Sons.atualizarCaixa();
       MinhaVoz.abrir();
       Narracao.atualizarAreaDosPais();
     }
@@ -455,6 +457,7 @@ const FotoQuest = (() => {
     });
 
     App.mostrarTela('resultado');
+    Sons.tocar('medalha');
   }
 
   return { preparar, jogar };
