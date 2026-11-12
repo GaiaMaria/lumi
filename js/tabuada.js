@@ -162,6 +162,7 @@ const Tabuada = (() => {
 
   let rodada = null;
   let relogio = null;
+  const SEGUNDOS_COM_TIQUE = 5; // tique nos últimos segundos do desafio
   let espera = null;
   let vista = 'menu';
 
@@ -392,14 +393,16 @@ const Tabuada = (() => {
       // Frase de incentivo variada (e especial em 3, 5 e 10 acertos seguidos).
       const incentivo = temVoz ? Incentivo.acerto() : { frase: null, texto: 'Certo!' };
       mostrarFeedback('sucesso', `${incentivo.texto} +${PONTOS_POR_ACERTO} pontos`, ContasTabuada.completa(c));
-      tocarFrase(incentivo.frase);
+      rodada.seguidas = (rodada.seguidas || 0) + 1;
+      Sons.tocar(Sons.deAcerto(rodada.seguidas), () => tocarFrase(incentivo.frase));
     } else {
       rodada.erradas += 1;
       registrarErro(c);
       el.resposta.classList.add('tabuada-resposta--errada');
       if (temVoz) Incentivo.erro(); // zera a sequência de acertos
       mostrarFeedback('erro', 'Quase!', `A conta completa é ${ContasTabuada.completa(c)}.`);
-      tocarFrase('quase');
+      rodada.seguidas = 0;
+      Sons.tocar('erro', () => tocarFrase('quase'));
     }
     Familia.salvar();
 
@@ -437,8 +440,13 @@ const Tabuada = (() => {
 
   function iniciarRelogio() {
     const fim = Date.now() + TEMPO_DESAFIO_SEGUNDOS * 1000;
+    let ultimoTique = null;
     const atualizar = () => {
       const restam = Math.max(0, Math.ceil((fim - Date.now()) / 1000));
+      if (restam > 0 && restam <= SEGUNDOS_COM_TIQUE && restam !== ultimoTique) {
+        ultimoTique = restam;
+        Sons.tocar('tique');
+      }
       el.tempo.textContent = `${restam} s`;
       el.tempoPreenchido.style.width = `${(restam / TEMPO_DESAFIO_SEGUNDOS) * 100}%`;
       if (restam <= 0) terminar(false);
@@ -489,6 +497,8 @@ const Tabuada = (() => {
 
     const nivelAgora = Pontos.nivel().nivel;
     const subiuDeNivel = nivelAgora > rodada.nivelAntes;
+    if (novaMedalha || subiuDeNivel) Sons.tocar('medalha');
+    else if (concluiu) Sons.tocar('sequencia');
     el.fimNivel.hidden = !subiuDeNivel;
     el.fimNivel.textContent = `Nível novo: você chegou ao nível ${nivelAgora}!`;
 

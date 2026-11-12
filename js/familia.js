@@ -169,6 +169,17 @@ const Familia = (() => {
     memoria = null;
   }
 
+  // Sons do app: ligados por padrão. A família pode desligar na Área dos pais.
+  function som() {
+    return ler().som !== false;
+  }
+
+  function definirSom(ligado) {
+    const dados = ler();
+    dados.som = Boolean(ligado);
+    gravar();
+  }
+
   // Data em que a responsável autorizou gravar a própria voz.
   function consentimentoVoz() {
     return ler().consentimentoVoz || null;
@@ -302,5 +313,7 @@ const Familia = (() => {
     tabuada,
     salvar,
     apagarTudo,
+    som,
+    definirSom,
   };
 })();

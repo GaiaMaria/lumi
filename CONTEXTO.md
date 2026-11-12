@@ -164,6 +164,7 @@ lumi/
 ├── js/
 │ ├── app.js controle das telas e navegação (App.mostrarTela)
 │ ├── familia.js dados da família no aparelho (localStorage por família)
+│ ├── sons.js sons curtos do app (Web Audio, sem arquivos); liga/desliga na Área dos pais
 │ ├── fotos.js FotoQuest: fotos do material e envio para api/questoes
 │ ├── quiz.js perguntas, respostas e feedback
 │ ├── pontos.js pontos, níveis e medalhas
